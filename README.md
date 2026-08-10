@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Catalin — Portfolio
 
-## Getting Started
+A personal developer portfolio. Dark-first, editorial, data-driven.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router, Server Components by default)
+- React 19, TypeScript, Tailwind CSS v4
+- shadcn/ui (Base UI primitives) — heavily customized
+- Motion for restrained animation
+- next-themes (dark / light / system)
+- cmdk command palette (⌘K / Ctrl+K)
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+app/                  routes, layout, metadata, SEO
+components/           section components + ui primitives
+data/                 ALL content lives here — the only file you should edit
+public/projects/      project screenshots (drop files here)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Content
 
-## Learn More
+Everything on the page is driven by `data/`:
 
-To learn more about Next.js, take a look at the following resources:
+- `data/site.ts` — name, email, GitHub, hero tagline, "currently building" panel
+- `data/projects.ts` — projects (featured + explorer + detail pages)
+- `data/skills.ts` — stack groups and the "I work with" list
+- `data/journey.ts` — timeline
+- `data/ml.ts` — ML notebook runs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Entries flagged `placeholder: true` render with a clearly temporary treatment.
+Replace them with real content and remove the flag. **Never invent metrics,
+stats, clients or experience — leave fields out instead.**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To add a project: add an entry to `data/projects.ts`, drop a screenshot in
+`public/projects/`, and point `image` at it. The site updates everywhere.
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` — development
+- `npm run build` — production build
+- `npm run lint` — eslint

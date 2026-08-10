@@ -1,0 +1,28 @@
+import { Container } from "@/components/container";
+import { CurrentYear } from "@/components/current-year";
+import { site } from "@/data/site";
+
+export function Footer() {
+  return (
+    <footer className="border-t border-border/40">
+      <Container className="flex flex-col gap-4 py-12 md:flex-row md:items-center md:justify-between">
+        <p className="font-mono text-[11px] text-muted-foreground">
+          © <CurrentYear /> {site.name} — portfolio v2
+        </p>
+        <div className="flex flex-wrap items-center gap-6 font-mono text-[11px] text-muted-foreground">
+          <a
+            href={site.source}
+            target="_blank"
+            rel="noreferrer"
+            className="transition-colors hover:text-foreground"
+          >
+            view source ↗
+          </a>
+          <a href="#top" className="transition-colors hover:text-foreground">
+            back to top ↑
+          </a>
+        </div>
+      </Container>
+    </footer>
+  );
+}

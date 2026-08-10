@@ -1,26 +1,302 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+  --font-heading: var(--font-inter);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-signal-soft: var(--signal-soft);
+  --color-saffron: var(--saffron);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/*
+ * Light — bone-white canvas, ink text. The Dala palette's light counterpart:
+ * same violet + amber accents, designed for white rather than inverted.
+ */
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --primary: #8052ff;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f4;
+  --secondary-foreground: #111111;
+  --muted: #f4f4f4;
+  --muted-foreground: #6b6b6b;
+  --accent: #f0f0f0;
+  --accent-foreground: #111111;
+  --destructive: #c0392b;
+  --border: #e5e5e5;
+  --input: #e0e0e0;
+  --ring: #8052ff;
+  --radius: 1.5rem;
+  /* Electric Iris — the single violet accent (Dala) */
+  --signal: #8052ff;
+  --signal-ink: #ffffff;
+  --signal-soft: rgba(128, 82, 255, 0.1);
+  /* Saffron Spark — emphasis only; deepened for 4.5:1 on white */
+  --saffron: #b45309;
+}
+
+/*
+ * Dark — the primary design. Pure void black, bone-white text,
+ * electric-iris violet, ash + silver-mist grays. No warm tones.
+ */
+.dark {
+  color-scheme: dark;
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #000000;
+  --card-foreground: #ffffff;
+  --popover: #0a0a0a;
+  --popover-foreground: #ffffff;
+  --primary: #8052ff;
+  --primary-foreground: #ffffff;
+  --secondary: #111111;
+  --secondary-foreground: #ffffff;
+  --muted: #0e0e0e;
+  --muted-foreground: #9a9a9a;
+  --accent: #141414;
+  --accent-foreground: #ffffff;
+  --destructive: #e5584a;
+  --border: #1a1a1a;
+  --input: #222222;
+  --ring: #8052ff;
+  --signal: #8052ff;
+  --signal-ink: #ffffff;
+  --signal-soft: rgba(128, 82, 255, 0.14);
+  --saffron: #ffb829;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--signal);
+    color: var(--signal-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+
+  /* quiet the scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  /*
+   * Deliberately NOT setting `will-change` on `.pin-spacer`: will-change:
+   * transform makes the spacer a containing block for position:fixed
+   * descendants, and ScrollTrigger pins sections by making them fixed —
+   * the combination renders as a black void on some GPUs.
+   */
+}
+
+/* Status dot pulse — the one ambient motion on the page */
+@keyframes signal-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-signal-pulse {
+  animation: signal-pulse 2.4s ease-in-out infinite;
+}
+
+/* Hero — faint technical grid, masked to fade at the edges */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 85% 70% at 50% 45%,
+    black 25%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(
+    ellipse 85% 70% at 50% 45%,
+    black 25%,
+    transparent 72%
+  );
+  /* GSAP fades this in on load; stays visible without JS / reduced motion. */
+}
+
+/* Hero constellation — one fade-in, no other entrance motion */
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-hero-fade {
+  animation: hero-fade 1.4s ease-out both;
+}
+
+/* Hero scroll hint — a single gentle nudge, then still */
+@keyframes scroll-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+.animate-scroll-nudge {
+  animation: scroll-nudge 2.2s ease-in-out 2.4s 1 both;
+}
+
+/* ------------------------------------------------------------------ */
+/* Lenis smooth scroll                                                */
+/* ------------------------------------------------------------------ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------------ */
+/* Custom cursor (desktop only)                                        */
+/* ------------------------------------------------------------------ */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
+@media (pointer: coarse) {
+  .has-custom-cursor,
+  .has-custom-cursor * {
+    cursor: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* SplitText mask reveal — text rises through a hidden viewport        */
+/* ------------------------------------------------------------------ */
+.tr-root {
+  position: relative;
+}
+
+.tr-line {
+  display: block;
+  will-change: transform;
+}
+
+.tr-mask--line {
+  display: block;
+  overflow: hidden;
+}
+
+.tr-word {
+  display: inline-block;
+  will-change: transform;
+}
+
+.tr-mask--word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+/* Theme switch — subtle, once (documented next-themes technique) */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    fill 0.25s ease,
+    stroke 0.25s ease !important;
+  transition-delay: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

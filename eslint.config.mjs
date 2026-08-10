@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Project copies are kept for reference and are not part of this app.
+    "Worthy-projects/**",
   ]),
 ]);
 
