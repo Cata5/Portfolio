@@ -508,11 +508,24 @@ type Ambient = {
 
 function buildAmbient(count: number): Ambient[] {
   const rand = mulberry32(7733551);
-  const clusters = Array.from({ length: 7 }, () => ({
-    x: (rand() - 0.5) * 2.7,
+  // Clusters now reach edge-to-edge: four clusters pin the left/right margins
+  // (centered just inside the viewport edge, so they fill the sides instead of
+  // pooling mid-screen), and the rest scatter across the middle — the cloud
+  // spans the full page width. Seeded, so the arrangement is reproducible.
+  const sideCluster = (side: number) => ({
+    x: side * (1.55 + rand() * 0.3),
     y: (rand() - 0.5) * 1.7,
-    r: 0.14 + rand() * 0.5,
-  }));
+    r: 0.18 + rand() * 0.45,
+  });
+  const clusters = [
+    sideCluster(-1),
+    sideCluster(-1),
+    sideCluster(1),
+    sideCluster(1),
+    { x: (rand() - 0.5) * 1.1, y: (rand() - 0.5) * 1.5, r: 0.18 + rand() * 0.5 },
+    { x: (rand() - 0.5) * 1.1, y: (rand() - 0.5) * 1.5, r: 0.18 + rand() * 0.5 },
+    { x: (rand() - 0.5) * 1.9, y: (rand() - 0.5) * 1.8, r: 0.16 + rand() * 0.45 },
+  ];
   const pts: Ambient[] = [];
   for (let i = 0; i < count; i++) {
     let bx: number;
@@ -524,7 +537,8 @@ function buildAmbient(count: number): Ambient[] {
       bx = c.x + Math.cos(a) * r;
       by = c.y + Math.sin(a) * r * 0.8;
     } else {
-      bx = (rand() - 0.5) * 2.9;
+      // Wide scatter — lone motes reach both edges too.
+      bx = (rand() - 0.5) * 4.4;
       by = (rand() - 0.5) * 1.8;
     }
     const layer = rand() < 0.45 ? 0 : rand() < 0.8 ? 1 : 2;
@@ -707,7 +721,7 @@ export function TriangleWorld() {
       // still ~150 on mobile so the cloud reads on small screens too. The
       // pieces stay small and dim, so density can be higher without
       // competing with the main forms.
-      ambient = buildAmbient(w < 640 ? 150 : w < 1024 ? 175 : 260);
+      ambient = buildAmbient(w < 640 ? 180 : w < 1024 ? 230 : 360);
       const n = particles.length;
       screenX = new Float32Array(n);
       screenY = new Float32Array(n);
@@ -984,6 +998,9 @@ export function TriangleWorld() {
           (1 + dispVis * 0.35) *
           swallowed;
         if (alpha <= 0.012) continue;
+        // The cloud now reaches past the edges — skip fully off-canvas motes.
+        if (sx < -size * 3 || sx > w + size * 3 || sy < -size * 3 || sy > h + size * 3)
+          continue;
         const ang = a.rot + s * a.rotSpeed;
         ctx.globalAlpha = alpha;
         ctx.strokeStyle = palette[a.color];
