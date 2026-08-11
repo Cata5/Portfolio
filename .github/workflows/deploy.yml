@@ -55,8 +55,6 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          static_site_generator: next
 
       # NOTE: no .next/cache restore on purpose. The export config is driven by
       # NEXT_PUBLIC_DEPLOY_TARGET (not part of any cache key), and a restored
