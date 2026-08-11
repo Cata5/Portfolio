@@ -10,7 +10,10 @@ import { site } from "@/data/site";
 export function Contact() {
   return (
     <Section id="contact" eyebrow="Contact">
-      <GlassCard className="p-6 sm:p-10 lg:p-14">
+      {/* Left-aligned and narrower on desktop so the final black-hole form
+          (which owns the right side of the canvas) shows beside the copy
+          instead of hiding behind the panel. */}
+      <GlassCard className="p-6 sm:p-10 lg:max-w-[40rem] lg:p-14">
         <div className="max-w-3xl">
           <TextReveal
             as="h2"

@@ -168,7 +168,7 @@ export const projects: Project[] = [
     description:
       "AI Interface is a compact experiment: a Flask web app that loads Keras models registered in models.json, accepts an image upload, runs inference with the selected model and returns the predicted class. A companion tkinter script walks a directory of images and writes top_level_folders.json — a small helper for assembling image datasets for training.",
     technologies: ["Python", "Flask", "TensorFlow / Keras", "tkinter"],
-    image: null,
+    image: "/projects/ai-interface/01-home.webp",
     screenshots: [
       "/projects/ai-interface/01-home.webp"
     ],
@@ -218,7 +218,7 @@ export const projects: Project[] = [
       "react-markdown",
       "Axios",
     ],
-    image: null,
+    image: "/projects/ai-studio/01-home.webp",
     screenshots: [
       "/projects/ai-studio/01-home.webp"
     ],
@@ -321,7 +321,7 @@ export const projects: Project[] = [
       "PyInstaller",
       "unittest",
     ],
-    image: null,
+    image: "/projects/aplicatie-teka/01-home.webp",
     screenshots: [
       "/projects/aplicatie-teka/01-home.webp"
     ],
@@ -376,7 +376,7 @@ export const projects: Project[] = [
       "Tailwind CSS",
       "winget",
     ],
-    image: null,
+    image: "/projects/apps-manager/01-home.webp",
     screenshots: [
       "/projects/apps-manager/01-home.webp"
     ],
@@ -477,7 +477,7 @@ export const projects: Project[] = [
       "C++",
       "ArduinoJson",
     ],
-    image: null,
+    image: "/projects/detectie/01-home.webp",
     screenshots: [
       "/projects/detectie/01-home.webp",
     ],
@@ -536,7 +536,7 @@ export const projects: Project[] = [
       "Radix UI",
       "Tailwind CSS",
     ],
-    image: null,
+    image: "/projects/omni-studio/01-home.webp",
     screenshots: [
       "/projects/omni-studio/01-home.webp"
     ],
@@ -590,7 +590,7 @@ export const projects: Project[] = [
       "Docker",
       "cloudflared",
     ],
-    image: null,
+    image: "/projects/primarie/01-home.webp",
     github: "https://github.com/Cata5/Primarie",
     featured: true,
     screenshots: [
@@ -648,7 +648,7 @@ export const projects: Project[] = [
       "Three.js (react-three-fiber)",
       "framer-motion",
     ],
-    image: null,
+    image: "/projects/siteauto/01-home.webp",
     featured: true,
     screenshots: ["/projects/siteauto/01-home.webp"],
     features: [
@@ -701,9 +701,9 @@ export const projects: Project[] = [
       "framer-motion",
       "PDF parsing",
     ],
-    image: null,
+    image: "/projects/coraltech/01-home.webp",
     featured: false,
-    screenshots: ["/projects/coraltech/01-home.webp"],
+    screenshots: ["/projects/coraltech/01-home.webp", "/coral-web.png"],
     features: [
       "Bilingual content (EN/RO) with locale files",
       "Content model: activities, seasons, sponsors, team, blog posts",
@@ -752,7 +752,7 @@ export const projects: Project[] = [
       "framer-motion",
       "pdf-parse",
     ],
-    image: null,
+    image: "/projects/liceul/01-home.webp",
     featured: false,
     screenshots: ["/projects/liceul/01-home.webp"],
     features: [
@@ -799,8 +799,9 @@ export const projects: Project[] = [
       "Inno Setup",
       "WebSockets",
     ],
-    image: null,
+    image: "/yolo-train.png",
     featured: false,
+    screenshots: ["/yolo-train.png"],
     features: [
       "Train / fine-tune / test tabs with preset configurations",
       "Background training via QThread with live logs and progress",
@@ -905,7 +906,7 @@ export const projects: Project[] = [
       "psutil",
       "nvidia-smi / WMI",
     ],
-    image: null,
+    image: "/projects/llm-finetuner/01-home.webp",
     screenshots: [
       "/projects/llm-finetuner/01-home.webp"
     ],
@@ -959,8 +960,9 @@ export const projects: Project[] = [
       "OpenAI-compatible APIs",
       "PyInstaller",
     ],
-    image: null,
+    image: "/neuro-shell.png",
     featured: false,
+    screenshots: ["/neuro-shell.png"],
     features: [
       "Interactive REPL with a slash-command palette (/help, /model, /gpu, /download, /clear, /tools, /mode, /history, /exit)",
       "Real-time tab autocompletion for commands, models, Hugging Face repos and workspace paths",

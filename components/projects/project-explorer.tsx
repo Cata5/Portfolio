@@ -5,6 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
+import { GlassCard } from "@/components/glass-card";
 import { Counter } from "@/components/motion/counter";
 import { gsap } from "@/components/motion/gsap";
 import { Section } from "@/components/section";
@@ -71,41 +72,46 @@ export function ProjectExplorer() {
 
   return (
     <Section id="projects" eyebrow="Index">
-      <div className="mb-8 flex flex-wrap items-center gap-x-2 gap-y-2">
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            type="button"
-            onClick={() => changeFilter(f)}
-            aria-pressed={filter === f}
-            className={cn(
-              "relative px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.04em] transition-colors",
-              "after:absolute after:-bottom-0.5 after:left-2 after:right-2 after:h-px after:origin-left after:bg-signal after:transition-transform after:duration-300",
-              filter === f
-                ? "text-signal after:scale-x-100"
-                : "text-muted-foreground after:scale-x-0 hover:text-foreground",
-            )}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
+      {/* The whole project index floats on the same frosted glass as the
+          other sections — the persistent triangle material reads through
+          the blur behind the rows. */}
+      <GlassCard className="p-6 sm:p-10 lg:p-12">
+        <div className="mb-8 flex flex-wrap items-center gap-x-2 gap-y-2">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => changeFilter(f)}
+              aria-pressed={filter === f}
+              className={cn(
+                "relative px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.04em] transition-colors",
+                "after:absolute after:-bottom-0.5 after:left-2 after:right-2 after:h-px after:origin-left after:bg-signal after:transition-transform after:duration-300",
+                filter === f
+                  ? "text-signal after:scale-x-100"
+                  : "text-muted-foreground after:scale-x-0 hover:text-foreground",
+              )}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
 
-      <p className="mb-3 font-mono text-[11px] text-muted-foreground">
-        showing <Counter value={filtered.length} /> of {projects.length}{" "}
-        projects
-      </p>
+        <p className="mb-6 font-mono text-[11px] text-muted-foreground">
+          showing <Counter value={filtered.length} /> of {projects.length}{" "}
+          projects
+        </p>
 
-      <ul ref={listRef} className="border-t border-border/40">
-        {filtered.map((project, i) => (
-          <ExplorerRow key={project.id} project={project} index={i} />
-        ))}
-        {filtered.length === 0 && (
-          <li className="border-b border-border/40 py-12 text-center font-mono text-[12px] text-muted-foreground">
-            No projects in this category yet — real work lands here.
-          </li>
-        )}
-      </ul>
+        <ul ref={listRef} className="border-t border-border/40">
+          {filtered.map((project, i) => (
+            <ExplorerRow key={project.id} project={project} index={i} />
+          ))}
+          {filtered.length === 0 && (
+            <li className="border-b border-border/40 py-12 text-center font-mono text-[12px] text-muted-foreground">
+              No projects in this category yet — real work lands here.
+            </li>
+          )}
+        </ul>
+      </GlassCard>
     </Section>
   );
 }

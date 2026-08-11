@@ -284,8 +284,8 @@ function brainForm(p: P, t: number): V3 {
  */
 function finalForm(p: P, t: number): V3 {
   const tilt = 0.42; // disc inclination — gives the ellipse-on-screen read
-  if (p.f3 > 0.78) {
-    // Infalling piece — spirals from the disc edge toward the horizon,
+  if (p.f3 > 0.9) {
+    // Infalling minority — spirals from the disc edge toward the horizon,
     // with a slow radial wobble so the swallow reads as converging, not
     // just orbiting a smaller circle.
     const r = 0.24 + (1 - p.f2) * 0.5 + Math.sin(t * 0.2 + p.f1 * 6.283) * 0.05;
@@ -295,13 +295,18 @@ function finalForm(p: P, t: number): V3 {
     const z = Math.sin(ang) * r * Math.sin(tilt);
     return { x, y, z };
   }
-  // Accretion disc — radius spread around the horizon, thin in y, spinning
-  // with keplerian shear: the inner edge races ahead of the outer.
-  const r = 0.3 + p.f2 * 0.8;
-  const ang = p.f1 * Math.PI * 2 + t * (0.34 / (0.3 + r)) + p.f3 * 0.4;
-  const x = Math.cos(ang) * r;
-  const y = Math.sin(ang) * r * Math.cos(tilt) + (p.f3 - 0.5) * 0.06;
-  const z = Math.sin(ang) * r * Math.sin(tilt) + (p.f2 - 0.5) * 0.12;
+  // Accretion disc — the bulk of the pieces orbit a tilted, razor-thin
+  // plane. Radius skews toward the inner edge (via ^1.6) so the disk hugs
+  // the horizon and reads as a bright ring, and stays inside the frame
+  // (max ~0.87 world units) so the whole disk is visible beside the card.
+  const r = 0.27 + Math.pow(p.f2, 1.6) * 0.6;
+  const ang = p.f1 * Math.PI * 2 + t * (0.4 / (0.27 + r)) + p.f3 * 0.4;
+  // A faint per-piece radial wobble breaks perfect circular symmetry so
+  // the disk reads as churning matter, not a drawn ring.
+  const rw = r + 0.015 * Math.sin(ang * 2 + p.f1 * 6.283);
+  const x = Math.cos(ang) * rw;
+  const y = Math.sin(ang) * rw * Math.cos(tilt) + (p.f3 - 0.5) * 0.03;
+  const z = Math.sin(ang) * rw * Math.sin(tilt) + (p.f2 - 0.5) * 0.06;
   return { x, y, z };
 }
 
@@ -436,16 +441,20 @@ function buildAmbient(count: number): Ambient[] {
   return pts;
 }
 
-/* ---- Section-boundary form windows --------------------------------- */
+/* ---- Even-cadence form windows ------------------------------------ */
 
 /*
- * The measured top of each section is a handover boundary: form i hands over
- * to form i+1 across a window centred on the top of the next section. Inside
- * the window the pieces run the full dispersion sequence; outside it, the
- * owning form simply lives. Windows never overlap, so the material is never
- * empty and never pops. The half-width derives from the gap between the
- * sections, so tight sections disperse quickly and spread-out ones get a
- * long, cinematic transformation.
+ * Section gaps are wildly uneven (the Work section alone is ~40% of the
+ * page, About and Stack are squeezed), so sizing the transition windows
+ * from the local gaps skipped some forms entirely (orbit and wave got
+ * ~0px of life) and let others overstay (the spiral held ~34% of the
+ * page). Instead the page is cut into an even rhythm: every form lives
+ * the same scroll distance and every transition gets the same window, so
+ * the reel reads at a constant speed — one steady shape-change cadence
+ * from top to bottom, scrubbable and reversible, nothing skipped.
+ * Boundaries are then gently pulled toward their real section tops so
+ * the world still lives where its content is. Windows never overlap
+ * (minimum life enforced), the material is never empty and never pops.
  */
 
 type FormDef = {
@@ -463,7 +472,7 @@ const FORMS: FormDef[] = [
   { key: "spiral", cx: 0.5, oy: 0.48, zoom: 1.05, size: 1 },
   { key: "wave", cx: 0.5, oy: 0.34, zoom: 1, size: 0.9 },
   { key: "brain", cx: 0.5, oy: 0.5, zoom: 1.1, size: 1 },
-  { key: "final", cx: 0.72, oy: 0.5, zoom: 0.9, size: 0.9 },
+  { key: "final", cx: 0.84, oy: 0.5, zoom: 0.9, size: 0.9 },
 ];
 
 /** boundary[i] = the scroll position where form i hands over to form i+1. */
@@ -493,12 +502,17 @@ export function TriangleWorld() {
   const reduce = !!useReducedMotion();
   const paletteRef = useRef<string[]>(DARK_PALETTE);
   const glowRgbRef = useRef(DARK_GLOW_RGB);
+  // Light theme renders on a pale page: strokes are thicker, alphas higher,
+  // and the additive glow layers switch to plain compositing (adding to
+  // white is invisible) so the shapes and motes actually read.
+  const lightModeRef = useRef(false);
   const renderRef = useRef<((ms: number, animated: boolean) => void) | null>(null);
 
   useEffect(() => {
     const light = resolvedTheme === "light";
     paletteRef.current = light ? LIGHT_PALETTE : DARK_PALETTE;
     glowRgbRef.current = light ? LIGHT_GLOW_RGB : DARK_GLOW_RGB;
+    lightModeRef.current = light;
     renderRef.current?.(0, false);
   }, [resolvedTheme]);
 
@@ -579,9 +593,10 @@ export function TriangleWorld() {
       const max = w < 640 ? 1100 : w < 1024 ? 2400 : 3200;
       const count = Math.max(min, Math.min(max, Math.round((w * h) / density)));
       particles = buildEarth(count, w);
-      // Ambient stays a background layer, but it must be visible — 120–190
-      // on desktop, scaled down on mobile.
-      ambient = buildAmbient(w < 640 ? 58 : w < 1024 ? 120 : 185);
+      // Ambient stays a background layer, but it must be visible — ~185 on
+      // desktop, still ~110 on mobile so the drifting cloud reads on small
+      // screens too (the user's "can't see the motes on phone" ask).
+      ambient = buildAmbient(w < 640 ? 110 : w < 1024 ? 120 : 185);
       const n = particles.length;
       screenX = new Float32Array(n);
       screenY = new Float32Array(n);
@@ -610,7 +625,7 @@ export function TriangleWorld() {
       const y = window.scrollY;
       const ih = window.innerHeight || h;
 
-      // ---- Form weights (section-boundary windows) -------------------
+      // ---- Form weights (even cadence) -------------------------------
       // The contact and footer section tops sit below the point where the
       // page runs out of scroll, so the closing act is repositioned into the
       // reachable range — the final dispersion must complete while the user
@@ -639,20 +654,36 @@ export function TriangleWorld() {
         }
         return v;
       });
-      const halfW = B.map((b, i) => {
-        const prevGap = i === 0 ? b : b - B[i - 1];
-        const nextGap = i === B.length - 1 ? Math.max(prevGap, ih) : B[i + 1] - b;
-        const room = Math.max(1, Math.min(prevGap, nextGap));
-        const roomVH = room / ih;
-        // Wide, gentle handovers — every transition gets 1.1–2.8 viewport
-        // heights of scroll so the dispersion reads as a slow, linear reel
-        // instead of a sudden burst.
-        const wVH = Math.max(0.55, Math.min(1.4, roomVH * 0.45));
-        return Math.min(room / 2, wVH * ih);
+      // ---- Even cadence ---------------------------------------------
+      // The page is cut into equal beats: every form lives the same scroll
+      // distance and every transition window is the same width, so shapes
+      // change at a steady, predictable rate instead of bunching (orbit +
+      // wave were being skipped entirely) and lingering (spiral held 34%).
+      // Boundaries are gently pulled toward their real section tops so the
+      // world still tracks its content, and minimum life is enforced so no
+      // window can swallow the form between two of them.
+      const totalScroll = Math.max(maxScroll, 1);
+      const nB = B.length; // one boundary (and window) per form handover
+      const hw = Math.min(0.5 * ih, totalScroll / (4 * nB)); // transition half-width
+      const life = Math.max(0.4 * ih, (totalScroll - 2 * nB * hw) / nB);
+      const SECTION_PULL = 0.15; // 0 = pure even cadence, 1 = pure section tops
+      const C = B.map((b, i) => {
+        const even = (i + 1) * life + (2 * i + 1) * hw;
+        return even + (b - even) * SECTION_PULL;
       });
+      // No window may swallow the form between two of them — push later
+      // boundaries forward so every form keeps a real moment on screen.
+      const MIN_LIFE = 0.5 * ih;
+      for (let i = 1; i < C.length; i++) {
+        C[i] = Math.max(C[i], C[i - 1] + 2 * hw + MIN_LIFE);
+      }
+      // The world → void fade (footer boundary) must stay unreachable so the
+      // black hole holds while the page runs out of scroll.
+      C[C.length - 1] = Math.max(C[C.length - 1], totalScroll + hw + 100);
+      const halfW = C.map(() => hw);
       const weights = FORMS.map((_, i) => {
-        const inW = i === 0 ? 1 : rise(y, B[i - 1], halfW[i - 1]);
-        const outW = fall(y, B[i], halfW[i]);
+        const inW = i === 0 ? 1 : rise(y, C[i - 1], halfW[i - 1]);
+        const outW = fall(y, C[i], halfW[i]);
         return inW * outW;
       });
       const total = weights.reduce((a, b) => a + b, 0);
@@ -679,12 +710,12 @@ export function TriangleWorld() {
       // ---- Active dispersion (the boundary currently being crossed) ---
       let dispI = -1;
       let dispP = 0;
-      for (let i = 0; i < B.length; i++) {
-        if (y >= B[i] - halfW[i] && y <= B[i] + halfW[i]) {
+      for (let i = 0; i < C.length; i++) {
+        if (y >= C[i] - halfW[i] && y <= C[i] + halfW[i]) {
           dispI = i;
           // Plain linear ramp — constant scroll velocity through the whole
           // transformation (the user's "smooth and linear" ask).
-          dispP = clamp01((y - (B[i] - halfW[i])) / (2 * halfW[i]));
+          dispP = clamp01((y - (C[i] - halfW[i])) / (2 * halfW[i]));
           break;
         }
       }
@@ -707,7 +738,7 @@ export function TriangleWorld() {
       // scrolling always animates — there is never a dead stretch before the
       // handover. Progress is linear: every pixel of scroll turns the globe
       // by the same amount, so the motion is constant and scrubbed.
-      const earthHoldEnd = Math.max(B[0] - halfW[0], 1);
+      const earthHoldEnd = Math.max(C[0] - halfW[0], 1);
       const earthProg = clamp01(y / earthHoldEnd);
       const rotY =
         s * ROT_SPEED +
@@ -762,20 +793,28 @@ export function TriangleWorld() {
       const oy = h * oyEff + (fine ? mouseY * unit * 0.055 : 0);
       const glyphScale = w < 640 ? 1.15 : 1;
       const palette = paletteRef.current;
+      const lightMode = lightModeRef.current;
+      // 1px hairlines vanish on a pale page — light theme draws thicker.
+      const strokeW = lightMode ? 1.6 : 1;
 
       // ---- Ambient layer — drawn first, under everything -------------
       ctx.globalCompositeOperation = "source-over";
-      ctx.lineWidth = 1;
+      ctx.lineWidth = lightMode ? 1.3 : 1;
       const aStep = (Math.PI * 2) / 3;
       const ambientMod =
         clamp01(0.95 + 0.25 * wSpiral + 0.1 * wBrain - 0.3 * wFinal) *
-        (w < 640 ? 0.85 : 1);
+        (w < 640 ? 1.05 : 1);
       const aUnit = unit * 1.2;
       const aOx = w * 0.5;
       const aOy = h * 0.5;
-      const ambientBase = [0.16, 0.24, 0.32]; // far / mid / near
+      // Light mode needs a stronger base — the same cloud, clearly visible
+      // against the pale background instead of sinking into it.
+      const ambientBase = lightMode
+        ? [0.26, 0.36, 0.46] // far / mid / near
+        : [0.16, 0.24, 0.32];
       for (const a of ambient) {
-        if (w < 640 && a.layer === 0) continue; // mobile keeps mid + near
+        // All three depth layers render on every screen — the far layer is
+        // what gives the cloud its atmospheric spread on mobile too.
         const t = s * a.speed;
         const amp = a.layer === 0 ? 0.05 : a.layer === 1 ? 0.08 : 0.12;
         let ax =
@@ -819,8 +858,7 @@ export function TriangleWorld() {
           flick *
           (asm * 0.9 + 0.1) *
           (1 + dispVis * 0.35) *
-          swallowed *
-          (w < 640 ? 0.9 : 1);
+          swallowed;
         if (alpha <= 0.012) continue;
         const ang = a.rot + s * a.rotSpeed;
         ctx.globalAlpha = alpha;
@@ -840,7 +878,7 @@ export function TriangleWorld() {
 
       // ---- Projection ------------------------------------------------
       const n = particles.length;
-      const lastBoundary = dispI === B.length - 1;
+      const lastBoundary = dispI === C.length - 1;
       for (let i = 0; i < n; i++) {
         const p = particles[i];
         const pulse = p.frag
@@ -951,10 +989,19 @@ export function TriangleWorld() {
         // cools outward; infalling pieces stay bright at the rim and dim as
         // they spiral toward the horizon and are swallowed.
         if (wFinal > 0.05) {
-          if (p.f3 > 0.78) {
+          if (p.f3 > 0.9) {
             light *= 0.3 + 0.7 * (1 - p.f2); // brighter far out, dim near the hole
           } else {
-            light *= 0.55 + 0.45 * (1 - p.f2); // inner disc hot, outer cool
+            // Inner disc hot, outer cool — plus keplerian beaming: the side
+            // of the disk approaching the camera glows brighter, so the
+            // disk reads as a living accretion flow, not a static ring.
+            const rr = 0.27 + Math.pow(p.f2, 1.6) * 0.6;
+            // Same orbit angle as finalForm (incl. the f3 phase term) so the
+            // bright hemisphere tracks each piece's real position in the disk.
+            const angN =
+              p.f1 * Math.PI * 2 + s * (0.4 / (0.27 + rr)) + p.f3 * 0.4;
+            light *=
+              (0.55 + 0.45 * (1 - p.f2)) * (1 + 0.3 * Math.cos(angN));
           }
         }
         const dispBoost = dispStyle ? 1 + (dispStyle.alpha - 1) * dispVis : 1;
@@ -963,7 +1010,15 @@ export function TriangleWorld() {
         const tailFade = lastBoundary
           ? 1 - smoothstep(clamp01((dispP - 0.5) / 0.5))
           : 1;
-        alphaA[i] = zAlpha * appear * light * dispBoost * tailFade;
+        // Light theme boosts alpha, scaled by depth so near pieces pop while
+        // far shards stay visibly dimmer — the depth contrast survives.
+        alphaA[i] =
+          zAlpha *
+          appear *
+          light *
+          dispBoost *
+          tailFade *
+          (lightMode ? 1 + 0.32 * depth : 1);
       }
 
       // Twinkles — the occasional bright land mote (Earth form only).
@@ -1010,7 +1065,7 @@ export function TriangleWorld() {
         path.closePath();
       }
 
-      ctx.lineWidth = 1;
+      ctx.lineWidth = strokeW;
       for (let layer = 0; layer < DEPTH_LAYERS; layer++) {
         for (let color = 0; color < colorCount; color++) {
           for (let bucket = 0; bucket < BUCKETS; bucket++) {
@@ -1046,21 +1101,24 @@ export function TriangleWorld() {
         ctx.fill();
         // Photon rim — the bright ring that bends light around the shadow,
         // drawn a touch wider so it bridges the gap to the inner disc edge.
-        ctx.globalCompositeOperation = "lighter";
+        // Additive on dark; plain on light so the rim reads on white.
+        ctx.globalCompositeOperation = lightMode ? "source-over" : "lighter";
         ctx.strokeStyle = `rgba(${glowRgb}, 1)`;
-        ctx.lineWidth = 1.4;
-        ctx.globalAlpha = 0.5 * holeAlpha;
+        ctx.lineWidth = lightMode ? 2 : 1.4;
+        ctx.globalAlpha = (lightMode ? 0.6 : 0.5) * holeAlpha;
         ctx.beginPath();
         ctx.arc(hx, hy, hr * 1.08, 0, Math.PI * 2);
         ctx.stroke();
+        // The wider rings were designed as additive soft glow — on light they
+        // would read as hard outlines, so they soften instead of thicken.
         ctx.lineWidth = 3.4;
-        ctx.globalAlpha = 0.28 * holeAlpha;
+        ctx.globalAlpha = (lightMode ? 0.18 : 0.28) * holeAlpha;
         ctx.beginPath();
         ctx.arc(hx, hy, hr * 1.3, 0, Math.PI * 2);
         ctx.stroke();
         // Soft outer glow so the hole sits in the scene rather than on it.
         ctx.lineWidth = 4;
-        ctx.globalAlpha = 0.16 * holeAlpha;
+        ctx.globalAlpha = (lightMode ? 0.1 : 0.16) * holeAlpha;
         ctx.beginPath();
         ctx.arc(hx, hy, hr * 1.7, 0, Math.PI * 2);
         ctx.stroke();
@@ -1072,18 +1130,20 @@ export function TriangleWorld() {
       // scene.
       const atmoAlpha =
         clamp01((asm - 0.72) / 0.28) * wEarth * (w < 640 ? 0.6 : 1);
-      ctx.globalCompositeOperation = "lighter";
+      // Additive on dark (soft glow); plain strokes on light (the same violet
+      // reads against the pale page instead of vanishing into white).
+      ctx.globalCompositeOperation = lightMode ? "source-over" : "lighter";
       if (atmoAlpha > 0.01) {
         ctx.strokeStyle = `rgba(${glowRgb}, 1)`;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = lightMode ? 1.2 : 1;
         for (let i = 0; i < 8; i++) {
           const rr = unit * (1.015 + i * 0.03);
-          ctx.globalAlpha = 0.085 * Math.pow(0.72, i) * atmoAlpha;
+          ctx.globalAlpha = (lightMode ? 0.13 : 0.085) * Math.pow(0.72, i) * atmoAlpha;
           ctx.beginPath();
           ctx.arc(ox, oy, rr, 0, Math.PI * 2);
           ctx.stroke();
         }
-        ctx.globalAlpha = 0.15 * atmoAlpha;
+        ctx.globalAlpha = (lightMode ? 0.22 : 0.15) * atmoAlpha;
         ctx.beginPath();
         ctx.arc(ox, oy, unit * 1.012, 0, Math.PI * 2);
         ctx.stroke();
@@ -1130,13 +1190,16 @@ export function TriangleWorld() {
         }
       }
 
+      // Twinkle halos + form light — additive on dark, plain on light so
+      // they stay visible over a pale background.
+      ctx.globalCompositeOperation = lightMode ? "source-over" : "lighter";
       ctx.strokeStyle = `rgb(${glowRgb})`;
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = lightMode ? 1.2 : 1;
+      ctx.globalAlpha = lightMode ? 0.7 : 0.85;
       ctx.stroke(glowPath);
-      ctx.globalAlpha = 0.2;
+      ctx.globalAlpha = lightMode ? 0.18 : 0.2;
       ctx.stroke(haloPath);
-      ctx.globalAlpha = 0.3;
+      ctx.globalAlpha = lightMode ? 0.28 : 0.3;
       ctx.stroke(fragGlow);
 
       ctx.globalCompositeOperation = "source-over";

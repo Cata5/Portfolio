@@ -16,9 +16,9 @@ export const site = {
   url: "https://catalin.dev",
 
   /**
-   * PLACEHOLDER — replace with a real address before going live.
+   * Real address — the contact section's mailto link.
    */
-  email: "hello@catalin.dev",
+  email: "cata.manu06@gmail.com",
 
   /**
    * Verified from the git remotes of the analyzed projects (github.com/Cata5).
