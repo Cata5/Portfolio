@@ -15,7 +15,11 @@ const mobileApps = projects.filter(
 );
 
 function PhoneScreen({ project }: { project: Project }) {
-  const src = project.image ?? project.screenshots?.[0] ?? null;
+  // The phone frame is a tall 9:19 portrait, so it must use the portrait
+  // screenshot (screenshots[0]) — `project.image` is chosen for wide crops
+  // (e.g. Vortex's TV shot on the work cards) and would look wrong here.
+  // Fall back to `image` only when a project has no screenshots at all.
+  const src = project.screenshots?.[0] ?? project.image ?? null;
   if (!project.placeholder && src) {
     return (
       <Image

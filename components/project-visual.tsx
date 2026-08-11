@@ -21,7 +21,7 @@ export function ProjectVisual({
   // Fall back to the first screenshot when `image` isn't set yet — several
   // featured projects only have screenshots, and they should show the real
   // shot rather than the temporary placeholder.
-  const imageSrc = src ?? project.image ?? project.screenshots?.[0];
+  const imageSrc = src ?? project.image ?? project.screenshots?.[1];
   if (!project.placeholder && imageSrc) {
     return (
       <div

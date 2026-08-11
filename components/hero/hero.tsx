@@ -6,36 +6,31 @@ import { ArrowDown, ArrowUpRight } from "lucide-react";
 
 import { Container } from "@/components/container";
 import { CurrentYear } from "@/components/current-year";
+import { GlassCard } from "@/components/glass-card";
 import { HeroScrollIndicator } from "@/components/hero/hero-scroll-indicator";
 import { HeroTypography } from "@/components/hero/hero-typography";
-import { HeroVisual } from "@/components/hero/hero-visual";
 import { WorkspacePanel } from "@/components/hero/workspace-panel";
-import { gsap, ScrollTrigger } from "@/components/motion/gsap";
+import { gsap } from "@/components/motion/gsap";
 import { Magnetic } from "@/components/motion/magnetic";
 import { Button } from "@/components/ui/button";
 import { site } from "@/data/site";
 import { EASE, prefersReducedMotion, useIsomorphicLayoutEffect } from "@/lib/motion";
 
 /**
- * The hero — a digital poster, not a centered greeting. Four depth layers:
+ * The hero — a short pinned poster that frames the Earth, not a self-contained
+ * animation. The globe itself lives on the page-wide TriangleWorld canvas
+ * (fixed behind everything), so this section only owns the typography:
  *
- *   background   faint technical grid
- *   midground    the neural network (right of center, behind the type)
- *   text         giant SOFTWARE / DEVELOPER lines
- *   foreground   the floating "currently building" card + edge labels
- *
- * Entrance: grid → network → eyebrow → headline lines rise through their
- * masks → tagline/CTAs → card → labels → scroll cue.
- *
- * Scroll: every layer moves at its own speed (scrubbed) — grid slowest,
- * headline medium, card fastest — so the hero feels like it opens up into
- * the portfolio rather than sliding away as one block.
+ *   entrance    grid → eyebrow → headline lines rise through their masks →
+ *               tagline/CTAs → card → labels → scroll cue
+ *   scroll      the hero pins for two viewport-heights (1.5 on mobile) so the
+ *               globe's load-time assembly and slow rotation get breathing
+ *               room, then the typography drifts away and the section
+ *               releases. The same pieces keep migrating into the orbital
+ *               form as About arrives — one continuous world, never a cut.
  */
 export function Hero() {
   const rootRef = useRef<HTMLElement>(null);
-  // Scroll progress fed into the Earth so it enlarges and dissolves in
-  // lockstep with the hero's exit.
-  const visualRef = useRef<{ current: number }>({ current: 0 });
 
   useIsomorphicLayoutEffect(() => {
     const el = rootRef.current;
@@ -51,12 +46,6 @@ export function Hero() {
         { opacity: 1, duration: 1.4, ease: "power2.out" },
         0,
       )
-        .fromTo(
-          ".hero-visual",
-          { opacity: 0, scale: 1.06 },
-          { opacity: 1, scale: 1, duration: 1.8, ease: "power2.out" },
-          0.05,
-        )
         .fromTo(
           ".hero-eyebrow-inner",
           { yPercent: 130 },
@@ -82,6 +71,12 @@ export function Hero() {
           0.95,
         )
         .fromTo(
+          ".hero-glass",
+          { y: 24, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.9 },
+          0.25,
+        )
+        .fromTo(
           ".hero-workspace",
           { y: 26, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.9 },
@@ -100,47 +95,42 @@ export function Hero() {
           1.4,
         );
 
-      // ---- Scroll choreography (per-layer speeds) -------------------
+      // ---- Pinned scroll ----------------------------------------------
+      // The Earth lives on the page-wide TriangleWorld canvas behind
+      // everything, so the hero only needs to hold its typography for the
+      // globe's assembly and slow rotation to breathe (2 screens on desktop,
+      // 1.5 on mobile), then release — the pieces keep migrating into the
+      // orbital form as About arrives. Every tween is scrubbed.
       const st = gsap.timeline({
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: "bottom top",
-          scrub: 0.6,
+          end: () =>
+            "+=" +
+            Math.round(
+              window.innerHeight * (window.innerWidth < 640 ? 1.5 : 2),
+            ),
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          scrub: true,
         },
+        defaults: { ease: EASE.none },
       });
 
-      // The Earth's own internal enlargement/dissolve is driven by the ref
-      // below, so the wrapper only leans and fades — no double-growth.
-      st.to(".hero-grid", { opacity: 0, yPercent: 6, ease: "none" }, 0)
-        .to(".hero-visual", { scale: 1.08, yPercent: -10, ease: "none" }, 0)
-        .to(".hero-visual", { opacity: 0, ease: "none" }, 0.72)
-        .to(".hero-title", { yPercent: -16, ease: "none" }, 0)
-        .to(".hero-scroll-hint", { opacity: 0, ease: "none" }, 0.02)
-        .to(
-          ".hero-label, .hero-side-label",
-          { opacity: 0, ease: "none" },
-          0.2,
-        )
-        .to(".hero-tagline", { opacity: 0, y: -28, ease: "none" }, 0.3)
-        .to(".hero-ctas", { opacity: 0, y: -28, ease: "none" }, 0.35)
-        .to(
-          ".hero-workspace",
-          { yPercent: -40, opacity: 0, ease: "none" },
-          0.25,
-        )
-        .to(".hero-content", { opacity: 0, yPercent: -4, ease: "none" }, 0.55);
-
-      // Feed scroll progress into the Earth (scrub-like smoothing is applied
-      // inside the canvas). Collected by ctx.revert() on cleanup.
-      ScrollTrigger.create({
-        trigger: el,
-        start: "top top",
-        end: "bottom top",
-        onUpdate: (self) => {
-          visualRef.current.current = self.progress;
-        },
-      });
+      // Typography recedes cleanly — the labels first, the headline last —
+      // so the material owns the remaining pin.
+      st.to(".hero-scroll-hint", { opacity: 0, duration: 0.05 }, 0.05)
+        .to(".hero-grid", { opacity: 0, yPercent: 6, duration: 0.08 }, 0.06)
+        .to(".hero-label, .hero-side-label", { opacity: 0, duration: 0.06 }, 0.12)
+        .to(".hero-workspace", { yPercent: -22, opacity: 0, duration: 0.12 }, 0.2)
+        .to(".hero-tagline, .hero-ctas", { y: -22, opacity: 0, duration: 0.14 }, 0.32)
+        .to(".hero-eyebrow", { y: -12, opacity: 0, duration: 0.1 }, 0.42)
+        .to(".hero-title", { yPercent: -8, duration: 0.1 }, 0.46)
+        // The glass fades out with the headline, not before it — the panel
+        // must not strip the headline of its "leaves last" moment.
+        .to(".hero-glass", { yPercent: -6, opacity: 0, duration: 0.14 }, 0.5)
+        .to(".hero-title", { yPercent: -30, opacity: 0, duration: 0.14 }, 0.5);
     }, el);
 
     return () => ctx.revert();
@@ -158,40 +148,38 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      {/* Midground — the triangular Earth, right of center behind the type.
-          Dimming stays on the outer frame (Tailwind classes survive); the
-          entrance tween animates only the inner wrapper. */}
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-full opacity-50 sm:w-[72%] sm:opacity-70 md:w-[54%] md:opacity-90">
-        <HeroVisual className="hero-visual h-full w-full" progressRef={visualRef} />
-      </div>
-
       {/* Text + content — centered in the free space; the scroll cue sits
-          at the very bottom of the viewport-height column. */}
+          at the very bottom of the viewport-height column. The Earth on the
+          page-wide TriangleWorld canvas shows through behind it. */}
       <Container className="hero-content relative z-10 flex min-h-[100svh] flex-col py-24 md:py-28">
         <div className="flex flex-1 flex-col justify-center">
-          <HeroTypography />
-          <p className="hero-tagline mt-10 max-w-md text-lg font-extralight leading-relaxed text-muted-foreground md:text-xl">
-            {site.tagline}
-          </p>
-          <div className="hero-ctas mt-12 flex flex-wrap items-center gap-8">
-          <Magnetic>
-            <Button nativeButton={false} render={<a href="#work" />}>
-              View work
-              <ArrowDown className="size-4 transition-transform duration-200 group-hover/button:translate-y-0.5" />
-            </Button>
-          </Magnetic>
-          <Magnetic strength={0.2}>
-            <a
-              href={site.github}
-              target="_blank"
-              rel="noreferrer"
-              className="group inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.03em] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              GitHub
-              <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </a>
-          </Magnetic>
-          </div>
+          {/* The headline block sits in the same frosted-glass recipe as the
+              workspace card — the fixed triangle canvas blurs behind it. */}
+          <GlassCard className="hero-glass w-fit max-w-full p-6 sm:p-8 lg:p-10">
+            <HeroTypography />
+            <p className="hero-tagline mt-10 max-w-md text-lg font-extralight leading-relaxed text-muted-foreground md:text-xl">
+              {site.tagline}
+            </p>
+            <div className="hero-ctas mt-12 flex flex-wrap items-center gap-8">
+              <Magnetic>
+                <Button nativeButton={false} render={<a href="#work" />}>
+                  View work
+                  <ArrowDown className="size-4 transition-transform duration-200 group-hover/button:translate-y-0.5" />
+                </Button>
+              </Magnetic>
+              <Magnetic strength={0.2}>
+                <a
+                  href={site.github}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.03em] text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  GitHub
+                  <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </a>
+              </Magnetic>
+            </div>
+          </GlassCard>
         </div>
 
         {/* Scroll cue hugs the bottom of the viewport-height column */}

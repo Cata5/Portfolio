@@ -4,8 +4,8 @@ import { site } from "@/data/site";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/40">
-      <Container className="flex flex-col gap-4 py-12 md:flex-row md:items-center md:justify-between">
+    <footer className="relative overflow-hidden border-t border-border/40">
+      <Container className="relative z-10 flex flex-col gap-4 py-12 md:flex-row md:items-center md:justify-between">
         <p className="font-mono text-[11px] text-muted-foreground">
           © <CurrentYear /> {site.name} — portfolio v2
         </p>

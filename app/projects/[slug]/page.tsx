@@ -110,7 +110,6 @@ export default async function ProjectPage({
   const prev = realProjects[index - 1] ?? null;
   const next = realProjects[index + 1] ?? null;
   const related = getRelatedProjects(project.id);
-
   return (
     <Container className="pb-24 pt-10 md:pb-32 md:pt-14">
       <PageReveal>

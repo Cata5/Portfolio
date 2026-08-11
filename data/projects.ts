@@ -102,14 +102,16 @@ export const projects: Project[] = [
       "NewPipe extractor",
       "ProGuard / R8",
     ],
-    image: null,
+    // The wide TV shot leads the cards (it fits the 16/10 frame); the phone
+    // screenshot stays the first gallery image on the detail page.
+    image: "/projects/vortex/02-tv.webp",
     // Verified from git remote. Note: the repo is named "Infuse" on GitHub
     // while the project is called Vortex — intentional, do not "fix".
     github: "https://github.com/Cata5/Infuse",
     featured: true,
     screenshots: [
-      "/projects/vortex/02-tv.webp",
       "/projects/vortex/01-phone.webp",
+      "/projects/vortex/02-tv.webp",
     ],
     features: [
       "Unified movie & TV library aggregated from multiple remote sources",
@@ -682,6 +684,7 @@ export const projects: Project[] = [
     platform: "Web",
     year: 2026,
     status: "In Development",
+    demo: "https://cata5.github.io/CoralTechWeb/",
     summary:
       "Bilingual (EN/RO) website for an FTC robotics team with a local-LLM RAG chatbot that answers from the site's own content, citing sources.",
     description:
@@ -732,6 +735,7 @@ export const projects: Project[] = [
     platform: "Web",
     year: 2026,
     status: "Active",
+    demo: "https://cata5.github.io/LiceulTeoreticIonCantacuzino/",
     summary:
       "A complete school website — news, classes, teachers directory, documents, gallery, e-learning and timetable — with a SQLite-backed admin panel.",
     description:

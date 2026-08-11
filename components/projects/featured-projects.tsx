@@ -18,7 +18,10 @@ import { cn } from "@/lib/utils";
 import { prefersReducedMotion, useIsomorphicLayoutEffect } from "@/lib/motion";
 
 function cardImageSrc(project: Project) {
-  return project.screenshots?.[0] ?? project.image ?? null;
+  // The card frame is a wide rectangle, so the project's `image` (chosen to
+  // fit that crop — e.g. Vortex's TV shot) wins; projects without one fall
+  // back to their first screenshot.
+  return project.image ?? project.screenshots?.[0] ?? null;
 }
 
 function PlaceholderBox({ project }: { project: Project }) {
@@ -190,7 +193,7 @@ export function FeaturedProjects() {
   if (count === 0) return null;
 
   return (
-    <section id="work" className="relative scroll-mt-16">
+    <section id="work" className="relative scroll-mt-16 overflow-hidden">
       <Container className="pt-24 md:pt-36">
         <SectionHeader eyebrow="Work" />
         <TextReveal
