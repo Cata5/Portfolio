@@ -13,6 +13,10 @@ permissions:
 # Force the runner to use Node 24 for all Javascript-based actions
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  # Job-wide so the flag reaches the build (and any subprocess it spawns) and
+  # the verify step can echo it back as a check.
+  NEXT_DEPLOY_TARGET: gh-pages
+  NEXT_PUBLIC_DEPLOY_TARGET: gh-pages
 
 concurrency:
   group: "pages"
@@ -64,11 +68,10 @@ jobs:
 
       # This site is fully static (no app/api or app/admin routes to strip) —
       # next.config.ts switches to `output: "export"` when the flag below is set.
+      # The flag is defined at the job level (see top-level `env`), so it is
+      # inherited by the build and every process it spawns.
 
       - name: Build with Next.js
-        env:
-          NEXT_DEPLOY_TARGET: gh-pages
-          NEXT_PUBLIC_DEPLOY_TARGET: gh-pages
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
 
       - name: Ensure static export output exists

@@ -14,12 +14,15 @@ import { BASE_PATH, isGhPages } from "./lib/base-path";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["192.168.101.11"],
+  // Kept unconditional: the export decides between `<route>/index.html` and
+  // `<route>.html` from this flag at export time, and CI has produced flat
+  // `.html` files when it was tucked inside the env-driven spread below.
+  trailingSlash: true,
   ...(isGhPages
     ? {
         output: "export" as const,
         basePath: BASE_PATH,
         assetPrefix: `${BASE_PATH}/`,
-        trailingSlash: true,
         images: {
           loader: "custom" as const,
           loaderFile: "./lib/image-loader.ts",
