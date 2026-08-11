@@ -54,14 +54,10 @@ jobs:
         with:
           static_site_generator: next
 
-      - name: Restore cache
-        uses: actions/cache@v5 # Updated to v5 (Node 24 native)
-        with:
-          path: |
-            .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
+      # NOTE: no .next/cache restore on purpose. The export config is driven by
+      # NEXT_PUBLIC_DEPLOY_TARGET (not part of any cache key), and a restored
+      # Turbopack build cache has produced exports without the expected config
+      # in CI. Cold, deterministic builds are ~1 min slower but always correct.
 
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
@@ -90,15 +86,33 @@ jobs:
       - name: Verify export is correctly prefixed
         run: |
           set -e
+          echo "NEXT_PUBLIC_DEPLOY_TARGET=$NEXT_PUBLIC_DEPLOY_TARGET"
           fail() { echo "::error::$1"; exit 1; }
+          dump() {
+            echo "--- out/ html files ---"
+            find out -name '*.html' 2>/dev/null | head -30 || true
+            echo "--- out/projects/ ---"
+            ls out/projects/ 2>/dev/null | head -25 || true
+            echo "--- flat html (depth>=2, should be none) ---"
+            find out -mindepth 2 -name '*.html' -not -name 'index.html' 2>/dev/null | head -10 || true
+          }
+          # basePath must prefix assets
           grep -q '/Portofolio-V2/_next' out/index.html \
-            || fail "basePath not applied to assets (no /Portofolio-V2/_next in out/index.html)"
+            || { echo "::error::basePath not applied (no /Portofolio-V2/_next in out/index.html)"; dump; exit 1; }
+          # trailingSlash: export must never emit flat <route>.html files
+          FLAT=$(find out -mindepth 2 -name '*.html' -not -name 'index.html' | head -1)
+          if [ -n "$FLAT" ]; then
+            echo "::error::trailingSlash not applied - flat .html file found: $FLAT"
+            dump
+            exit 1
+          fi
           test -f out/projects/vortex/index.html \
-            || fail "trailingSlash not applied (expected out/projects/vortex/index.html)"
+            || { echo "::error::missing out/projects/vortex/index.html"; dump; exit 1; }
+          # custom image loader must prefix project images on both pages
           grep -q '/Portofolio-V2/projects/' out/index.html \
-            || fail "image loader not applied (no prefixed project image in out/index.html)"
+            || { echo "::error::image loader not applied (no prefixed project image in out/index.html)"; dump; exit 1; }
           grep -q '/Portofolio-V2/projects/' out/projects/vortex/index.html \
-            || fail "image loader not applied on project page (out/projects/vortex/index.html)"
+            || { echo "::error::image loader not applied on project page"; dump; exit 1; }
           if grep -oE '(href|src)="/projects/' out/index.html; then
             echo "::error::unprefixed internal URLs found (see above)"
             exit 1
