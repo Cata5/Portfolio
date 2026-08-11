@@ -257,7 +257,7 @@ export const projects: Project[] = [
     category: "Desktop",
     platform: "Windows",
     year: 2026,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A PyQt6 desktop expense tracker that scans IMAP inboxes for invoices, extracts amounts with OCR and PDF parsing, and exports everything to formatted Excel.",
     description:
@@ -307,7 +307,7 @@ export const projects: Project[] = [
     category: "Desktop",
     platform: "Windows · Android (Capacitor)",
     year: 2026,
-    status: "Active",
+    status: "Completed",
     summary:
       "Offline offer generator for Teka: reads six Excel files (products, clients, promos), applies tiered discounts, and exports client offers — as a Windows app and an Android app.",
     description:
@@ -411,7 +411,7 @@ export const projects: Project[] = [
     category: "Developer Tools",
     platform: "Windows · desktop",
     year: 2026,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A desktop tool for building image datasets from multiple sources — Bing, Google, iCrawler — and generating SAM-based masks and annotation files for training.",
     description:
@@ -574,7 +574,7 @@ export const projects: Project[] = [
     category: "Web",
     platform: "Web",
     year: 2025,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A car-parts shop with AI detection: upload a photo and a custom YOLOv8 model identifies the part and matches products — plus cart, checkout, appointments and a dashboard.",
     description:
@@ -626,7 +626,7 @@ export const projects: Project[] = [
     category: "Web",
     platform: "Web",
     year: 2026,
-    status: "In Development",
+    status: "Completed",
     demo: "https://cata5.github.io/CoralTechWeb/",
     summary:
       "Bilingual (EN/RO) website for an FTC robotics team with a local-LLM RAG chatbot that answers from the site's own content, citing sources.",
@@ -677,7 +677,7 @@ export const projects: Project[] = [
     category: "Web",
     platform: "Web",
     year: 2026,
-    status: "Active",
+    status: "Completed",
     demo: "https://cata5.github.io/LiceulTeoreticIonCantacuzino/",
     summary:
       "A complete school website — news, classes, teachers directory, documents, gallery, e-learning and timetable — with a SQLite-backed admin panel.",
@@ -725,7 +725,7 @@ export const projects: Project[] = [
     category: "Developer Tools",
     platform: "Windows",
     year: 2026,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A PySide6 desktop app for training, fine-tuning and testing YOLO models (v8/11/26) with live logs, metric charts, GPU checks and a packaged Windows installer.",
     description:
@@ -834,7 +834,7 @@ export const projects: Project[] = [
     category: "AI / ML",
     platform: "Web · local tool",
     year: null,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A Flask web interface for fine-tuning LLMs with Unsloth — LoRA parameters, live GPU monitoring, custom chat templates and training resume.",
     description:
@@ -888,7 +888,7 @@ export const projects: Project[] = [
     category: "Developer Tools",
     platform: "Terminal (Windows/Linux/macOS)",
     year: null,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A Claude Code-style terminal AI shell: slash commands, tab completion, instant model hot-swapping across Ollama/GGUF/Transformers/HF/OpenAI, and a sandboxed tool loop.",
     description:
@@ -952,7 +952,7 @@ export const projects: Project[] = [
     category: "Desktop",
     platform: "Windows/Linux/macOS (GUI + API)",
     year: null,
-    status: "Active",
+    status: "Completed",
     summary:
       "A local desktop app that converts handwritten PDF pages — including math — into clean typed PDFs, powered by GLM-OCR via Ollama or Transformers.",
     description:

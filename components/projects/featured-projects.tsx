@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 
-import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 
 import { Container } from "@/components/container";
@@ -16,6 +15,7 @@ import { featuredProjects } from "@/data/projects";
 import type { Project } from "@/data/projects";
 import { cn } from "@/lib/utils";
 import { prefersReducedMotion, useIsomorphicLayoutEffect } from "@/lib/motion";
+import { GlassCard } from "@/components/glass-card";
 
 function cardImageSrc(project: Project) {
   // The card frame is a wide rectangle, so the project's `image` (chosen to
@@ -47,14 +47,21 @@ function PlaceholderBox({ project }: { project: Project }) {
  * that plays the shared expand transition into the detail page; the
  * screenshot sits in a parallax frame that drifts while scrolling and nudges
  * on hover.
+ *
+ * `stage` cards live in the pinned horizontal track (a full-viewport box), so
+ * the screenshot takes the leftover height and can never push the footer — the
+ * technologies — off-screen. `stack` cards (mobile / reduced motion) keep the
+ * natural 16/10 frame in normal document flow.
  */
 function ProjectCard({
   project,
   index,
+  variant = "stack",
   className,
 }: {
   project: Project;
   index: number;
+  variant?: "stage" | "stack";
   className?: string;
 }) {
   const src = cardImageSrc(project);
@@ -63,12 +70,22 @@ function ProjectCard({
     <ProjectLink
       href={`/projects/${project.id}`}
       src={src ?? undefined}
-      className={cn("block", className)}
+      className={cn("group block", className)}
     >
-      <div className="flex h-full flex-col gap-6">
+      <GlassCard
+        className={cn(
+          "flex flex-col overflow-hidden",
+          variant === "stage" && "h-[calc(100svh-6rem)]",
+        )}
+      >
         <div
           data-project-visual
-          className="relative aspect-[16/10] overflow-hidden bg-muted/20"
+          className={cn(
+            "relative shrink-0 overflow-hidden bg-muted/20",
+            variant === "stage"
+              ? "min-h-[10rem] flex-1"
+              : "aspect-[16/10]",
+          )}
         >
           {src && !project.placeholder ? (
             <Parallax speed={0.07} className="relative h-full w-full">
@@ -85,34 +102,32 @@ function ProjectCard({
           )}
         </div>
 
-        <div className="flex items-baseline justify-between gap-4">
-          <span className="font-mono text-[13px] text-signal">
-            0{index + 1}
-          </span>
-          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-            {project.category}
-            {project.year ? ` — ${project.year}` : ""}
-          </span>
-        </div>
+        <div className="flex flex-col gap-4 p-6 md:p-7">
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="font-mono text-[13px] text-signal">
+              0{index + 1}
+            </span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+              {project.category}
+              {project.year ? ` — ${project.year}` : ""}
+            </span>
+          </div>
 
-        <h3 className="text-3xl font-normal leading-[1.02] tracking-[-0.03em] transition-colors duration-300 group-hover:text-signal md:text-4xl">
-          {project.title}
-        </h3>
-        <p className="max-w-md text-lg font-extralight leading-relaxed text-muted-foreground">
-          {project.summary}
-        </p>
-        {project.technologies.length > 0 && (
-          <p className="font-mono text-[12px] text-muted-foreground">
-            {project.technologies.slice(0, 4).join(" · ")}
+          <h3 className="text-3xl font-normal leading-[1.02] tracking-[-0.03em] transition-colors duration-300 group-hover:text-signal md:text-4xl">
+            {project.title}
+          </h3>
+
+          <p className="line-clamp-2 max-w-md text-lg font-extralight leading-relaxed text-muted-foreground">
+            {project.summary}
           </p>
-        )}
-        <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium">
-          <span className="transition-transform duration-200 group-hover:translate-x-1">
-            View project
-          </span>
-          <ArrowRight className="size-4" aria-hidden="true" />
-        </span>
-      </div>
+
+          {project.technologies.length > 0 && (
+            <p className="mt-auto truncate border-t border-border/50 pt-4 font-mono text-[12px] text-muted-foreground">
+              {project.technologies.slice(0, 4).join(" · ")}
+            </p>
+          )}
+        </div>
+      </GlassCard>
     </ProjectLink>
   );
 }
@@ -228,6 +243,7 @@ export function FeaturedProjects() {
               key={project.id}
               project={project}
               index={i}
+              variant="stage"
               className="w-[78vw] shrink-0 sm:w-[58vw] xl:w-[42vw]"
             />
           ))}

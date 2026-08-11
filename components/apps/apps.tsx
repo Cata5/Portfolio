@@ -78,7 +78,7 @@ export function Apps() {
   if (mobileApps.length === 0) return null;
 
   return (
-    <Section id="apps" eyebrow="Apps">
+    <Section id="apps" eyebrow="Mobile Apps">
       {/* The whole Apps block floats on the same frosted glass as the other
           sections — the persistent triangle material blurs through behind
           the phone frames. */}

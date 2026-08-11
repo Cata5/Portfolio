@@ -19,8 +19,9 @@ import { scrollToId } from "@/components/motion/lenis";
 import { site } from "@/data/site";
 
 const sections = [
-  { label: "Work", target: "work", hint: "selected projects" },
+
   { label: "About", target: "about", hint: "background" },
+  { label: "Projects", target: "work", hint: "selected projects" },
   { label: "Stack", target: "stack", hint: "tools" },
   { label: "ML", target: "ml", hint: "notebook" },
   { label: "Apps", target: "apps", hint: "mobile" },
