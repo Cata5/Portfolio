@@ -6,6 +6,7 @@ import { Stagger } from "@/components/motion/stagger";
 import { TextReveal } from "@/components/motion/text-reveal";
 import { Section } from "@/components/section";
 import { certifications } from "@/data/certifications";
+import { withBasePath } from "@/lib/base-path";
 
 /**
  * Certifications — the earned-paper shelf. Each card shows a crisp WebP
@@ -47,7 +48,7 @@ export function Certifications() {
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <a
-                    href={cert.file}
+                    href={withBasePath(cert.file)}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 p-2 font-mono text-[11px] text-muted-foreground transition-colors hover:text-signal"
@@ -56,7 +57,7 @@ export function Certifications() {
                     <ExternalLink className="size-3.5" aria-hidden="true" />
                   </a>
                   <a
-                    href={cert.file}
+                    href={withBasePath(cert.file)}
                     download
                     className="inline-flex items-center gap-1.5 p-2 font-mono text-[11px] text-muted-foreground transition-colors hover:text-signal"
                     aria-label={`Download ${cert.title} certificate`}
@@ -70,7 +71,7 @@ export function Certifications() {
                   visible (CCNA is 3:2, IC3 4:3); the frame clips nothing. */}
               <div className="relative mx-6 aspect-[4/3] overflow-hidden rounded-xl border border-border/60 bg-muted/30 sm:mx-7">
                 <a
-                  href={cert.file}
+                  href={withBasePath(cert.file)}
                   target="_blank"
                   rel="noreferrer"
                   aria-label={`Open ${cert.title} certificate`}

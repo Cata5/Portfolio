@@ -83,6 +83,28 @@ jobs:
       - name: Add .nojekyll for Pages
         run: touch out/.nojekyll
 
+      # Guard: a static export with the wrong config would silently deploy a
+      # broken site (unprefixed assets / flat .html files). Verify the exact
+      # things that must be true for this project site to work, and fail the
+      # job — with diagnostics — if any are missing.
+      - name: Verify export is correctly prefixed
+        run: |
+          set -e
+          fail() { echo "::error::$1"; exit 1; }
+          grep -q '/Portofolio-V2/_next' out/index.html \
+            || fail "basePath not applied to assets (no /Portofolio-V2/_next in out/index.html)"
+          test -f out/projects/vortex/index.html \
+            || fail "trailingSlash not applied (expected out/projects/vortex/index.html)"
+          grep -q '/Portofolio-V2/projects/' out/index.html \
+            || fail "image loader not applied (no prefixed project image in out/index.html)"
+          grep -q '/Portofolio-V2/projects/' out/projects/vortex/index.html \
+            || fail "image loader not applied on project page (out/projects/vortex/index.html)"
+          if grep -oE '(href|src)="/projects/' out/index.html; then
+            echo "::error::unprefixed internal URLs found (see above)"
+            exit 1
+          fi
+          echo "export verified: basePath + trailingSlash + image loader all applied"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

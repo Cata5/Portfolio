@@ -4,6 +4,7 @@ import { useRef, type MouseEvent, type ReactNode } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { withBasePath } from "@/lib/base-path";
 import { beginProjectTransition } from "@/lib/page-transition";
 import { hasFinePointer, prefersReducedMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -50,7 +51,7 @@ export function ProjectLink({
   return (
     <a
       ref={ref}
-      href={href}
+      href={withBasePath(href)}
       onClick={onClick}
       data-cursor="view"
       className={cn("group", className)}

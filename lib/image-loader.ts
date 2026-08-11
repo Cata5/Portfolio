@@ -8,10 +8,7 @@
  * through untouched. Images ship as-is: the loader is used for URL building
  * only, so width/quality are intentionally unused.
  */
-const BASE_PATH =
-  process.env.NEXT_PUBLIC_DEPLOY_TARGET === "gh-pages"
-    ? "/Portofolio-V2"
-    : "";
+import { BASE_PATH } from "./base-path";
 
 export default function imageLoader({
   src,
