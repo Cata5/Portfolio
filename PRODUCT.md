@@ -40,7 +40,7 @@ with genuine depth — and proves it with real, evidence-backed projects rather 
 - Strict no-fabrication rule: never invent metrics, stats, clients, or experience; leave fields
   out instead. Placeholder-flagged entries render a temporary treatment.
 - English-only content.
-- Featured projects: Vortex, Detectie, ATLAS, Siteauto, Jarvis.
+- Featured projects: Vortex, Detectie, Siteauto, Jarvis.
 
 ## Brand Commitments
 
@@ -50,9 +50,9 @@ with genuine depth — and proves it with real, evidence-backed projects rather 
 ## Evidence on Hand
 
 - PROJECT_ANALYSIS.md — every project claim verified against source, dated 2026-08-10.
-- Real screenshots under public/projects/ (e.g. Vortex phone/TV, Primarie dashboard).
+- Real screenshots under public/projects/ (e.g. Vortex phone/TV).
 - GitHub remotes: github.com/Cata5 (Infuse/Vortex, AI-interface, Aplicatie-Teka, OmniStudio,
-  Primarie, Agetic-OS-Helper).
+  Agetic-OS-Helper).
 
 ## Product Principles
 

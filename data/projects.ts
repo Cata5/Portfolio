@@ -222,7 +222,7 @@ export const projects: Project[] = [
     screenshots: [
       "/projects/ai-studio/01-home.webp"
     ],
-    featured: false,
+    featured: true,
     features: [
       "GGUF model scanning and profile management (settings persisted to JSON)",
       "llama-server process manager — context size, GPU layers, threads, batch, cache type",
@@ -481,7 +481,7 @@ export const projects: Project[] = [
     screenshots: [
       "/projects/detectie/01-home.webp",
     ],
-    featured: true,
+    featured: false,
     features: [
       "YOLO-based license-plate detection with confidence filtering",
       "OCR of the cropped plate region with EasyOCR",
@@ -569,63 +569,6 @@ export const projects: Project[] = [
   },
 
   {
-    id: "primarie",
-    title: "ATLAS · Primărie portal",
-    category: "Web",
-    platform: "Web",
-    year: 2026,
-    status: "In Development",
-    summary:
-      "A tax-declaration portal for a city hall: scrypt-authenticated demo login, a guided declaration wizard, role-based dashboards, audit logging and SQLite storage.",
-    description:
-      "ATLAS is a Next.js portal for municipal tax declarations. It ships with a seeded demo user, scrypt password hashing with an optional pepper (ATLAS_PEPPER), brute-force throttling on login, a declaration wizard, role-based dashboard views (an OWASP A01 access-control pass is recorded in git history), audit logging, and a performance pass that lifted its audit score to 84/100. Data lives in SQLite (node:sqlite) with a JSON store for legacy content, and the whole thing deploys via a multi-stage Dockerfile.",
-    technologies: [
-      "Next.js 16",
-      "React 19",
-      "TypeScript",
-      "Tailwind CSS v4",
-      "SQLite (node:sqlite)",
-      "scrypt",
-      "Server Actions",
-      "Docker",
-      "cloudflared",
-    ],
-    image: "/projects/primarie/01-home.webp",
-    github: "https://github.com/Cata5/Primarie",
-    featured: true,
-    screenshots: [
-      "/projects/primarie/01-home.webp",
-      "/projects/primarie/03-dashboard.webp",
-    ],
-    features: [
-      "Authentication with scrypt hashing, pepper support and login throttling (5 attempts / 15 min)",
-      "Seeded demo user for evaluation",
-      "Guided declaration wizard",
-      "Role-based dashboard views with access control",
-      "Audit logging of sensitive actions",
-      "SQLite system of record (users, sessions) plus JSON store for declarations/certificates/payments",
-      "Contact, legislation and FAQ pages",
-      "Multi-stage Docker deployment as non-root user",
-      "Documented performance audits (84/100 on second pass)",
-    ],
-    architecture:
-      "Server actions validate input (validate.ts), manage sessions and audit (audit.ts, auth.ts). Declarations flow through lib/declarations.ts and forms.ts against SQLite, with a JSON database for content that predates the migration. The Dockerfile builds a standalone Next.js output.",
-    architectureDiagram: [
-      "Browser",
-      "    ↓  Server Actions",
-      "Next.js (App Router)",
-      "    ├─ auth.ts (scrypt · pepper · throttle)",
-      "    ├─ declarations.ts / forms.ts",
-      "    ├─ SQLite (node:sqlite) + data/db.json",
-      "    └─ audit.ts → data/logs",
-    ].join("\n"),
-    limitations: [
-      "Demo credentials are hardcoded in lib/auth.ts — fine for evaluation, must be replaced for production",
-      "JSON store is being migrated to SQLite; both are read at runtime",
-    ],
-  },
-
-  {
     id: "siteauto",
     title: "Siteauto",
     category: "Web",
@@ -702,7 +645,7 @@ export const projects: Project[] = [
       "PDF parsing",
     ],
     image: "/projects/coraltech/01-home.webp",
-    featured: false,
+    featured: true,
     screenshots: ["/projects/coraltech/01-home.webp", "/coral-web.png"],
     features: [
       "Bilingual content (EN/RO) with locale files",
@@ -853,7 +796,7 @@ export const projects: Project[] = [
     ],
     image: null,
     github: "https://github.com/Cata5/Agetic-OS-Helper",
-    featured: true,
+    featured: false,
     features: [
       "Three-layer agent architecture: planner (9B) → executor (26M) → runtime",
       "56 tools in 14 groups with a permissions system (safe/ask)",
@@ -910,7 +853,7 @@ export const projects: Project[] = [
     screenshots: [
       "/projects/llm-finetuner/01-home.webp"
     ],
-    featured: false,
+    featured: true,
     features: [
       "Fine-tune any Unsloth-compatible model from a web form",
       "Model presets in config/models.json (e.g. Llama 3.2 1B Instruct, Mistral 7B v0.3, 4-bit variants)",
@@ -961,8 +904,18 @@ export const projects: Project[] = [
       "PyInstaller",
     ],
     image: "/neuro-shell.png",
-    featured: false,
-    screenshots: ["/neuro-shell.png"],
+    featured: true,
+    // Genuine captures of the running CLI (welcome, command menu, tool list
+    // with the security panel, CUDA diagnostics, and the model registry),
+    // followed by the original boot screen from the packaged build.
+    screenshots: [
+      "/projects/neuroshell/01-welcome.webp",
+      "/projects/neuroshell/02-help.webp",
+      "/projects/neuroshell/03-tools.webp",
+      "/projects/neuroshell/04-gpu.webp",
+      "/projects/neuroshell/05-model.webp",
+      "/neuro-shell.png",
+    ],
     features: [
       "Interactive REPL with a slash-command palette (/help, /model, /gpu, /download, /clear, /tools, /mode, /history, /exit)",
       "Real-time tab autocompletion for commands, models, Hugging Face repos and workspace paths",

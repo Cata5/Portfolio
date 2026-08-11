@@ -18,6 +18,22 @@ export function Footer() {
           >
             view source ↗
           </a>
+          <a
+            href={site.linkedin}
+            target="_blank"
+            rel="noreferrer"
+            className="transition-colors hover:text-foreground"
+          >
+            LinkedIn ↗
+          </a>
+          <a
+            href={site.instagram}
+            target="_blank"
+            rel="noreferrer"
+            className="transition-colors hover:text-foreground"
+          >
+            Instagram ↗
+          </a>
           <a href="#top" className="transition-colors hover:text-foreground">
             back to top ↑
           </a>

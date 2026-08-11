@@ -270,30 +270,6 @@ Normal.
 
 ---
 
-## Primarie (ATLAS)
-
-- **Type:** Municipal tax-declaration portal
-- **Platform:** Web
-- **Technologies:** Next.js 16, React 19, TypeScript, Tailwind v4, SQLite (node:sqlite), scrypt, Server Actions, Docker, cloudflared
-- **Status:** In Development (6 commits, last 2026-07-18)
-- **GitHub:** https://github.com/Cata5/Primarie
-
-### Confirmed Features
-
-- scrypt hashing + optional pepper (`ATLAS_PEPPER`); login throttling (5 tries/15 min)
-- Declaration wizard; role-based dashboards (OWASP A01 pass in git history)
-- Audit logging; SQLite + JSON stores; Docker multi-stage non-root; performance audits (84/100 second pass)
-
-### Security Notes
-
-- `lib/auth.ts` hardcodes demo credentials `demo / demo2026` — explicitly a demo user; **replace for any real deployment**.
-
-### Portfolio Recommendation
-
-**Featured** (real-world portal with auth/audit/perf work).
-
----
-
 ## siteauto
 
 - **Type:** Car-parts shop with AI part detection
@@ -543,7 +519,6 @@ Upstream open-source project.
 |---|---|---|
 | Vortex | `TV SECRET.json`, `WEB Secret.json`, `local.properties` contain OAuth/TMDB credentials — gitignored | ⚠️ Never commit or publish; rotate if ever leaked |
 | Detectie | Wi-Fi credentials previously hardcoded in `src/main.cpp` | ✅ Fixed 2026-08-10 — moved to gitignored `include/secrets.h`; both-macro guard fails loudly with `#error` on missing/partial config; live `secrets.h` removed from the `Worthy-projects/` showcase copy |
-| Primarie | Hardcoded demo credentials (`demo/demo2026`) in `lib/auth.ts` | ⚠️ Demo-only; replace before real use |
 | Cheltuieli | IMAP `password` field in `settings.json` | Info — check if populated; use keychain |
 | siteauto | `.env.local` (value is default placeholder) | Info — don't publish the file |
 

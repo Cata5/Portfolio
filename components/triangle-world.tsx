@@ -18,11 +18,15 @@ import { mulberry32, pickColor } from "@/lib/triangles";
  *   HERO     earth   the assembled globe, right of the type, holding while
  *                    the hero's short pin lets it breathe
  *   ABOUT    orbit   the globe dissolves into orbital rings beside the copy
- *   WORK     spiral  a 3D coil reaches through depth, framing the projects
- *   STACK    wave    a volumetric flowing surface beside the skills list   *   ML       brain   two lobes, fissure and fold texture — the AI beat
-   *   CONTACT  final   the material collapses into a black hole — a tilted
-   *                    accretion disc orbiting a dark event horizon with a
-   *                    glowing photon rim, holding as the page closes
+ *   WORK     galaxy  a tilted spiral galaxy — bright bulge, three feathered
+ *                    arms, faint halo — framing the projects
+ *   STACK    wave    a volumetric flowing surface beside the skills list
+ *   ML       solar   a glowing sun with planets orbiting on concentric
+ *                    rings and a scattered asteroid belt
+ *   CONTACT  final   the material collapses into a black hole — a tilted
+ *                    accretion disc orbiting a dark event horizon, its
+ *                    photon ring and lensed far-side arc cresting over the
+ *                    shadow as it powers up, holding as the page closes
  *
  * Every handover between two forms is a full-screen dispersion: the pieces
  * detach from the structure, burst across the whole viewport in 3D, hold as
@@ -78,6 +82,15 @@ const LAND_KEEP = 0.94;
 const FRAGMENT_RATIO = 0.06;
 const TWINKLE_RATE = 0.002;
 const GLOW_DECAY = 0.9;
+
+// Set every frame by the render loop (scroll depth × final-form dominance);
+// finalForm and the event-horizon draw read them to power the hole up as
+// the page closes — faster spin, swelling horizon, brighter rim, hungrier
+// gravity. spin/grow are hoisted here so the form layout and the beaming
+// light pass always agree on the same values.
+let finalPower = 0;
+let finalSpin = 1;
+let finalGrow = 1;
 
 /* Continents — soft ellipses [clon, clat, rw(°), rh(°)] in lat/lon space. */
 const LAND: [number, number, number, number][] = [
@@ -211,6 +224,21 @@ const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 type V3 = { x: number; y: number; z: number };
 type FormFn = (p: P, t: number, wR: number) => V3;
 
+// Shared incliner factory — the cosmic forms (galaxy, solar system) live in
+// inclined orbital planes so their discs always project as readable ellipses.
+// A flat X-Z plane razor-flattens under the scene's scroll-driven rotation
+// and reads as a horizontal smear instead of a structure. Each form keeps
+// its own inclination constant; the trig is hoisted once at module scope.
+const makeIncliner = (inc: number) => {
+  const c = Math.cos(inc);
+  const s = Math.sin(inc);
+  return (x: number, y: number, z: number): V3 => ({
+    x,
+    y: y * c - z * s,
+    z: y * s + z * c,
+  });
+};
+
 /* ---- Form layouts (front of the scene = +z, distance = −z) --------- */
 
 /** Earth — the unit-sphere surface (with assembly shell + frag pulse). */
@@ -244,52 +272,133 @@ function waveForm(p: P, t: number): V3 {
   return { x, y, z };
 }
 
-/** Spiral — an archimedean coil reaching from near the camera into the distance. */
-function spiralForm(p: P, t: number): V3 {
-  const turns = 2.7;
-  const a0 = p.f1 * turns * Math.PI * 2;
-  const rad = 0.14 + p.f1 * 0.6 + (p.f3 - 0.5) * 0.08;
-  const a = a0 + t * 0.22;
-  return {
-    x: Math.cos(a) * rad,
-    y: Math.sin(a) * rad * 0.92,
-    z: 0.25 - p.f1 * 1.8 - (p.f3 - 0.5) * 0.25,
-  };
+// Galaxy — deliberately more face-on (0.52) than the solar disc (0.34) and
+// the black hole (0.42), so the three cosmic forms stay visually distinct
+// and the spiral arms read as an open swirl, not a sibling of the rings.
+const GALAXY_INC = 0.52;
+const inGalaxyPlane = makeIncliner(GALAXY_INC);
+
+/**
+ * Galaxy — a spiral galaxy seen at an angle: a bright central bulge, three
+ * logarithmic spiral arms of shards feathering outward with differential
+ * rotation (inner pieces circle faster, like real disc dynamics), and a
+ * sparse halo scattered through the surrounding volume.
+ */
+function galaxyForm(p: P, t: number): V3 {
+  // Central bulge — a dense cbrt-packed ball, slightly squashed like a
+  // galactic core.
+  if (p.f3 < 0.2) {
+    const rr = Math.cbrt(p.f1) * 0.16;
+    const ph = p.f2 * Math.PI * 2;
+    const cp = 2 * (p.f3 / 0.2) - 1;
+    const s = Math.sqrt(1 - cp * cp);
+    const pulse = 1 + Math.sin(t * 0.5 + p.f1 * 6.283) * 0.025;
+    return inGalaxyPlane(
+      rr * s * Math.cos(ph) * pulse,
+      rr * cp * 0.72 * pulse,
+      rr * s * Math.sin(ph) * pulse,
+    );
+  }
+  // Halo — a sparse sphere of old shards surrounding the whole system.
+  if (p.f2 > 0.85) {
+    const rr = 0.5 + p.f1 * 0.5;
+    const ph = p.f3 * Math.PI * 2;
+    const cp = (2 * (p.f2 - 0.85)) / 0.15 - 1; // full shell across the band
+    const s = Math.sqrt(1 - cp * cp);
+    return inGalaxyPlane(rr * s * Math.cos(ph), rr * cp, rr * s * Math.sin(ph));
+  }
+  // Spiral arms — three logarithmic arms, feathered toward the edge.
+  const ARMS = 3;
+  const arm = Math.floor(p.f1 * ARMS);
+  const armF = p.f1 * ARMS - arm; // 0 → 1 along the arm
+  const r = 0.16 + Math.pow(armF, 0.85) * 0.72; // 0.16 → 0.88
+  // Differential rotation — inner pieces circle faster.
+  const a = arm * ((Math.PI * 2) / ARMS) + armF * 2.4 + t * (0.16 / (0.25 + r));
+  // In-plane jitter feathers the arms; radial jitter thins them at the core.
+  const aj = (p.f2 - 0.5) * (0.05 + armF * 0.22);
+  const jr = (p.f3 - 0.5) * (0.02 + armF * 0.05);
+  return inGalaxyPlane(
+    Math.cos(a + aj) * (r + jr),
+    Math.sin(a + aj) * (r + jr),
+    (p.f3 - 0.5) * 0.05 * (0.4 + armF),
+  );
 }
 
-/** Brain — two lobes with a central fissure and fold-wave texture. */
-function brainForm(p: P, t: number): V3 {
-  const side = p.f2 < 0.5 ? -1 : 1;
-  const rr = Math.cbrt(p.f1) * 0.56;
-  const ph = p.f2 * Math.PI * 2;
-  const cp = 2 * p.f3 - 1;
-  const s = Math.sqrt(1 - cp * cp);
-  const sx = rr * s * Math.cos(ph);
-  const sy = rr * s * Math.sin(ph);
-  const sz = rr * cp;
-  const fold =
-    Math.sin(sx * 5 + t * 0.6) * 0.05 + Math.sin(sz * 6 - side * 1.3 + t * 0.4) * 0.045;
-  return {
-    x: side * 0.5 + sx * 0.92,
-    y: sy * 1.3 + fold + (side > 0 ? 0.06 : -0.06),
-    z: sz * 0.95,
-  };
+/**
+ * Solar system — a glowing central sun with planets orbiting on concentric
+ * rings, plus a scattered asteroid belt. Sun pieces stay packed at the
+ * core; each planet is a tight cluster riding its own ring with a distinct
+ * radius, tilt and orbital speed; the belt spreads as a thin wide band.
+ */
+// Solar system — a moderate tilt (0.34), between the galaxy and the hole.
+const SOLAR_INC = 0.34;
+const inSolarPlane = makeIncliner(SOLAR_INC);
+
+function solarForm(p: P, t: number): V3 {
+
+  const sun = p.f3 < 0.18;
+  if (sun) {
+    // Sun — a dense, slightly pulsing ball at the centre. cbrt packs the
+    // core tight so it reads as a hot body, not a hollow shell.
+    const rr = Math.cbrt(p.f1) * 0.16;
+    const ph = p.f2 * Math.PI * 2;
+    const cp = 2 * (p.f3 / 0.18) - 1;
+    const s = Math.sqrt(1 - cp * cp);
+    const pulse = 1 + Math.sin(t * 0.6 + p.f1 * 6.283) * 0.03;
+    return inSolarPlane(
+      rr * s * Math.cos(ph) * pulse,
+      rr * cp * pulse,
+      rr * s * Math.sin(ph) * pulse,
+    );
+  }
+  // Asteroid belt — a thin, sparse band of small shards clearly outside the
+  // outer planet (the light pass keeps it quieter than the planets).
+  if (p.f1 > 0.86) {
+    const r = 0.7 + p.f2 * 0.14;
+    const ang = p.f3 * Math.PI * 2 + t * 0.05 + p.f2 * 1.7;
+    return inSolarPlane(
+      Math.cos(ang) * r,
+      (p.f2 - 0.5) * 0.045,
+      Math.sin(ang) * r,
+    );
+  }
+  // Planets — five compact rings, each a visible cluster riding its own
+  // orbit with a distinct radius and speed (inner ones circle faster, like
+  // real orbital mechanics). The whole system stays under ~0.82 wide so it
+  // reads as one unit rather than a band.
+  const PLANET_R = [0.26, 0.36, 0.47, 0.56, 0.64];
+  const planet = Math.min(4, Math.floor(p.f1 * 5));
+  const r = PLANET_R[planet];
+  const speed = 0.34 / Math.sqrt(r + 0.08);
+  const ang = p.f3 * Math.PI * 2 + t * speed + p.f2 * 4;
+  const c = 0.055;
+  return inSolarPlane(
+    Math.cos(ang) * r + (p.f2 - 0.5) * c,
+    (p.f3 - 0.5) * c * 0.8,
+    Math.sin(ang) * r + (p.f2 + p.f3 - 1) * c * 0.6,
+  );
 }
 
 /**
  * Final — a black hole. Most pieces orbit a tilted accretion disc with
  * keplerian shear (inner pieces circle faster); a fraction spiral inward
  * past the photon ring, dimming as they are swallowed by the event horizon
- * (drawn as a dark disc + glowing rim on the canvas).
+ * (drawn as a dark disc + glowing rim on the canvas). The disc's near side
+ * passes below the shadow in front of it while the far side is lensed over
+ * the top — the classic Gargantua read the light pass renders.
  */
 function finalForm(p: P, t: number): V3 {
   const tilt = 0.42; // disc inclination — gives the ellipse-on-screen read
+  // The hole powers up with the scroll: the disc accelerates (up to ~2.4×)
+  // and swells as the event horizon grows, so a calm hole becomes a
+  // devouring one by the time the page closes. finalSpin/finalGrow are set
+  // per frame by the render loop, shared with the beaming light pass.
   if (p.f3 > 0.9) {
     // Infalling minority — spirals from the disc edge toward the horizon,
     // with a slow radial wobble so the swallow reads as converging, not
-    // just orbiting a smaller circle.
+    // just orbiting a smaller circle; faster inward as the hole powers up.
     const r = 0.24 + (1 - p.f2) * 0.5 + Math.sin(t * 0.2 + p.f1 * 6.283) * 0.05;
-    const ang = p.f1 * Math.PI * 2 + t * 0.45 + p.f2 * 6.283;
+    const ang = p.f1 * Math.PI * 2 + t * 0.45 * finalSpin + p.f2 * 6.283;
     const x = Math.cos(ang) * r;
     const y = Math.sin(ang) * r * Math.cos(tilt) * 0.8 + (p.f2 - 0.5) * 0.1;
     const z = Math.sin(ang) * r * Math.sin(tilt);
@@ -298,9 +407,11 @@ function finalForm(p: P, t: number): V3 {
   // Accretion disc — the bulk of the pieces orbit a tilted, razor-thin
   // plane. Radius skews toward the inner edge (via ^1.6) so the disk hugs
   // the horizon and reads as a bright ring, and stays inside the frame
-  // (max ~0.87 world units) so the whole disk is visible beside the card.
-  const r = 0.27 + Math.pow(p.f2, 1.6) * 0.6;
-  const ang = p.f1 * Math.PI * 2 + t * (0.4 / (0.27 + r)) + p.f3 * 0.4;
+  // (max ~0.87 world units at rest) so the whole disk is visible beside
+  // the card; the power-up swell is modest so the hole grows faster than
+  // the disk, reading as matter collapsing inward.
+  const r = (0.27 + Math.pow(p.f2, 1.6) * 0.6) * finalGrow;
+  const ang = p.f1 * Math.PI * 2 + t * (0.4 / (0.27 + r)) * finalSpin + p.f3 * 0.4;
   // A faint per-piece radial wobble breaks perfect circular symmetry so
   // the disk reads as churning matter, not a drawn ring.
   const rw = r + 0.015 * Math.sin(ang * 2 + p.f1 * 6.283);
@@ -313,9 +424,9 @@ function finalForm(p: P, t: number): V3 {
 const FORM_FNS: FormFn[] = [
   (p, _t, wR) => earthForm(p, wR),
   (p, t) => orbitForm(p, t),
-  (p, t) => spiralForm(p, t),
+  (p, t) => galaxyForm(p, t),
   (p, t) => waveForm(p, t),
-  (p, t) => brainForm(p, t),
+  (p, t) => solarForm(p, t),
   (p, t) => finalForm(p, t),
 ];
 
@@ -345,13 +456,13 @@ type DispStyle = {
 const DISP_STYLES: DispStyle[] = [
   // about — Earth → orbit: pieces detach gently, staying close to the frame
   { spread: 0.55, camera: 0.94, near: 0.02, alpha: 1.22, sweep: 0, turn: 0.2, swell: 2.2 },
-  // work — orbit → spiral: strong rotational burst
+  // work — orbit → galaxy: strong rotational burst
   { spread: 1.0, camera: 0.86, near: 0.1, alpha: 1.35, sweep: 0.2, turn: 1.0, swell: 3.0 },
-  // stack — spiral → wave: a directional sweep across the viewport
+  // stack — galaxy → wave: a directional sweep across the viewport
   { spread: 1.12, camera: 0.82, near: 0.15, alpha: 1.42, sweep: 1.0, turn: 0.2, swell: 3.4 },
-  // ml — wave → brain: violent, deep, foreground-heavy
+  // ml — wave → solar: violent, deep, foreground-heavy
   { spread: 1.25, camera: 0.78, near: 0.25, alpha: 1.52, sweep: 0.4, turn: 0.6, swell: 4.4 },
-  // contact — brain → final: a soft, calm dissolve
+  // contact — solar → final: a soft, calm dissolve
   { spread: 0.45, camera: 0.96, near: 0, alpha: 1.12, sweep: 0, turn: 0.1, swell: 1.8 },
   // footer — final → void: the world gently disperses and fades away
   { spread: 0.5, camera: 0.98, near: 0, alpha: 1.05, sweep: 0, turn: 0.1, swell: 1.5 },
@@ -441,20 +552,18 @@ function buildAmbient(count: number): Ambient[] {
   return pts;
 }
 
-/* ---- Even-cadence form windows ------------------------------------ */
+/* ---- Section-anchored form windows -------------------------------- */
 
 /*
- * Section gaps are wildly uneven (the Work section alone is ~40% of the
- * page, About and Stack are squeezed), so sizing the transition windows
- * from the local gaps skipped some forms entirely (orbit and wave got
- * ~0px of life) and let others overstay (the spiral held ~34% of the
- * page). Instead the page is cut into an even rhythm: every form lives
- * the same scroll distance and every transition gets the same window, so
- * the reel reads at a constant speed — one steady shape-change cadence
- * from top to bottom, scrubbable and reversible, nothing skipped.
- * Boundaries are then gently pulled toward their real section tops so
- * the world still lives where its content is. Windows never overlap
- * (minimum life enforced), the material is never empty and never pops.
+ * The page's content is the clock. Every handover is anchored to its real
+ * section top (about → orbit, work → galaxy, stack → wave, ml → solar,
+ * contact → black hole), so each form is live exactly while its content is
+ * on screen — the galaxy frames the projects, the wave rides the skills,
+ * the solar system holds through the notebook, apps and journey, and the
+ * black hole forms as Contact arrives instead of drifting behind the
+ * sections added over time. Transition windows stay equal-width (linear,
+ * scrubbed, reversible), minimum life keeps a tall neighbour from
+ * swallowing a form between two of them, and the material is never empty.
  */
 
 type FormDef = {
@@ -469,9 +578,9 @@ type FormDef = {
 const FORMS: FormDef[] = [
   { key: "earth", cx: 0, oy: 0.5, zoom: 1, size: 1 },
   { key: "orbit", cx: 0.66, oy: 0.5, zoom: 1, size: 0.95 },
-  { key: "spiral", cx: 0.5, oy: 0.48, zoom: 1.05, size: 1 },
+  { key: "galaxy", cx: 0.5, oy: 0.48, zoom: 1.05, size: 1 },
   { key: "wave", cx: 0.5, oy: 0.34, zoom: 1, size: 0.9 },
-  { key: "brain", cx: 0.5, oy: 0.5, zoom: 1.1, size: 1 },
+  { key: "solar", cx: 0.5, oy: 0.5, zoom: 1, size: 1 },
   { key: "final", cx: 0.84, oy: 0.5, zoom: 0.9, size: 0.9 },
 ];
 
@@ -593,10 +702,12 @@ export function TriangleWorld() {
       const max = w < 640 ? 1100 : w < 1024 ? 2400 : 3200;
       const count = Math.max(min, Math.min(max, Math.round((w * h) / density)));
       particles = buildEarth(count, w);
-      // Ambient stays a background layer, but it must be visible — ~185 on
-      // desktop, still ~110 on mobile so the drifting cloud reads on small
-      // screens too (the user's "can't see the motes on phone" ask).
-      ambient = buildAmbient(w < 640 ? 110 : w < 1024 ? 120 : 185);
+      // Ambient stays a background layer, but it must be visible and
+      // plentiful enough to read as a drifting cloud — ~260 on desktop,
+      // still ~150 on mobile so the cloud reads on small screens too. The
+      // pieces stay small and dim, so density can be higher without
+      // competing with the main forms.
+      ambient = buildAmbient(w < 640 ? 150 : w < 1024 ? 175 : 260);
       const n = particles.length;
       screenX = new Float32Array(n);
       screenY = new Float32Array(n);
@@ -625,7 +736,7 @@ export function TriangleWorld() {
       const y = window.scrollY;
       const ih = window.innerHeight || h;
 
-      // ---- Form weights (even cadence) -------------------------------
+      // ---- Form weights (section-anchored) ---------------------------
       // The contact and footer section tops sit below the point where the
       // page runs out of scroll, so the closing act is repositioned into the
       // reachable range — the final dispersion must complete while the user
@@ -654,23 +765,14 @@ export function TriangleWorld() {
         }
         return v;
       });
-      // ---- Even cadence ---------------------------------------------
-      // The page is cut into equal beats: every form lives the same scroll
-      // distance and every transition window is the same width, so shapes
-      // change at a steady, predictable rate instead of bunching (orbit +
-      // wave were being skipped entirely) and lingering (spiral held 34%).
-      // Boundaries are gently pulled toward their real section tops so the
-      // world still tracks its content, and minimum life is enforced so no
-      // window can swallow the form between two of them.
+      // Boundaries ARE the section tops (see the section-anchored note
+      // above) — no even-cadence redistribution, so a form can never drift
+      // away from the content it belongs to as the page grows. Windows are
+      // equal-width so every handover stays linear and scrubbed.
       const totalScroll = Math.max(maxScroll, 1);
       const nB = B.length; // one boundary (and window) per form handover
       const hw = Math.min(0.5 * ih, totalScroll / (4 * nB)); // transition half-width
-      const life = Math.max(0.4 * ih, (totalScroll - 2 * nB * hw) / nB);
-      const SECTION_PULL = 0.15; // 0 = pure even cadence, 1 = pure section tops
-      const C = B.map((b, i) => {
-        const even = (i + 1) * life + (2 * i + 1) * hw;
-        return even + (b - even) * SECTION_PULL;
-      });
+      const C = B.slice();
       // No window may swallow the form between two of them — push later
       // boundaries forward so every form keeps a real moment on screen.
       const MIN_LIFE = 0.5 * ih;
@@ -692,10 +794,19 @@ export function TriangleWorld() {
       const fw = weights.map((x) => x / total);
       const wEarth = fw[0];
       const wOrbit = fw[1];
-      const wSpiral = fw[2];
+      const wGalaxy = fw[2];
       const wWave = fw[3];
-      const wBrain = fw[4];
+      const wSolar = fw[4];
       const wFinal = fw[5];
+
+      // The black hole powers up as the page closes: the deeper the scroll
+      // (and the more the final form owns the scene), the faster the disc
+      // spins and the larger the horizon swells — a calm hole becomes a
+      // devouring one. Read by finalForm, the ambient gravity and the
+      // event-horizon draw.
+      finalPower = wFinal * clamp01(y / Math.max(maxScroll, 1));
+      finalSpin = 1 + finalPower * 1.4;
+      finalGrow = 1 + finalPower * 0.16;
 
       const ACTIVE = fw
         .map((weight, i) => ({ weight, i }))
@@ -705,7 +816,7 @@ export function TriangleWorld() {
       // hemisphere, the forms normalise a wider z range to 0..1 so far pieces
       // stay visible as small, dim shards.
       const depthFx =
-        wSpiral * 0.5 + wWave * 0.18 + wBrain * 0.4 + wFinal * 0.3;
+        wGalaxy * 0.5 + wWave * 0.18 + wSolar * 0.4 + wFinal * 0.3;
 
       // ---- Active dispersion (the boundary currently being crossed) ---
       let dispI = -1;
@@ -762,16 +873,27 @@ export function TriangleWorld() {
       }, 0);
       const oyBlend = fw.reduce((acc, wgt, i) => {
         // On mobile every form is centred behind the content, so the wave
-        // drops low enough to stay clear of the Stack heading.
-        const oy = w < 640 && FORMS[i].key === "wave" ? 0.66 : FORMS[i].oy;
+        // drops low enough to stay clear of the Stack heading, and the
+        // Earth rises to sit ABOVE the hero headline card (the glass would
+        // otherwise hide the whole globe behind it).
+        const oy =
+          w < 640 && FORMS[i].key === "wave"
+            ? 0.66
+            : w < 640 && FORMS[i].key === "earth"
+              ? 0.24
+              : FORMS[i].oy;
         return acc + wgt * oy;
       }, 0);
       const zoom = fw.reduce((acc, wgt, i) => acc + wgt * FORMS[i].zoom, 0);
       const sizeMul = fw.reduce((acc, wgt, i) => acc + wgt * FORMS[i].size, 0);
 
       const visualW = w < 640 ? w : w < 1024 ? w * 0.72 : w * 0.54;
+      // On mobile the forms sit behind the content panels, so they render
+      // ~28% smaller — a complete, readable object that shows through the
+      // translucent glass instead of a giant shape spilling off-screen.
       const baseUnit =
         Math.min(visualW * 0.46, h * 0.44) *
+        (w < 640 ? 0.72 : 1) *
         zoom *
         sizeMul *
         (1 + 0.012 * Math.sin(s * 0.25)) *
@@ -802,7 +924,7 @@ export function TriangleWorld() {
       ctx.lineWidth = lightMode ? 1.3 : 1;
       const aStep = (Math.PI * 2) / 3;
       const ambientMod =
-        clamp01(0.95 + 0.25 * wSpiral + 0.1 * wBrain - 0.3 * wFinal) *
+        clamp01(0.95 + 0.25 * wGalaxy + 0.1 * wSolar - 0.3 * wFinal) *
         (w < 640 ? 1.05 : 1);
       const aUnit = unit * 1.2;
       const aOx = w * 0.5;
@@ -842,7 +964,9 @@ export function TriangleWorld() {
           const hx = (ox - aOx) / aUnit;
           const hy = (oy - aOy) / aUnit;
           const d = Math.hypot(ax - hx, ay - hy);
-          const pull = g * 0.4 * clamp01(1.15 - d);
+          // Stronger pull as the hole powers up — the whole page quietly
+          // drains into the singularity faster near the bottom.
+          const pull = g * (0.4 + finalPower * 0.6) * clamp01(1.15 - d);
           ax += (hx - ax) * pull * 0.3;
           ay += (hy - ay) * pull * 0.3;
           swallowed = clamp01((d - 0.1) / 0.22); // fade just before the rim
@@ -970,21 +1094,46 @@ export function TriangleWorld() {
         }
 
         // Lighting follows the form — same palette, different treatment.
+        // Mobile forms live behind translucent glass panels, so they need
+        // their full brightness to read through it — no mobile dimming.
         const zAlpha =
           Math.pow(clamp01(pz0 * 1.7), 0.85) *
             (p.land ? 1 : 0.5) *
-            wEarth *
-            (w < 640 ? 0.8 : 1) +
+            wEarth +
           Math.pow(clamp01(0.16 + depth * 1.25), 0.9) *
             (p.land ? 1 : 0.72) *
             (1 - wEarth) *
-            (w < 640 ? 0.55 : 1);
+            (w < 640 ? 0.85 : 1);
         const appear = clamp01((asm * 1.4 - p.asmPhase) / 0.4);
         let light = 1;
         if (wOrbit > 0.05) light *= 0.72 + 0.28 * Math.abs(Math.sin(p.orbitPhase + s * 0.3));
         if (wWave > 0.05) light *= 0.72 + 0.28 * (0.5 + 0.5 * Math.sin((p.f1 - 0.5) * 3.4 * 1.7 + s * 1.0));
-        if (wSpiral > 0.05) light *= 0.55 + 0.45 * depth;
-        if (wBrain > 0.05) light *= 0.78 + 0.14 * Math.sin(s * 0.5 + p.f1 * 6.283);
+        // The galaxy: the bulge glows hot at its core, arms catch the light
+        // by depth, and the sparse halo stays quiet and distant.
+        if (wGalaxy > 0.05) {
+          if (p.f3 < 0.2) {
+            light *= 1.15 + 0.08 * Math.sin(s * 0.4 + p.f1 * 6.283) - p.f1 * 0.28;
+          } else if (p.f2 > 0.85) {
+            light *= 0.5 + 0.2 * depth; // faint halo
+          } else {
+            light *= 0.72 + 0.32 * depth; // arms by depth
+          }
+        }
+        // The solar system: the sun stays hot, planets brighten on their
+        // lit side (toward the viewer), and the belt stays dimmer/darker.
+        if (wSolar > 0.05) {
+          if (p.f3 < 0.18) {
+            // The sun glows hot and steady, brightest at its core.
+            light *= 1.18 + 0.1 * Math.sin(s * 0.5 + p.f1 * 6.283) - p.f1 * 0.3;
+          } else if (p.f1 > 0.86) {
+            light *= 0.55 + 0.25 * depth; // asteroid belt
+          } else {
+            // Planets catch the light by depth; inner planets glow brighter
+            // than the outer ones, like a real system's falloff.
+            const planet = Math.min(4, Math.floor(p.f1 * 5));
+            light *= (0.82 + 0.22 * (1 - planet / 4)) * (0.75 + 0.3 * depth);
+          }
+        }
         // The black hole: the accretion disc's inner edge glows hot and
         // cools outward; infalling pieces stay bright at the rim and dim as
         // they spiral toward the horizon and are swallowed.
@@ -995,13 +1144,14 @@ export function TriangleWorld() {
             // Inner disc hot, outer cool — plus keplerian beaming: the side
             // of the disk approaching the camera glows brighter, so the
             // disk reads as a living accretion flow, not a static ring.
-            const rr = 0.27 + Math.pow(p.f2, 1.6) * 0.6;
-            // Same orbit angle as finalForm (incl. the f3 phase term) so the
-            // bright hemisphere tracks each piece's real position in the disk.
+            // Uses the same finalSpin/finalGrow as finalForm (set per frame
+            // in render) so the bright hemisphere tracks each piece's real
+            // position in the disk.
+            const rr = (0.27 + Math.pow(p.f2, 1.6) * 0.6) * finalGrow;
             const angN =
-              p.f1 * Math.PI * 2 + s * (0.4 / (0.27 + rr)) + p.f3 * 0.4;
+              p.f1 * Math.PI * 2 + s * (0.4 / (0.27 + rr)) * finalSpin + p.f3 * 0.4;
             light *=
-              (0.55 + 0.45 * (1 - p.f2)) * (1 + 0.3 * Math.cos(angN));
+              (0.55 + 0.45 * (1 - p.f2)) * (1 + 0.36 * Math.cos(angN));
           }
         }
         const dispBoost = dispStyle ? 1 + (dispStyle.alpha - 1) * dispVis : 1;
@@ -1082,13 +1232,20 @@ export function TriangleWorld() {
 
       // Black hole — the closing form's event horizon. Drawn after the
       // pieces so the dark disc occludes motes orbiting behind it; the
-      // photon rim and a soft glow keep it reading as a hole, not a void.
-      const holeAlpha = clamp01((wFinal - 0.35) / 0.5) * (w < 640 ? 0.9 : 1);
+      // photon ring, lensed far-side arc over the shadow and underside bow
+      // (see below) keep it reading as a relativistic hole, not a void.
+      const holeAlpha = Math.min(
+        1,
+        clamp01((wFinal - 0.35) / 0.5) * (w < 640 ? 0.9 : 1) *
+          (1 + finalPower * 0.15),
+      );
       if (holeAlpha > 0.01) {
         const hx = ox;
         const hy = oy;
-        // World-space horizon radius — just inside the disc's inner edge.
-        const hr = unit * 0.26;
+        // World-space horizon radius — just inside the disc's inner edge at
+        // rest; it swells as the hole powers up (faster than the disc's own
+        // 16% growth), so matter collapses inward toward a larger shadow.
+        const hr = unit * 0.26 * (1 + finalPower * 0.45);
         ctx.globalCompositeOperation = "source-over";
         const grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
         grad.addColorStop(0, "rgba(0, 0, 0, 0.98)");
@@ -1099,28 +1256,99 @@ export function TriangleWorld() {
         ctx.beginPath();
         ctx.arc(hx, hy, hr, 0, Math.PI * 2);
         ctx.fill();
-        // Photon rim — the bright ring that bends light around the shadow,
-        // drawn a touch wider so it bridges the gap to the inner disc edge.
-        // Additive on dark; plain on light so the rim reads on white.
+        // Photon ring — the sharp bright ring at the shadow's edge, the
+        // innermost image of the accretion flow. Drawn as a segmented
+        // ellipse (squashed by the disc's inclination) whose brightness
+        // follows the Doppler phase and travels with the spin.
+        // Additive on dark; plain on light so the rim reads on white. It
+        // brightens with the power-up so the hole visibly "ignites" as the
+        // page closes.
+        const rimGlow = 1 + finalPower * 0.7;
         ctx.globalCompositeOperation = lightMode ? "source-over" : "lighter";
         ctx.strokeStyle = `rgba(${glowRgb}, 1)`;
-        ctx.lineWidth = lightMode ? 2 : 1.4;
-        ctx.globalAlpha = (lightMode ? 0.6 : 0.5) * holeAlpha;
+        // The lensed ring hugs the shadow, squashed to the disc's inclination
+        // so the whole structure reads as one tilted 3D object.
+        const eR = hr * 1.07;
+        const eRy = eR * 0.9;
+        // Representative angular speed of the disc — inner (bright) pieces
+        // circle faster, so the ring's bright hemisphere stays in step with
+        // the orbiting pieces' real beaming.
+        const ringPhase = s * 0.68 * finalSpin;
+        // Gravitational lensing — the disc's FAR side is bent over the hole,
+        // so its light arcs ABOVE the shadow (the classic bright upper bow),
+        // while the NEAR side passes below it in front of the shadow. The
+        // ring's upper half is therefore boosted, and a separate soft arc
+        // paints the lensed far-side image cresting over the top.
+        const SEGS = 72;
+        ctx.lineCap = "round";
+        ctx.lineWidth = lightMode ? 1.5 : 1.1;
+        for (let k = 0; k < SEGS; k++) {
+          const a0 = (k / SEGS) * Math.PI * 2;
+          const a1 = ((k + 1) / SEGS) * Math.PI * 2;
+          const am = (a0 + a1) / 2;
+          // Doppler — the approaching hemisphere glows hotter.
+          const dopp = 0.6 + 0.4 * Math.cos(am - ringPhase);
+          // Lensing — the upper (far-side) half of the ring reads brightest,
+          // arcing over the top of the shadow like the real lensed image.
+          const lens = 1 + 0.55 * Math.max(0, -Math.sin(am));
+          ctx.globalAlpha =
+            (lightMode ? 0.85 : 0.72) * holeAlpha * rimGlow * dopp * lens;
+          ctx.beginPath();
+          ctx.ellipse(hx, hy, eR, eRy, 0, a0, a1);
+          ctx.stroke();
+        }
+        // The lensed far-side image — a soft, wide band cresting over the
+        // top of the shadow (light from the far side appearing above the
+        // hole), with a tight bright peak at its crest.
+        const topLens = (lightMode ? 0.4 : 0.52) * holeAlpha * rimGlow;
+        ctx.lineWidth = lightMode ? 4.6 : 3.8;
+        ctx.globalAlpha = topLens * 0.4;
         ctx.beginPath();
-        ctx.arc(hx, hy, hr * 1.08, 0, Math.PI * 2);
+        ctx.ellipse(
+          hx,
+          hy - hr * 0.05,
+          eR * 1.07,
+          eRy * 1.03,
+          0,
+          Math.PI * 1.04,
+          Math.PI * 1.96,
+        );
         ctx.stroke();
-        // The wider rings were designed as additive soft glow — on light they
-        // would read as hard outlines, so they soften instead of thicken.
-        ctx.lineWidth = 3.4;
-        ctx.globalAlpha = (lightMode ? 0.18 : 0.28) * holeAlpha;
+        ctx.lineWidth = lightMode ? 2.2 : 1.7;
+        ctx.globalAlpha = topLens;
         ctx.beginPath();
-        ctx.arc(hx, hy, hr * 1.3, 0, Math.PI * 2);
+        ctx.ellipse(
+          hx,
+          hy - hr * 0.04,
+          eR * 1.04,
+          eRy,
+          0,
+          Math.PI * 1.07,
+          Math.PI * 1.93,
+        );
+        ctx.stroke();
+        // The underside — the near side of the disc passes below the shadow
+        // in front of it, its light reading as a fainter bow along the
+        // bottom edge.
+        ctx.lineWidth = lightMode ? 3.2 : 2.6;
+        ctx.globalAlpha = (lightMode ? 0.2 : 0.3) * holeAlpha * rimGlow;
+        ctx.beginPath();
+        ctx.ellipse(
+          hx,
+          hy + hr * 0.12,
+          eR * 1.03,
+          eRy * 1.05,
+          0,
+          0.05,
+          Math.PI - 0.05,
+        );
         ctx.stroke();
         // Soft outer glow so the hole sits in the scene rather than on it.
         ctx.lineWidth = 4;
-        ctx.globalAlpha = (lightMode ? 0.1 : 0.16) * holeAlpha;
+        ctx.lineCap = "butt";
+        ctx.globalAlpha = (lightMode ? 0.1 : 0.16) * holeAlpha * rimGlow;
         ctx.beginPath();
-        ctx.arc(hx, hy, hr * 1.7, 0, Math.PI * 2);
+        ctx.ellipse(hx, hy, eR * 1.45, eRy * 1.45, 0, 0, Math.PI * 2);
         ctx.stroke();
         ctx.lineWidth = 1;
         ctx.globalAlpha = 1;
@@ -1170,10 +1398,10 @@ export function TriangleWorld() {
         }
       }
 
-      // Form light — near pieces of the spiral, brain and final form catch
+      // Form light — near pieces of the galaxy, solar and final form catch
       // the glow additively, so the depth feels lit rather than flat.
       const fragGlow = new Path2D();
-      if (wSpiral + wBrain + wFinal > 0.25) {
+      if (wGalaxy + wSolar + wFinal > 0.25) {
         for (let i = 0; i < n; i++) {
           const p = particles[i];
           if (viewZ[i] < 0.8 || viewZ[i] < 0 || alphaA[i] <= 0.01) continue;

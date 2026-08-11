@@ -48,6 +48,24 @@ export function Contact() {
                   GitHub ↗
                 </a>
                 <span aria-hidden="true">·</span>
+                <a
+                  href={site.linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition-colors hover:text-foreground"
+                >
+                  LinkedIn ↗
+                </a>
+                <span aria-hidden="true">·</span>
+                <a
+                  href={site.instagram}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition-colors hover:text-foreground"
+                >
+                  Instagram ↗
+                </a>
+                <span aria-hidden="true">·</span>
                 <span>
                   currently building {site.currently.project.toLowerCase()}
                 </span>

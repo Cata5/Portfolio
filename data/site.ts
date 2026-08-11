@@ -26,6 +26,12 @@ export const site = {
   github: "https://github.com/Cata5",
 
   /**
+   * Socials from the old portfolio's footer.
+   */
+  linkedin: "https://www.linkedin.com/in/cata5",
+  instagram: "https://www.instagram.com/cata0617",
+
+  /**
    * PLACEHOLDER — link to the repository hosting this site's source.
    */
   source: "https://github.com/Cata5",
