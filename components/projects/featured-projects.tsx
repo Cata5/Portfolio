@@ -73,17 +73,14 @@ function ProjectCard({
       className={cn("group block", className)}
     >
       <GlassCard
-        className={cn(
-          "flex flex-col overflow-hidden",
-          variant === "stage" && "h-[calc(100svh-6rem)]",
-        )}
+        className={cn("flex flex-col overflow-hidden")}
       >
         <div
           data-project-visual
           className={cn(
             "relative shrink-0 overflow-hidden bg-muted/20",
             variant === "stage"
-              ? "min-h-[10rem] flex-1"
+              ? "aspect-[16/10] max-h-[68svh] w-full"
               : "aspect-[16/10]",
           )}
         >
@@ -94,7 +91,7 @@ function ProjectCard({
                 alt={`${project.title} — screenshot`}
                 fill
                 sizes="(min-width: 1024px) 42vw, 92vw"
-                className="scale-[1.14] object-cover transition-transform duration-700 ease-out group-hover:scale-[1.18]"
+                className="scale-[1.04] object-contain transition-transform duration-700 ease-out group-hover:scale-[1.06]"
               />
             </Parallax>
           ) : (

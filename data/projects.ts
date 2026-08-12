@@ -530,6 +530,72 @@ export const projects: Project[] = [
   },
 
   {
+    id: "primarie",
+    title: "Vortex Primarie",
+    category: "Web",
+    platform: "Web",
+    year: 2026,
+    status: "In Development",
+    demo: "https://cata5.github.io/Primarie/",
+    summary:
+      "A municipal e-services portal — declarations, tax certificates and fine payments in one account — with scrypt auth, role-based dashboards, audit logging and SQLite storage.",
+    description:
+      "Vortex Primarie is a Next.js portal for municipal e-services. It ships with a seeded demo user, scrypt password hashing with an optional pepper, brute-force throttling on login, a guided declaration wizard, role-based dashboard views (an OWASP A01 access-control pass is recorded in git history), audit logging, and a performance pass that lifted its audit score to 84/100. Data lives in SQLite (node:sqlite) with a JSON store for legacy content, and the whole thing deploys via a multi-stage Dockerfile. A fully interactive static demo (client-side state in localStorage) is published on GitHub Pages.",
+    technologies: [
+      "Next.js 16",
+      "React 19",
+      "TypeScript",
+      "Tailwind CSS v4",
+      "SQLite (node:sqlite)",
+      "scrypt",
+      "Server Actions",
+      "Docker",
+      "cloudflared",
+    ],
+    // Fresh captures of the live demo — landing, the (auto-authenticated)
+    // dashboard and the fine-payment page.
+    image: "/projects/primarie/01-home.webp",
+    github: "https://github.com/Cata5/Primarie",
+    featured: true,
+    screenshots: [
+      "/projects/primarie/01-home.webp",
+      "/projects/primarie/02-dashboard.webp",
+      "/projects/primarie/03-amenzi.webp",
+    ],
+    features: [
+      "Authentication with scrypt hashing, pepper support and login throttling (5 attempts / 15 min)",
+      "Seeded demo user for evaluation",
+      "Guided declaration wizard",
+      "Role-based dashboard views with access control",
+      "Audit logging of sensitive actions",
+      "SQLite system of record (users, sessions) plus JSON store for declarations/certificates/payments",
+      "Fine search and online payment (plata amenzi)",
+      "Certificate verification by code",
+      "Contact, legislation and FAQ pages",
+      "Multi-stage Docker deployment as non-root user",
+      "Documented performance audits (84/100 on second pass)",
+      "Static GitHub Pages demo with client-side persisted state",
+    ],
+    architecture:
+      "Server actions validate input (validate.ts), manage sessions and audit (audit.ts, auth.ts). Declarations flow through lib/declarations.ts and forms.ts against SQLite, with a JSON database for content that predates the migration. The Dockerfile builds a standalone Next.js output. In the Pages demo build, lib/auth.ts and lib/db.ts serve a seeded client-side store instead, so the whole dashboard stays interactive without a server.",
+    architectureDiagram: [
+      "Browser",
+      "    ↓  Server Actions",
+      "Next.js (App Router)",
+      "    ├─ auth.ts (scrypt · pepper · throttle)",
+      "    ├─ declarations.ts / forms.ts",
+      "    ├─ SQLite (node:sqlite) + data/db.json",
+      "    └─ audit.ts → data/logs",
+      "",
+      "GitHub Pages demo: seeded client store (localStorage)",
+    ].join("\n"),
+    limitations: [
+      "Demo credentials are hardcoded in lib/auth.ts — fine for evaluation, must be replaced for production",
+      "JSON store is being migrated to SQLite; both are read at runtime",
+    ],
+  },
+
+  {
     id: "siteauto",
     title: "Siteauto",
     category: "Web",

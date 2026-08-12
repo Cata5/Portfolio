@@ -37,7 +37,7 @@ export function LightboxTrigger({ project }: { project: Project }) {
             type="button"
             onClick={() => setIndex(0)}
             aria-label={`Open screenshot 1 of ${count}`}
-            className="group relative block aspect-[16/10] w-full cursor-zoom-in overflow-hidden text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+            className="group relative block aspect-[16/10] w-full cursor-zoom-in overflow-hidden bg-muted/20 text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
           />
         }
       >
@@ -46,7 +46,7 @@ export function LightboxTrigger({ project }: { project: Project }) {
           alt={`${project.title} — screenshot`}
           fill
           sizes="(min-width: 1024px) 56vw, 100vw"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.015]"
+          className="object-contain transition-transform duration-500 ease-out group-hover:scale-[1.015]"
         />
         <span
           className="absolute bottom-2 right-2 bg-background/85 px-1.5 py-0.5 font-mono text-[10px] text-foreground/80 backdrop-blur-sm"

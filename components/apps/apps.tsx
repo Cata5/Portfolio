@@ -28,7 +28,7 @@ function PhoneScreen({ project }: { project: Project }) {
         alt={`${project.title} — screenshot`}
         fill
         sizes="260px"
-        className="object-cover"
+        className="object-contain"
       />
     );
   }
