@@ -201,7 +201,7 @@ export const projects: Project[] = [
     category: "Desktop",
     platform: "Windows",
     year: 2026,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A PyQt6 desktop expense tracker that scans IMAP inboxes for invoices, extracts amounts with OCR and PDF parsing, and exports everything to formatted Excel.",
     description:
@@ -251,7 +251,7 @@ export const projects: Project[] = [
     category: "Desktop",
     platform: "Windows · Android (Capacitor)",
     year: 2026,
-    status: "Active",
+    status: "Completed",
     summary:
       "Offline offer generator for Teka: reads six Excel files (products, clients, promos), applies tiered discounts, and exports client offers — as a Windows app and an Android app.",
     description:
@@ -355,7 +355,7 @@ export const projects: Project[] = [
     category: "Developer Tools",
     platform: "Windows · desktop",
     year: 2026,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A desktop tool for building image datasets from multiple sources — Bing, Google, iCrawler — and generating SAM-based masks and annotation files for training.",
     description:
@@ -535,7 +535,7 @@ export const projects: Project[] = [
     category: "Web",
     platform: "Web",
     year: 2025,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A car-parts shop with AI detection: upload a photo and a custom YOLOv8 model identifies the part and matches products — plus cart, checkout, appointments and a dashboard.",
     description:
@@ -587,7 +587,7 @@ export const projects: Project[] = [
     category: "Web",
     platform: "Web",
     year: 2026,
-    status: "In Development",
+    status: "Completed",
     demo: "https://cata5.github.io/CoralTechWeb/",
     summary:
       "Bilingual (EN/RO) website for an FTC robotics team with a local-LLM RAG chatbot that answers from the site's own content, citing sources.",
@@ -638,7 +638,7 @@ export const projects: Project[] = [
     category: "Web",
     platform: "Web",
     year: 2026,
-    status: "Active",
+    status: "Completed",
     demo: "https://cata5.github.io/LiceulTeoreticIonCantacuzino/",
     summary:
       "A complete school website — news, classes, teachers directory, documents, gallery, e-learning and timetable — with a SQLite-backed admin panel.",
@@ -686,7 +686,7 @@ export const projects: Project[] = [
     category: "Developer Tools",
     platform: "Windows",
     year: 2026,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A PySide6 desktop app for training, fine-tuning and testing YOLO models (v8/11/26) with live logs, metric charts, GPU checks and a packaged Windows installer.",
     description:
@@ -795,7 +795,7 @@ export const projects: Project[] = [
     category: "AI / ML",
     platform: "Web · local tool",
     year: null,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A Flask web interface for fine-tuning LLMs with Unsloth — LoRA parameters, live GPU monitoring, custom chat templates and training resume.",
     description:
@@ -849,7 +849,7 @@ export const projects: Project[] = [
     category: "Developer Tools",
     platform: "Terminal (Windows/Linux/macOS)",
     year: null,
-    status: "In Development",
+    status: "Completed",
     summary:
       "A Claude Code-style terminal AI shell: slash commands, tab completion, instant model hot-swapping across Ollama/GGUF/Transformers/HF/OpenAI, and a sandboxed tool loop.",
     description:
@@ -907,6 +907,95 @@ export const projects: Project[] = [
     ],
   },
 
+  {
+    id: "ocr-pdf",
+    title: "Handwritten PDF → Typed PDF",
+    category: "Desktop",
+    platform: "Windows/Linux/macOS (GUI + API)",
+    year: null,
+    status: "Active",
+    summary:
+      "A local desktop app that converts handwritten PDF pages — including math — into clean typed PDFs, powered by GLM-OCR via Ollama or Transformers.",
+    description:
+      "This app turns scanned handwritten PDFs (including formulas) into clean typed PDFs entirely on your machine. A Tkinter GUI (the default mode) picks an input PDF, chooses a backend — an Ollama model like glm-ocr:q8_0, a custom GGUF imported into Ollama, or the zai-org/GLM-OCR Transformers model — and produces a typeset PDF via ReportLab with LaTeX-style math rendered through matplotlib mathtext. A FastAPI backend is also available for scripted use, with job tracking, per-page progress and timeouts.",
+    technologies: [
+      "Python",
+      "Tkinter",
+      "FastAPI",
+      "Ollama (GLM-OCR)",
+      "Transformers",
+      "PyMuPDF",
+      "ReportLab",
+      "matplotlib mathtext",
+      "PyTorch",
+    ],
+    image: null,
+    featured: false,
+    features: [
+      "Convert handwritten PDF pages (incl. math) to typed PDF locally",
+      "Two OCR backends: Ollama model tag (default glm-ocr:q8_0) or zai-org/GLM-OCR via Transformers",
+      "Custom GGUF import into Ollama on convert",
+      "Prompt modes for text, formula and table recognition",
+      "Math rendering with matplotlib mathtext in the output PDF",
+      "Unicode-safe PDF fonts (DejaVu) via ReportLab",
+      "Tkinter GUI with progress panel, page/pass progress and heartbeat updates",
+      "FastAPI API mode with job tracking, uploads and CORS for local frontends",
+      "Configurable DPI, max tokens, page timeout and runtime limits",
+      "Large pages resized automatically for reliability",
+    ],
+    architecture:
+      "FastAPI (v1.0) exposes conversion endpoints backed by ocr_service.py (backend selection, Ollama client, GLM-OCR Transformers path) and pdf_processing.py (page rendering with PyMuPDF, typed PDF assembly with ReportLab and matplotlib math). The Tkinter GUI drives the same pipeline. Jobs run with per-page timeouts and a shared inference lock.",
+    architectureDiagram: [
+      "Tkinter GUI (default)  ·  FastAPI (API mode)",
+      "        ↓",
+      "ocr_service — ollama | transformers (GLM-OCR)",
+      "        ↓",
+      "pdf_processing — PyMuPDF → ReportLab (+ matplotlib math)",
+      "        ↓",
+      "typed PDF",
+    ].join("\n"),
+    limitations: [
+      "Requires Ollama running locally for the Ollama backend, or the GLM-OCR Transformers model for the transformers backend",
+      "GPU recommended for speed (CPU works)",
+      "Recognition quality varies with handwriting and the chosen model",
+    ],
+  },
+
+  {
+    id: "webstudio",
+    title: "Webstudio · working copy",
+    category: "Experiments",
+    platform: "Web",
+    year: null,
+    status: "Experimental",
+    summary:
+      "A local working copy of Webstudio, the open-source visual website builder monorepo. No git history is present in this copy, so personal changes could not be verified.",
+    description:
+      "A local copy of the Webstudio monorepo (apps/builder plus the sdk, css-engine, design-system and prisma packages). It's kept for studying and experimenting with a production visual-builder codebase. Because this folder has no .git history, I could not verify which parts (if any) were authored or changed locally — treat it as a working copy until that's confirmed.",
+    technologies: [
+      "pnpm monorepo",
+      "React",
+      "TypeScript",
+      "Prisma",
+      "PostgREST",
+      "CSS engine",
+      "SDK packages",
+    ],
+    image: null,
+    featured: false,
+    excludeFromRelated: true,
+    features: [
+      "Webstudio Builder application (apps/builder)",
+      "Extensive package ecosystem: sdk, react-sdk, css-engine, design-system, prisma-client, cli",
+      "SDK component libraries for React, Radix, Remix and React Router",
+    ],
+    architecture:
+      "A pnpm-workspace monorepo: apps/builder is the visual editor; packages/ contains the sdk, css-engine, design-system, prisma-client and component libraries consumed by generated sites.",
+    limitations: [
+      "No git history in the copy — personal contributions could not be verified",
+      "Large third-party codebase; not authored from scratch",
+    ],
+  },
 ];
 
 export function getProject(id: string) {

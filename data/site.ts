@@ -6,7 +6,7 @@
  */
 
 export const site = {
-  name: "Catalin",
+  name: "Manu Catalin-Gabriel",
   role: "Software Developer",
 
   /**
@@ -40,7 +40,7 @@ export const site = {
     "I build web applications, experiment with machine learning, and make software for whatever problem I find interesting.",
 
   description:
-    "Catalin is a software developer building web applications, experimenting with machine learning, and making software for whatever problem he finds interesting.",
+    "I am a software developer building web applications, experimenting with machine learning, and making software for whatever problem he finds interesting.",
 
   /**
    * Shown in the hero's "currently building" workspace panel.

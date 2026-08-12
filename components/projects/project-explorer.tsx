@@ -71,7 +71,7 @@ export function ProjectExplorer() {
   }, [filter]);
 
   return (
-    <Section id="projects" eyebrow="Index">
+    <Section id="projects" eyebrow="All Projects">
       {/* The whole project index floats on the same frosted glass as the
           other sections — the persistent triangle material reads through
           the blur behind the rows. */}
