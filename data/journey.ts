@@ -1,6 +1,6 @@
 /**
  * Journey — the milestones from the old portfolio's timeline page
- * (cata5.github.io/Portofolio/timeline), scraped verbatim (light copy-edit
+ * (cata5.github.io/Portofolio-V2/timeline), scraped verbatim (light copy-edit
  * only) and ordered newest first. Categories mirror the source's filter:
  * main / education / competitions / side.
  */

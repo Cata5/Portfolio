@@ -15,7 +15,9 @@ export const isGhPages =
   process.env.NEXT_PUBLIC_DEPLOY_TARGET === "gh-pages";
 
 /** Base path prefix for the GitHub Pages build (empty elsewhere). */
-export const BASE_PATH = isGhPages ? "/Portofolio" : "";
+export const BASE_PATH = isGhPages
+  ? process.env.NEXT_PUBLIC_BASE_PATH || "/Portofolio-V2"
+  : "";
 
 /**
  * Prefix an internal absolute path with the GitHub Pages base path.

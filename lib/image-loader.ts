@@ -18,5 +18,8 @@ export default function imageLoader({
   quality?: number;
 }) {
   if (src.startsWith("http") || src.startsWith("data:")) return src;
+  if (BASE_PATH && (src === BASE_PATH || src.startsWith(`${BASE_PATH}/`))) {
+    return src;
+  }
   return `${BASE_PATH}${src}`;
 }
