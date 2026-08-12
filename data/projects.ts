@@ -68,6 +68,16 @@ export type Project = {
   challenges?: { problem: string; solution: string }[];
   learned?: string[];
   screenshots?: string[];
+  /**
+   * Device frame used in the Mobile Apps showcase. Set it on a project
+   * (even a non-Android/iOS one) to surface it there — e.g. a Windows tool
+   * that also runs as a phone/tablet app.
+   */
+  deviceFrame?: "phone" | "tablet";
+  /** Screenshot shown inside the device frame (defaults to screenshots[0]). */
+  deviceShot?: string;
+  /** Short name for the Mobile Apps carousel when the full title is long. */
+  appsTitle?: string;
   limitations?: string[];
   futureWork?: string[];
   /** Never suggested as a related project (e.g. third-party working copies). */
@@ -216,8 +226,13 @@ export const projects: Project[] = [
       "Pillow",
       "PyInstaller",
     ],
-    image: null,
+    image: "/projects/cheltuieli/01-phone.webp",
     featured: false,
+    // Shown in the Mobile Apps showcase as a phone app — the portrait
+    // capture of the expense-tracker UI.
+    deviceFrame: "phone",
+    deviceShot: "/projects/cheltuieli/01-phone.webp",
+    screenshots: ["/projects/cheltuieli/01-phone.webp"],
     features: [
       "IMAP mailbox scanning with provider presets (Gmail, Outlook/Hotmail, Yahoo, iCloud)",
       "Attachment extraction from HTML, PDF and image formats",
@@ -265,12 +280,21 @@ export const projects: Project[] = [
       "PyInstaller",
       "unittest",
     ],
-    image: "/projects/aplicatie-teka/01-home.webp",
+    // The website homepage shot leads the cards; the tablet capture joins
+    // the gallery.
+    image: "/projects/aplicatie-teka/03-home.webp",
     screenshots: [
-      "/projects/aplicatie-teka/01-home.webp"
+      "/projects/aplicatie-teka/03-home.webp",
+      "/projects/aplicatie-teka/01-home.webp",
+      "/projects/aplicatie-teka/02-tablet.webp",
     ],
     github: "https://github.com/Cata5/Aplicatie-Teka",
-    featured: false,
+    featured: true,
+    // Shown in the Mobile Apps showcase as an Android tablet app — the
+    // landscape capture of the offline offer generator.
+    deviceFrame: "tablet",
+    deviceShot: "/projects/aplicatie-teka/02-tablet.webp",
+    appsTitle: "Teka",
     features: [
       "Loads six Excel sources with sheet/header detection and column aliasing (incl. legacy .xls)",
       "Client-to-product matching across commercial conditions",
@@ -673,7 +697,7 @@ export const projects: Project[] = [
     ],
     image: "/projects/coraltech/01-home.webp",
     featured: true,
-    screenshots: ["/projects/coraltech/01-home.webp", "/coral-web.png"],
+    screenshots: ["/projects/coraltech/01-home.webp"],
     features: [
       "Bilingual content (EN/RO) with locale files",
       "Content model: activities, seasons, sponsors, team, blog posts",
@@ -723,8 +747,15 @@ export const projects: Project[] = [
       "pdf-parse",
     ],
     image: "/projects/liceul/01-home.webp",
-    featured: false,
-    screenshots: ["/projects/liceul/01-home.webp"],
+    featured: true,
+    github: "https://github.com/Cata5/LiceulTeoreticIonCantacuzino",
+    // Fresh captures of the live site — home, news, teachers, timetable.
+    screenshots: [
+      "/projects/liceul/01-home.webp",
+      "/projects/liceul/02-noutati.webp",
+      "/projects/liceul/03-profesori.webp",
+      "/projects/liceul/04-orar.webp",
+    ],
     features: [
       "Content entities: settings, news, classes, teachers, gallery, documents, results, pages",
       "Admin panel with JWT sessions and bcrypt password hashing",
@@ -931,7 +962,7 @@ export const projects: Project[] = [
       "PyInstaller",
     ],
     image: "/neuro-shell.png",
-    featured: true,
+    featured: false,
     // Genuine captures of the running CLI (welcome, command menu, tool list
     // with the security panel, CUDA diagnostics, and the model registry),
     // followed by the original boot screen from the packaged build.
@@ -1071,7 +1102,28 @@ export function getProject(id: string) {
 /** Projects with a real (non-placeholder) detail page. */
 export const realProjects = projects.filter((p) => !p.placeholder);
 
-export const featuredProjects = projects.filter((p) => p.featured);
+/**
+ * Preferred order for the "Selected projects" showcase. Projects not listed
+ * here keep their data-array order, appended after the listed ones.
+ */
+const FEATURED_ORDER = [
+  "vortex",
+  "aplicatie-teka",
+  "coraltech",
+  "liceul",
+  "siteauto",
+];
+
+export const featuredProjects = projects
+  .filter((p) => p.featured)
+  .sort((a, b) => {
+    const ia = FEATURED_ORDER.indexOf(a.id);
+    const ib = FEATURED_ORDER.indexOf(b.id);
+    if (ia === -1 && ib === -1) return 0;
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
 
 /** Categories that actually appear in the data — drives the explorer filters. */
 export const projectCategories = Array.from(
