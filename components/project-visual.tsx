@@ -12,11 +12,14 @@ export function ProjectVisual({
   project,
   src,
   className,
+  contain,
 }: {
   project: Project;
   /** Override the source — used by the detail page's screenshots gallery. */
   src?: string;
   className?: string;
+  /** Fit the whole image inside the frame instead of cropping (object-contain). */
+  contain?: boolean;
 }) {
   // Fall back to the first screenshot when `image` isn't set yet — several
   // featured projects only have screenshots, and they should show the real
@@ -27,6 +30,7 @@ export function ProjectVisual({
       <div
         className={cn(
           "group relative aspect-[16/10] overflow-hidden",
+          contain && "bg-muted/20",
           className,
         )}
       >
@@ -35,7 +39,10 @@ export function ProjectVisual({
           alt={`${project.title} — screenshot`}
           fill
           sizes="(min-width: 1024px) 56vw, 100vw"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.015]"
+          className={cn(
+            "transition-transform duration-500 ease-out group-hover:scale-[1.015]",
+            contain ? "object-contain" : "object-cover",
+          )}
         />
       </div>
     );

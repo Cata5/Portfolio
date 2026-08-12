@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 import { BASE_PATH, isGhPages } from "./lib/base-path";
 
 // GitHub Pages build — the deploy workflow sets NEXT_PUBLIC_DEPLOY_TARGET=gh-pages.
-// This repo publishes as a *project site* at https://cata5.github.io/Portofolio-V2/,
+// This repo publishes as a *project site* at https://cata5.github.io/Portofolio/,
 // so the build switches to a full static export: `output: "export"` emits `out/`,
 // `basePath` + `assetPrefix` prefix every link and asset with the sub-path, and
 // `trailingSlash: true` emits `<route>/index.html` files that GitHub Pages can

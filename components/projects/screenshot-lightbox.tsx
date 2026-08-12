@@ -36,7 +36,9 @@ export function ScreenshotLightbox({
   return (
     <DialogContent
       showCloseButton={false}
-      className="max-w-5xl gap-3 border-border/40 bg-background p-4 sm:p-6"
+      // max-h + overflow keeps the lightbox usable on short screens (phone
+      // landscape) — the whole popup scrolls instead of clipping.
+      className="max-h-[92dvh] max-w-5xl gap-3 overflow-y-auto overscroll-contain border-border/40 bg-background p-4 sm:p-6"
       onKeyDown={(e) => {
         if (count < 2) return;
         if (e.key === "ArrowLeft") step(-1);
@@ -58,7 +60,7 @@ export function ScreenshotLightbox({
           {current + 1} / {count}
         </p>
       </div>
-      <div className="relative h-[62vh] w-full overflow-hidden bg-black/40">
+      <div className="relative h-[52vh] w-full min-h-[260px] overflow-hidden bg-black/40 sm:h-[62vh]">
         <Image
           key={src}
           src={src}
@@ -70,7 +72,7 @@ export function ScreenshotLightbox({
         />
       </div>
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
           onClick={() => step(-1)}

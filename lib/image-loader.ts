@@ -3,7 +3,7 @@
  *
  * Static export cannot use the default image optimizer, and in this Next
  * version next/image does not automatically prefix `basePath` — so this
- * loader returns every local image with the `/Portofolio-V2` prefix (and the
+ * loader returns every local image with the `/Portofolio` prefix (and the
  * source unchanged in dev, where basePath is off). Remote/data URLs pass
  * through untouched. Images ship as-is: the loader is used for URL building
  * only, so width/quality are intentionally unused.

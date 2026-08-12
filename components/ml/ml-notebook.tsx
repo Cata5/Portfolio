@@ -1,3 +1,5 @@
+import { ArrowUpRight } from "lucide-react";
+
 import { GlassCard } from "@/components/glass-card";
 import { MLFlowDiagram } from "@/components/ml/ml-flow-diagram";
 import { Reveal } from "@/components/motion/reveal";
@@ -48,7 +50,26 @@ export function MLNotebook() {
                         !run && "text-muted-foreground/50",
                       )}
                     >
-                      {run ? run[field] : "—"}
+                      {field === "dataset" && run?.datasetUrl ? (
+                        <a
+                          href={run.datasetUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="group/ds inline-flex items-center gap-1.5 transition-colors hover:text-signal"
+                        >
+                          <span className="underline decoration-signal/40 underline-offset-4 transition-colors group-hover/ds:decoration-signal">
+                            {run.dataset}
+                          </span>
+                          <ArrowUpRight
+                            className="size-3 shrink-0 transition-transform duration-200 group-hover/ds:translate-x-0.5 group-hover/ds:-translate-y-0.5"
+                            aria-hidden="true"
+                          />
+                        </a>
+                      ) : run ? (
+                        run[field]
+                      ) : (
+                        "—"
+                      )}
                     </dd>
                   </div>
                 ))}

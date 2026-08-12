@@ -196,62 +196,6 @@ export const projects: Project[] = [
   },
 
   {
-    id: "ai-studio",
-    title: "AI Studio",
-    category: "AI / ML",
-    platform: "Web · local tool",
-    year: 2026,
-    status: "In Development",
-    summary:
-      "A local workspace for running LLMs: load llama.cpp servers from GGUF profiles, chat with agents, download models from Hugging Face, and watch GPU stats.",
-    description:
-      "AI Studio pairs a Vite/React frontend with a FastAPI backend to manage local LLM runtimes. It scans GGUF models into profiles, launches llama-server subprocesses with configurable context, GPU layers and threads, streams chat completions with built-in tools, and polls system/GPU stats. The Image and Video Studio tabs are currently placeholders that return generated preview SVGs — the real generation pipeline is not built yet.",
-    technologies: [
-      "React",
-      "Vite",
-      "TypeScript",
-      "Tailwind CSS",
-      "FastAPI",
-      "Python",
-      "llama.cpp (llama-server)",
-      "Three.js",
-      "react-markdown",
-      "Axios",
-    ],
-    image: "/projects/ai-studio/01-home.webp",
-    screenshots: [
-      "/projects/ai-studio/01-home.webp"
-    ],
-    featured: true,
-    features: [
-      "GGUF model scanning and profile management (settings persisted to JSON)",
-      "llama-server process manager — context size, GPU layers, threads, batch, cache type",
-      "Chat with streaming completions and tool-calling (calculator, web search, file parser)",
-      "Hugging Face model download UI",
-      "Live system stats and GPU VRAM polling",
-      "Native file and folder browsing",
-      "Mock llama-server for testing the UI without a model",
-    ],
-    partialFeatures: [
-      "Image Studio / Video Studio — endpoints exist but return placeholder SVGs / sample video, not real generation",
-    ],
-    architecture:
-      "FastAPI (v1.3) exposes model, process and media routes. LlamaProcessManager spawns llama-server as a subprocess with a model config and tracks its status, PID, uptime and a log ring buffer. The React app polls status and stats, and talks to models over the OpenAI-compatible API. Tool execution runs in the backend tool runner.",
-    architectureDiagram: [
-      "React UI (Vite)",
-      "    ↓  HTTP / polling",
-      "FastAPI backend",
-      "    ├─ LlamaProcessManager → llama-server",
-      "    ├─ config_manager → profiles/settings (JSON)",
-      "    └─ tool_runner → calculator / web_search / file_parser",
-    ].join("\n"),
-    limitations: [
-      "Image and video generation are mocked — no real diffusion pipeline yet",
-      "Requires llama.cpp binaries and GGUF models to be present locally",
-    ],
-  },
-
-  {
     id: "cheltuieli",
     title: "Cheltuieli",
     category: "Desktop",
@@ -514,56 +458,73 @@ export const projects: Project[] = [
 
   {
     id: "omni-studio",
-    title: "OmniStudio · Vortex AI Studio",
+    title: "OmniStudio",
     category: "AI / ML",
-    platform: "Desktop (Tauri)",
+    platform: "Web · local tool · Desktop (Tauri)",
     year: 2026,
     status: "In Development",
     summary:
-      "A Tauri + Rust desktop app for managing local AI runtimes: scan GGUF models, inspect backend capabilities, chat with persistence, and monitor hardware.",
+      "A local workspace for running LLMs: scan GGUF models, manage llama.cpp servers, chat with persistent conversations, and watch GPU stats — as a Tauri desktop app with a React UI.",
     description:
-      "OmniStudio is a cross-platform desktop application (Tauri 2, Rust core, React UI) for running local AI models. It scans and registers llama.cpp backends, parses GGUF metadata (architecture, quantization, context length, tokenizer), stores model folders and conversations, streams chat tokens, and polls hardware stats via sysinfo. Backend capability inspection uses dynamic library loading (libloading) to ask a backend what it can do.",
+      "OmniStudio is a local AI runtime manager. The Tauri desktop app (Rust core, React UI) scans and registers llama.cpp backends, parses GGUF metadata (architecture, quantization, context length, tokenizer), stores model folders and conversations, streams chat tokens, and polls hardware stats via sysinfo. A companion web build pairs a Vite/React frontend with a FastAPI backend that launches llama-server subprocesses with configurable context, GPU layers and threads, streams chat completions with built-in tools, and polls system/GPU stats. The Image and Video Studio tabs are currently placeholders that return generated preview SVGs — the real generation pipeline is not built yet.",
     technologies: [
       "Tauri 2",
       "Rust",
       "React",
-      "TypeScript",
       "Vite",
+      "TypeScript",
+      "Tailwind CSS",
+      "FastAPI",
+      "Python",
+      "llama.cpp (llama-server)",
       "zustand",
       "sysinfo",
       "libloading",
       "react-markdown",
+      "Axios",
       "Radix UI",
-      "Tailwind CSS",
+      "Three.js",
     ],
     image: "/projects/omni-studio/01-home.webp",
     screenshots: [
-      "/projects/omni-studio/01-home.webp"
+      "/projects/omni-studio/01-home.webp",
+      "/projects/ai-studio/01-home.webp",
     ],
     github: "https://github.com/Cata5/OmniStudio",
-    featured: false,
+    featured: true,
     features: [
       "Backend registry: scan for llama.cpp executables, add custom backends, remove, poll state",
       "Model management: add model folders, rescan, parse GGUF metadata",
+      "GGUF model scanning and profile management (settings persisted to JSON)",
+      "llama-server process manager — context size, GPU layers, threads, batch, cache type",
+      "Chat with streaming completions and tool-calling (calculator, web search, file parser)",
       "Chat with streaming tokens and persistent conversations",
+      "Hugging Face model download UI",
+      "Live system stats and GPU VRAM polling",
       "Hardware statistics polling (CPU/GPU via sysinfo) with subscribers",
       "Backend capability inspection and refresh (dynamic loading)",
+      "Native file and folder browsing",
       "Settings and UI state persisted via zustand stores",
       "Windows/DXGI integration in the Rust core",
+      "Mock llama-server for testing the UI without a model",
+    ],
+    partialFeatures: [
+      "Image Studio / Video Studio — endpoints exist but return placeholder SVGs / sample video, not real generation",
     ],
     architecture:
-      "The Rust core (tauri commands + sysinfo + libloading) owns hardware, model metadata and backend lifecycle. React services wrap Tauri invoke() calls and poll state; zustand stores keep settings and UI state. Chat runs through the active backend's runtime with token events emitted over Tauri events.",
+      "The Rust core (tauri commands + sysinfo + libloading) owns hardware, model metadata and backend lifecycle; React services wrap Tauri invoke() calls and poll state. The web build runs a FastAPI backend whose LlamaProcessManager spawns llama-server as a subprocess with a model config and tracks status, PID, uptime and a log ring buffer — the React app polls status and stats and talks to models over the OpenAI-compatible API. Tool execution runs in the backend tool runner; zustand stores keep settings and UI state.",
     architectureDiagram: [
-      "React UI (pages: dashboard · chat · models · backends · hardware)",
-      "    ↑  Tauri commands / events",
-      "Rust core",
-      "    ├─ sysinfo (hardware stats)",
-      "    ├─ GGUF metadata parser",
-      "    ├─ libloading (capability inspection)",
-      "    └─ backend runtime (llama.cpp)",
+      "React UI (Tauri desktop · web)",
+      "    ↑  Tauri commands / HTTP + polling",
+      "Rust core (sysinfo · GGUF parser · libloading) / FastAPI backend",
+      "    ├─ backend registry → llama-server / llama.cpp",
+      "    ├─ config_manager → profiles/settings (JSON)",
+      "    └─ tool_runner → calculator / web_search / file_parser",
     ].join("\n"),
     limitations: [
       "Early stage (v0.1.0, 3 commits) — chat depends on a backend being registered",
+      "Image and video generation are mocked — no real diffusion pipeline yet",
+      "Requires llama.cpp binaries and GGUF models to be present locally",
       "Rust core requires a Tauri build toolchain",
     ],
   },
@@ -946,95 +907,6 @@ export const projects: Project[] = [
     ],
   },
 
-  {
-    id: "ocr-pdf",
-    title: "Handwritten PDF → Typed PDF",
-    category: "Desktop",
-    platform: "Windows/Linux/macOS (GUI + API)",
-    year: null,
-    status: "Active",
-    summary:
-      "A local desktop app that converts handwritten PDF pages — including math — into clean typed PDFs, powered by GLM-OCR via Ollama or Transformers.",
-    description:
-      "This app turns scanned handwritten PDFs (including formulas) into clean typed PDFs entirely on your machine. A Tkinter GUI (the default mode) picks an input PDF, chooses a backend — an Ollama model like glm-ocr:q8_0, a custom GGUF imported into Ollama, or the zai-org/GLM-OCR Transformers model — and produces a typeset PDF via ReportLab with LaTeX-style math rendered through matplotlib mathtext. A FastAPI backend is also available for scripted use, with job tracking, per-page progress and timeouts.",
-    technologies: [
-      "Python",
-      "Tkinter",
-      "FastAPI",
-      "Ollama (GLM-OCR)",
-      "Transformers",
-      "PyMuPDF",
-      "ReportLab",
-      "matplotlib mathtext",
-      "PyTorch",
-    ],
-    image: null,
-    featured: false,
-    features: [
-      "Convert handwritten PDF pages (incl. math) to typed PDF locally",
-      "Two OCR backends: Ollama model tag (default glm-ocr:q8_0) or zai-org/GLM-OCR via Transformers",
-      "Custom GGUF import into Ollama on convert",
-      "Prompt modes for text, formula and table recognition",
-      "Math rendering with matplotlib mathtext in the output PDF",
-      "Unicode-safe PDF fonts (DejaVu) via ReportLab",
-      "Tkinter GUI with progress panel, page/pass progress and heartbeat updates",
-      "FastAPI API mode with job tracking, uploads and CORS for local frontends",
-      "Configurable DPI, max tokens, page timeout and runtime limits",
-      "Large pages resized automatically for reliability",
-    ],
-    architecture:
-      "FastAPI (v1.0) exposes conversion endpoints backed by ocr_service.py (backend selection, Ollama client, GLM-OCR Transformers path) and pdf_processing.py (page rendering with PyMuPDF, typed PDF assembly with ReportLab and matplotlib math). The Tkinter GUI drives the same pipeline. Jobs run with per-page timeouts and a shared inference lock.",
-    architectureDiagram: [
-      "Tkinter GUI (default)  ·  FastAPI (API mode)",
-      "        ↓",
-      "ocr_service — ollama | transformers (GLM-OCR)",
-      "        ↓",
-      "pdf_processing — PyMuPDF → ReportLab (+ matplotlib math)",
-      "        ↓",
-      "typed PDF",
-    ].join("\n"),
-    limitations: [
-      "Requires Ollama running locally for the Ollama backend, or the GLM-OCR Transformers model for the transformers backend",
-      "GPU recommended for speed (CPU works)",
-      "Recognition quality varies with handwriting and the chosen model",
-    ],
-  },
-
-  {
-    id: "webstudio",
-    title: "Webstudio · working copy",
-    category: "Experiments",
-    platform: "Web",
-    year: null,
-    status: "Experimental",
-    summary:
-      "A local working copy of Webstudio, the open-source visual website builder monorepo. No git history is present in this copy, so personal changes could not be verified.",
-    description:
-      "A local copy of the Webstudio monorepo (apps/builder plus the sdk, css-engine, design-system and prisma packages). It's kept for studying and experimenting with a production visual-builder codebase. Because this folder has no .git history, I could not verify which parts (if any) were authored or changed locally — treat it as a working copy until that's confirmed.",
-    technologies: [
-      "pnpm monorepo",
-      "React",
-      "TypeScript",
-      "Prisma",
-      "PostgREST",
-      "CSS engine",
-      "SDK packages",
-    ],
-    image: null,
-    featured: false,
-    excludeFromRelated: true,
-    features: [
-      "Webstudio Builder application (apps/builder)",
-      "Extensive package ecosystem: sdk, react-sdk, css-engine, design-system, prisma-client, cli",
-      "SDK component libraries for React, Radix, Remix and React Router",
-    ],
-    architecture:
-      "A pnpm-workspace monorepo: apps/builder is the visual editor; packages/ contains the sdk, css-engine, design-system, prisma-client and component libraries consumed by generated sites.",
-    limitations: [
-      "No git history in the copy — personal contributions could not be verified",
-      "Large third-party codebase; not authored from scratch",
-    ],
-  },
 ];
 
 export function getProject(id: string) {

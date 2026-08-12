@@ -47,7 +47,7 @@ export function ScreenshotGallery({ project }: { project: Project }) {
                 type="button"
                 onClick={() => setIndex(i)}
                 aria-label={`Open screenshot ${i + 1} of ${count}`}
-                className="group relative aspect-[4/3] cursor-zoom-in overflow-hidden text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+                className="group relative aspect-[4/3] touch-manipulation cursor-zoom-in overflow-hidden bg-muted/15 text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
               />
             }
           >
@@ -56,7 +56,10 @@ export function ScreenshotGallery({ project }: { project: Project }) {
               alt={`${project.title} — screenshot ${i + 1}`}
               fill
               sizes="(min-width: 640px) 40vw, 100vw"
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.015]"
+              // The whole image fits inside the frame (no cropping) — tall
+              // phone shots letterbox on the muted backdrop instead of
+              // having their edges sliced off.
+              className="object-contain transition-[filter] duration-500 ease-out group-hover:brightness-110"
             />
             <span
               className="absolute bottom-2 right-2 bg-background/85 px-1.5 py-0.5 font-mono text-[10px] text-foreground/80 backdrop-blur-sm"

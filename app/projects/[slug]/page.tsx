@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Container } from "@/components/container";
+import { MotesField } from "@/components/motes-field";
 import { PageReveal } from "@/components/motion/page-reveal";
 import { Reveal } from "@/components/motion/reveal";
 import { ScrollScale } from "@/components/motion/scroll-scale";
@@ -111,8 +112,13 @@ export default async function ProjectPage({
   const next = realProjects[index + 1] ?? null;
   const related = getRelatedProjects(project.id);
   return (
-    <Container className="pb-24 pt-10 md:pb-32 md:pt-14">
-      <PageReveal>
+    <>
+      {/* Detail pages don't carry the full TriangleWorld scene — just the
+          ambient motes, so the page still breathes with the triangle
+          material instead of sitting on a flat background. */}
+      <MotesField />
+      <Container className="relative z-10 pb-24 pt-10 md:pb-32 md:pt-14">
+        <PageReveal>
         <Link
           href="/#work"
           className="group inline-flex items-center gap-2 font-mono text-[12px] text-muted-foreground transition-colors hover:text-foreground"
@@ -167,7 +173,11 @@ export default async function ProjectPage({
 
         <div className="mt-14">
           <ScrollScale>
-            <ProjectVisual project={project} className="aspect-[16/9]" />
+            <ProjectVisual
+              project={project}
+              contain
+              className="aspect-[16/9]"
+            />
           </ScrollScale>
         </div>
 
@@ -384,7 +394,8 @@ export default async function ProjectPage({
             <span />
           )}
         </nav>
-      </PageReveal>
-    </Container>
+        </PageReveal>
+      </Container>
+    </>
   );
 }

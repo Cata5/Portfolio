@@ -98,8 +98,8 @@ jobs:
             find out -mindepth 2 -name '*.html' -not -name 'index.html' 2>/dev/null | head -10 || true
           }
           # basePath must prefix assets
-          grep -q '/Portofolio-V2/_next' out/index.html \
-            || { echo "::error::basePath not applied (no /Portofolio-V2/_next in out/index.html)"; dump; exit 1; }
+          grep -q '/Portofolio/_next' out/index.html \
+            || { echo "::error::basePath not applied (no /Portofolio/_next in out/index.html)"; dump; exit 1; }
           # trailingSlash: export must never emit flat <route>.html files
           FLAT=$(find out -mindepth 2 -name '*.html' -not -name 'index.html' | head -1)
           if [ -n "$FLAT" ]; then
@@ -110,9 +110,9 @@ jobs:
           test -f out/projects/vortex/index.html \
             || { echo "::error::missing out/projects/vortex/index.html"; dump; exit 1; }
           # custom image loader must prefix project images on both pages
-          grep -q '/Portofolio-V2/projects/' out/index.html \
+          grep -q '/Portofolio/projects/' out/index.html \
             || { echo "::error::image loader not applied (no prefixed project image in out/index.html)"; dump; exit 1; }
-          grep -q '/Portofolio-V2/projects/' out/projects/vortex/index.html \
+          grep -q '/Portofolio/projects/' out/projects/vortex/index.html \
             || { echo "::error::image loader not applied on project page"; dump; exit 1; }
           if grep -oE '(href|src)="/projects/' out/index.html; then
             echo "::error::unprefixed internal URLs found (see above)"

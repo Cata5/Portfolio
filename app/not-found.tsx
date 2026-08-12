@@ -2,10 +2,13 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import { Container } from "@/components/container";
+import { MotesField } from "@/components/motes-field";
 
 export default function NotFound() {
   return (
-    <Container className="flex min-h-[60vh] flex-col items-start justify-center py-24">
+    <>
+      <MotesField />
+      <Container className="relative z-10 flex min-h-[60vh] flex-col items-start justify-center py-24">
       <p className="font-mono text-[12px] uppercase tracking-[0.2em] text-muted-foreground">
         404
       </p>
@@ -23,6 +26,7 @@ export default function NotFound() {
         <ArrowLeft className="size-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
         back home
       </Link>
-    </Container>
+      </Container>
+    </>
   );
 }
