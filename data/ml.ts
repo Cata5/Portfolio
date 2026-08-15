@@ -21,6 +21,8 @@ export type MlRun = {
 export const ml = {
   /** Field order in the notebook ledger. */
   fields: ["model", "dataset", "framework", "hardware", "training"] as const,
+  /** The machine the notebook runs on — shown in the training stack column. */
+  hardware: "R9 5900Hs · 40GB RAM · RTX 3060",
   runs: [
     {
       model: "YOLOv8 — car parts (2 variants: with / without side mirrors)",

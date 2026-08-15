@@ -94,6 +94,12 @@ export function MLNotebook() {
                 <p className="font-mono text-[13px] leading-loose text-foreground/85">
                   {mlStack.join(" · ")}
                 </p>
+                <p className="mb-5 mt-8 text-[13px] font-semibold uppercase tracking-[0.03em] text-saffron">
+                  Hardware
+                </p>
+                <p className="font-mono text-[13px] leading-loose text-foreground/85">
+                  {ml.hardware}
+                </p>
                 <MLFlowDiagram className="mt-10" />
                 <p className="mt-10 max-w-sm text-lg font-extralight leading-relaxed text-muted-foreground">
                   When an experiment completes, its configuration and loss

@@ -1,6 +1,5 @@
 import { About } from "@/components/about/about";
 import { Activities } from "@/components/activities/activities";
-import { Apps } from "@/components/apps/apps";
 import { Certifications } from "@/components/certifications/certifications";
 import { Contact } from "@/components/contact/contact";
 import { Hero } from "@/components/hero/hero";
@@ -26,7 +25,6 @@ export default function Home() {
         <Stack />
         <Certifications />
         <MLNotebook />
-        <Apps />
         <Journey />
         <Activities />
         <Contact />

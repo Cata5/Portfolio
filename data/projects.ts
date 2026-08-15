@@ -69,15 +69,31 @@ export type Project = {
   learned?: string[];
   screenshots?: string[];
   /**
-   * Device frame used in the Mobile Apps showcase. Set it on a project
+   * Device frame used in the mobile work showcase. Set it on a project
    * (even a non-Android/iOS one) to surface it there — e.g. a Windows tool
    * that also runs as a phone/tablet app.
    */
   deviceFrame?: "phone" | "tablet";
   /** Screenshot shown inside the device frame (defaults to screenshots[0]). */
   deviceShot?: string;
-  /** Short name for the Mobile Apps carousel when the full title is long. */
+  /** Short name for the mobile carousel when the full title is long. */
   appsTitle?: string;
+  /**
+   * Multi-runtime showcase entries — e.g. Vortex on Android, TV and PC.
+   * Each entry pairs a runtime label with the frame type and screenshot
+   * used to display it in the flagship showcase.
+   */
+  runtimes?: {
+    id: string;
+    /** Short runtime name — e.g. "Android", "TV", "PC". */
+    label: string;
+    /** Frame used to display this runtime's shot. */
+    device: "phone" | "tv" | "desktop";
+    /** Screenshot shown inside the frame. */
+    shot: string;
+    /** One-liner about what this runtime offers. */
+    description?: string;
+  }[];
   limitations?: string[];
   futureWork?: string[];
   /** Never suggested as a related project (e.g. third-party working copies). */
@@ -89,13 +105,13 @@ export const projects: Project[] = [
     id: "vortex",
     title: "Vortex",
     category: "Android",
-    platform: "Android · phones, tablets, TV",
+    platform: "Android · Android TV · PC",
     year: 2026,
     status: "In Development",
     summary:
-      "Self-hosted media streaming for Android and Android TV — one library from your own Google Drive, SMB, SFTP, FTP and WebDAV sources.",
+      "Self-hosted media streaming across three runtimes — Android phones & tablets, Android TV and PC — one library from your own Google Drive, SMB, SFTP, FTP and WebDAV sources.",
     description:
-      "Vortex is a client-side, self-hosted media streaming application for Android phones, tablets and Android TV. It aggregates personal media libraries from remote sources — Google Drive, SMB, SFTP, FTP/FTPS and WebDAV — into one unified library, enriches it with TMDB metadata, and plays everything with ExoPlayer/Media3. There is no server and no cloud dependency: the app talks to sources you already own.",
+      "Vortex is a client-side, self-hosted media streaming application that runs on three targets — Android phones and tablets, Android TV, and PC. It aggregates personal media libraries from remote sources — Google Drive, SMB, SFTP, FTP/FTPS and WebDAV — into one unified library, enriches it with TMDB metadata, and plays everything with ExoPlayer/Media3. There is no Vortex server and no subscription: the app streams directly from sources you already own, including your Google Drive cloud storage.",
     technologies: [
       "Kotlin",
       "Jetpack Compose",
@@ -112,8 +128,8 @@ export const projects: Project[] = [
       "NewPipe extractor",
       "ProGuard / R8",
     ],
-    // The wide TV shot leads the cards (it fits the 16/10 frame); the phone
-    // screenshot stays the first gallery image on the detail page.
+    // The wide TV shot leads the detail page hero and the flagship showcase
+    // transition; the phone screenshot stays the first gallery image.
     image: "/projects/vortex/02-tv.webp",
     // Verified from git remote. Note: the repo is named "Infuse" on GitHub
     // while the project is called Vortex — intentional, do not "fix".
@@ -122,6 +138,35 @@ export const projects: Project[] = [
     screenshots: [
       "/projects/vortex/01-phone.webp",
       "/projects/vortex/02-tv.webp",
+      "/projects/vortex/03-desktop.png",
+    ],
+    // The three runtimes shown in the flagship showcase — Android (phone),
+    // TV and PC (desktop) — each with the shot that fits its frame.
+    runtimes: [
+      {
+        id: "android",
+        label: "Android",
+        device: "phone",
+        shot: "/projects/vortex/01-phone.webp",
+        description:
+          "Phones and tablets — touch UI with metadata, resume, downloads, profiles and offline support.",
+      },
+      {
+        id: "tv",
+        label: "TV",
+        device: "tv",
+        shot: "/projects/vortex/02-tv.webp",
+        description:
+          "Android TV — Leanback launcher, D-pad navigation and remote controls.",
+      },
+      {
+        id: "pc",
+        label: "PC",
+        device: "desktop",
+        shot: "/projects/vortex/03-desktop.png",
+        description:
+          "Desktop build — the same unified library and playback on your PC.",
+      },
     ],
     features: [
       "Unified movie & TV library aggregated from multiple remote sources",
@@ -228,7 +273,7 @@ export const projects: Project[] = [
     ],
     image: "/projects/cheltuieli/01-phone.webp",
     featured: false,
-    // Shown in the Mobile Apps showcase as a phone app — the portrait
+    // Shown in the mobile work showcase as a phone app — the portrait
     // capture of the expense-tracker UI.
     deviceFrame: "phone",
     deviceShot: "/projects/cheltuieli/01-phone.webp",
@@ -290,7 +335,7 @@ export const projects: Project[] = [
     ],
     github: "https://github.com/Cata5/Aplicatie-Teka",
     featured: true,
-    // Shown in the Mobile Apps showcase as an Android tablet app — the
+    // Shown in the mobile work showcase as an Android tablet app — the
     // landscape capture of the offline offer generator.
     deviceFrame: "tablet",
     deviceShot: "/projects/aplicatie-teka/02-tablet.webp",

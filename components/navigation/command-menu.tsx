@@ -21,10 +21,9 @@ import { site } from "@/data/site";
 const sections = [
 
   { label: "About", target: "about", hint: "background" },
-  { label: "Projects", target: "work", hint: "selected projects" },
+  { label: "My best project", target: "work", hint: "flagship" },
   { label: "Stack", target: "stack", hint: "tools" },
   { label: "ML", target: "ml", hint: "notebook" },
-  { label: "Apps", target: "apps", hint: "mobile" },
   { label: "Contact", target: "contact", hint: "write to me" },
 ] as const;
 

@@ -37,8 +37,41 @@ export function Hero() {
     if (!el || prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
+      // ---- Pinned scroll ----------------------------------------------
+      // The scrollTrigger is created empty (pin included) so the pin spacer
+      // exists from first paint and no layout jump happens later. The fade
+      // tweens are added in the entrance's onComplete below: GSAP records a
+      // fromTo tween's start values from the element's LIVE state on first
+      // render, and if that render happens while the entrance's hidden
+      // from-state is still applied (e.g. a reload while scrolled, where
+      // scroll restoration makes the scrub render mid-hero), scrolling back
+      // up would render those captured hidden values and the hero content
+      // would never return. Adding the tweens after the entrance completes
+      // guarantees they record the visible state on every load path.
+      const st = gsap.timeline({
+        scrollTrigger: {
+          trigger: el,
+          start: "top top",
+          end: () =>
+            "+=" +
+            Math.round(
+              window.innerHeight * (window.innerWidth < 640 ? 1.5 : 2),
+            ),
+          pin: true,
+          anticipatePin: 1,
+          scrub: true,
+        },
+        // Explicit from-values keep the start state deterministic, and
+        // immediateRender stays off so the scrub never clobbers the entrance
+        // animation.
+        defaults: { ease: EASE.none, immediateRender: false },
+      });
+
       // ---- Entrance -------------------------------------------------
-      const tl = gsap.timeline({ defaults: { ease: EASE.out } });
+      const tl = gsap.timeline({
+        defaults: { ease: EASE.out },
+        onComplete: buildScrubTweens,
+      });
 
       tl.fromTo(
         ".hero-grid",
@@ -95,42 +128,68 @@ export function Hero() {
           1.4,
         );
 
-      // ---- Pinned scroll ----------------------------------------------
-      // The Earth lives on the page-wide TriangleWorld canvas behind
-      // everything, so the hero only needs to hold its typography for the
-      // globe's assembly and slow rotation to breathe (2 screens on desktop,
-      // 1.5 on mobile), then release — the pieces keep migrating into the
-      // orbital form as About arrives. Every tween is scrubbed.
-      const st = gsap.timeline({
-        scrollTrigger: {
-          trigger: el,
-          start: "top top",
-          end: () =>
-            "+=" +
-            Math.round(
-              window.innerHeight * (window.innerWidth < 640 ? 1.5 : 2),
-            ),
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          scrub: true,
-        },
-        defaults: { ease: EASE.none },
-      });
-
       // Typography recedes cleanly — the labels first, the headline last —
-      // so the material owns the remaining pin.
-      st.to(".hero-scroll-hint", { opacity: 0, duration: 0.05 }, 0.05)
-        .to(".hero-grid", { opacity: 0, yPercent: 6, duration: 0.08 }, 0.06)
-        .to(".hero-label, .hero-side-label", { opacity: 0, duration: 0.06 }, 0.12)
-        .to(".hero-workspace", { yPercent: -22, opacity: 0, duration: 0.12 }, 0.2)
-        .to(".hero-tagline, .hero-ctas", { y: -22, opacity: 0, duration: 0.14 }, 0.32)
-        .to(".hero-eyebrow", { y: -12, opacity: 0, duration: 0.1 }, 0.42)
-        .to(".hero-title", { yPercent: -8, duration: 0.1 }, 0.46)
+      // so the material owns the remaining pin. Added only after the
+      // entrance completes (see above) so the tweens record visible start
+      // values on every load path.
+      function buildScrubTweens() {
+      st.fromTo(
+          ".hero-scroll-hint",
+          { opacity: 1 },
+          { opacity: 0, duration: 0.05 },
+          0.05,
+        )
+        .fromTo(
+          ".hero-grid",
+          { opacity: 1, yPercent: 0 },
+          { opacity: 0, yPercent: 6, duration: 0.08 },
+          0.06,
+        )
+        .fromTo(
+          ".hero-label, .hero-side-label",
+          { opacity: 1 },
+          { opacity: 0, duration: 0.06 },
+          0.12,
+        )
+        .fromTo(
+          ".hero-workspace",
+          { yPercent: 0, opacity: 1 },
+          { yPercent: -22, opacity: 0, duration: 0.12 },
+          0.2,
+        )
+        .fromTo(
+          ".hero-tagline, .hero-ctas",
+          { y: 0, opacity: 1 },
+          { y: -22, opacity: 0, duration: 0.14 },
+          0.32,
+        )
+        .fromTo(
+          ".hero-eyebrow",
+          { y: 0, opacity: 1 },
+          { y: -12, opacity: 0, duration: 0.1 },
+          0.42,
+        )
+        .fromTo(
+          ".hero-title",
+          { yPercent: 0 },
+          { yPercent: -8, duration: 0.1 },
+          0.46,
+        )
         // The glass fades out with the headline, not before it — the panel
         // must not strip the headline of its "leaves last" moment.
-        .to(".hero-glass", { yPercent: -6, opacity: 0, duration: 0.14 }, 0.5)
-        .to(".hero-title", { yPercent: -30, opacity: 0, duration: 0.14 }, 0.5);
+        .fromTo(
+          ".hero-glass",
+          { yPercent: 0, opacity: 1 },
+          { yPercent: -6, opacity: 0, duration: 0.14 },
+          0.5,
+        )
+        .fromTo(
+          ".hero-title",
+          { yPercent: -8, opacity: 1 },
+          { yPercent: -30, opacity: 0, duration: 0.14 },
+          0.5,
+        );
+      }
     }, el);
 
     return () => ctx.revert();

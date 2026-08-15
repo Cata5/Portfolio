@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { Providers } from "@/components/providers";
 import { ScrollProgress, SiteHeader } from "@/components/navigation/site-header";
 import { site } from "@/data/site";
+import { withBasePath } from "@/lib/base-path";
 
 import "./globals.css";
 
@@ -52,8 +53,12 @@ export const metadata: Metadata = {
     title: `${site.name} — ${site.role}`,
     description: site.description,
   },
+  // Explicit metadata icon strings are NOT auto-prefixed with the GitHub
+  // Pages basePath (unlike app/icon.svg or app/favicon.ico file conventions),
+  // so the raw href gets the prefix here — otherwise the browser asks for
+  // /icon.svg at the site root and 404s on a project site.
   icons: {
-    icon: "/icon.svg",
+    icon: withBasePath("/icon.svg"),
   },
 };
 
