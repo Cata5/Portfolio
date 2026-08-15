@@ -319,20 +319,22 @@ export function FeaturedProjects() {
         </Reveal>
       </Container>
 
-      {/* Runtime showcase — the whole block floats on the same frosted glass
-          as the other sections. */}
+      {/* Runtime showcase — the Vortex info sits in a compact glass card
+          (kept small and more transparent on desktop so the galaxy material
+          behind the section stays visible), while the device frames float
+          free on the page around it. */}
       <Container className="mt-14 md:mt-20">
-        <GlassCard className="p-6 sm:p-10 lg:p-12">
-          <div
-            ref={rootRef}
-            onMouseEnter={auto.onMouseEnter}
-            onMouseLeave={auto.onMouseLeave}
-            onFocusCapture={auto.onFocusCapture}
-            onBlurCapture={auto.onBlurCapture}
-            className="grid gap-12 lg:grid-cols-12"
-          >
-            {/* Runtime selector + details. */}
-            <div className="flex flex-col justify-center gap-3 lg:col-span-5">
+        <div
+          ref={rootRef}
+          onMouseEnter={auto.onMouseEnter}
+          onMouseLeave={auto.onMouseLeave}
+          onFocusCapture={auto.onFocusCapture}
+          onBlurCapture={auto.onBlurCapture}
+          className="grid gap-12 lg:grid-cols-12"
+        >
+          {/* Compact glass card — runtime selector + details + CTA. */}
+          <div className="lg:col-span-4">
+            <GlassCard className="flex h-full flex-col p-6 sm:p-8 md:bg-card/60">
               <div
                 role="tablist"
                 aria-label="Vortex runtimes"
@@ -347,7 +349,7 @@ export function FeaturedProjects() {
                       aria-selected={selected}
                       onClick={() => go(i)}
                       className={cn(
-                        "group rounded-xl border px-5 py-4 text-left transition-all duration-300",
+                        "group rounded-xl border px-4 py-3 text-left transition-all duration-300",
                         selected
                           ? "border-signal/40 bg-signal/10"
                           : "border-border/50 bg-muted/10 hover:border-border hover:bg-muted/20",
@@ -364,7 +366,7 @@ export function FeaturedProjects() {
                       </p>
                       <h3
                         className={cn(
-                          "mt-1.5 text-xl font-normal tracking-[-0.02em] transition-colors duration-300",
+                          "mt-1 text-base font-normal tracking-[-0.02em] transition-colors duration-300",
                           selected
                             ? "text-foreground"
                             : "text-muted-foreground group-hover:text-foreground",
@@ -378,7 +380,7 @@ export function FeaturedProjects() {
               </div>
 
               {/* Active runtime details — crossfade with the frame. */}
-              <div className="mt-6 min-h-[7rem]">
+              <div className="mt-5 min-h-[7rem] flex-1">
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
                     key={active.id}
@@ -388,11 +390,11 @@ export function FeaturedProjects() {
                     transition={{ duration: 0.3, ease: "easeOut" }}
                   >
                     {active.description && (
-                      <p className="max-w-sm text-lg font-extralight leading-relaxed text-muted-foreground">
+                      <p className="max-w-sm text-base font-extralight leading-relaxed text-muted-foreground">
                         {active.description}
                       </p>
                     )}
-                    <p className="mt-4 font-mono text-[12px] text-muted-foreground">
+                    <p className="mt-3 font-mono text-[12px] text-muted-foreground">
                       {vortex.technologies.join(" · ")}
                     </p>
                   </motion.div>
@@ -402,15 +404,16 @@ export function FeaturedProjects() {
               <ProjectLink
                 href={`/projects/${vortex.id}`}
                 src={vortex.image ?? undefined}
-                className="group mt-4 inline-flex w-fit items-center gap-2 text-sm font-medium transition-colors hover:text-signal"
+                className="group mt-5 inline-flex w-fit items-center gap-2 text-sm font-medium transition-colors hover:text-signal"
               >
                 View the full project
                 <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </ProjectLink>
-            </div>
+            </GlassCard>
+          </div>
 
-            {/* Frame stage. */}
-            <div className="relative flex items-center justify-center lg:col-span-7">
+          {/* Frame stage — floats free so the galaxy shows around it. */}
+          <div className="relative flex items-center justify-center lg:col-span-8">
               <button
                 type="button"
                 aria-label="Previous runtime"
@@ -453,27 +456,26 @@ export function FeaturedProjects() {
                 <ChevronRight className="size-5" />
               </button>
             </div>
-          </div>
+        </div>
 
-          {/* Dots */}
-          <div className="mt-8 flex items-center justify-center gap-2.5">
-            {runtimes.map((r, i) => (
-              <button
-                key={r.id}
-                type="button"
-                aria-label={`Go to ${r.label}`}
-                aria-current={i === index}
-                onClick={() => go(i)}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
-                  i === index
-                    ? "w-8 bg-signal"
-                    : "w-2.5 bg-foreground/25 hover:bg-foreground/50",
-                )}
-              />
-            ))}
-          </div>
-        </GlassCard>
+        {/* Dots — below the grid, outside the card. */}
+        <div className="mt-8 flex items-center justify-center gap-2.5">
+          {runtimes.map((r, i) => (
+            <button
+              key={r.id}
+              type="button"
+              aria-label={`Go to ${r.label}`}
+              aria-current={i === index}
+              onClick={() => go(i)}
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-300",
+                i === index
+                  ? "w-8 bg-signal"
+                  : "w-2.5 bg-foreground/25 hover:bg-foreground/50",
+              )}
+            />
+          ))}
+        </div>
       </Container>
 
     </section>
