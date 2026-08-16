@@ -17,7 +17,7 @@ export function GlassCard({
   return (
     <div
       className={cn(
-        "border border-border/50 bg-card/35 backdrop-blur-[2px] md:bg-card/85 md:backdrop-blur-sm",
+        "border border-border/40 bg-card/30 backdrop-blur-[3px] sm:bg-card/35 md:bg-card/40 md:backdrop-blur-md lg:bg-card/50 shadow-2xl",
         className,
       )}
       {...props}

@@ -84,16 +84,18 @@ export function About() {
             </h2>
             <div className="mt-10 max-w-xl space-y-6">
               <p className="about-para text-lg font-extralight leading-relaxed text-muted-foreground">
-                I&apos;m {site.name}, a software developer. I build web
-                applications, experiment with machine learning, and make
-                software for whatever problem I find interesting — from media
-                apps on Android to interfaces on the web.
+                I&apos;m {site.name}, a Computer and Information Technology
+                (CTI) student at ETTI Bucharest (POLITEHNICA University). I build
+                web applications, experiment with machine learning, and create
+                multi-platform software for whatever challenge I find
+                interesting — from media streaming apps on Android to
+                intelligent systems on the web.
               </p>
               <p className="about-para text-lg font-extralight leading-relaxed text-muted-foreground">
-                I care about the details: readable code, deliberate interfaces,
-                and software that holds up in daily use. This site is a record
-                of that work — what I&apos;m building now, and what
-                I&apos;ve learned along the way.
+                I&apos;m actively looking for software engineering roles and
+                internships where I can bring hands-on project experience, fast
+                learning, and strong engineering fundamentals to real-world
+                products.
               </p>
             </div>
           </div>

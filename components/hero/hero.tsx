@@ -210,16 +210,16 @@ export function Hero() {
       {/* Text + content — centered in the free space; the scroll cue sits
           at the very bottom of the viewport-height column. The Earth on the
           page-wide TriangleWorld canvas shows through behind it. */}
-      <Container className="hero-content relative z-10 flex min-h-[100svh] flex-col py-24 md:py-28">
+      <Container className="hero-content relative z-10 flex min-h-[100svh] flex-col py-16 sm:py-20 md:py-20 lg:py-28">
         <div className="flex flex-1 flex-col justify-center">
           {/* The headline block sits in the same frosted-glass recipe as the
               workspace card — the fixed triangle canvas blurs behind it. */}
-          <GlassCard className="hero-glass w-fit max-w-full p-6 sm:p-8 lg:p-10">
+          <GlassCard className="hero-glass w-fit max-w-full md:max-w-[520px] lg:max-w-[640px] xl:max-w-[720px] p-5 sm:p-7 lg:p-9">
             <HeroTypography />
-            <p className="hero-tagline mt-10 max-w-md text-lg font-extralight leading-relaxed text-muted-foreground md:text-xl">
+            <p className="hero-tagline mt-6 sm:mt-8 lg:mt-10 max-w-md text-base sm:text-lg md:text-lg lg:text-xl font-extralight leading-relaxed text-muted-foreground">
               {site.tagline}
             </p>
-            <div className="hero-ctas mt-12 flex flex-wrap items-center gap-8">
+            <div className="hero-ctas mt-8 sm:mt-10 lg:mt-12 flex flex-wrap items-center gap-6 sm:gap-8">
               <Magnetic>
                 <Button nativeButton={false} render={<a href="#work" />}>
                   View work
@@ -242,11 +242,11 @@ export function Hero() {
         </div>
 
         {/* Scroll cue hugs the bottom of the viewport-height column */}
-        <HeroScrollIndicator className="pt-20 md:pt-24" />
+        <HeroScrollIndicator className="pt-8 sm:pt-12 md:pt-14 lg:pt-20" />
       </Container>
 
-      {/* Foreground — floating card (in flow on mobile, overlapping on desktop) */}
-      <div className="relative z-20 mt-4 px-5 pb-12 sm:px-8 lg:absolute lg:bottom-28 lg:right-[3vw] lg:mt-0 lg:px-0 lg:pb-0">
+      {/* Foreground — floating card (in flow on mobile, floating on tablet/desktop) */}
+      <div className="relative z-20 mt-4 px-5 pb-12 sm:px-8 md:absolute md:bottom-16 md:right-6 md:mt-0 md:px-0 md:pb-0 lg:bottom-28 lg:right-[3vw]">
         <Magnetic strength={0.08}>
           <WorkspacePanel />
         </Magnetic>

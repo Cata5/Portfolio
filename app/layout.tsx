@@ -31,7 +31,9 @@ export const metadata: Metadata = {
   },
   description: site.description,
   keywords: [
-    "software developer",
+    "software engineering student",
+    "ETTI CTI Bucharest",
+    "computer engineering",
     "web development",
     "machine learning",
     "android",

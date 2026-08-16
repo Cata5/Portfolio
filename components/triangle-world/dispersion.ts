@@ -27,11 +27,9 @@ export const DISP_STYLES: DispStyle[] = [
   { spread: 0.55, camera: 0.94, near: 0.02, alpha: 1.22, sweep: 0, turn: 0.2, swell: 2.2 },
   // work — galaxy → brain: strong rotational burst
   { spread: 1.0, camera: 0.86, near: 0.1, alpha: 1.35, sweep: 0.2, turn: 1.0, swell: 3.0 },
-  // stack — brain → wave: a directional sweep across the viewport
-  { spread: 1.12, camera: 0.82, near: 0.15, alpha: 1.42, sweep: 1.0, turn: 0.2, swell: 3.4 },
-  // ml — wave → solar: violent, deep, foreground-heavy
-  { spread: 1.25, camera: 0.78, near: 0.25, alpha: 1.52, sweep: 0.4, turn: 0.6, swell: 4.4 },
-  // contact — solar → final: a soft, calm dissolve
+  // stack — brain → solar: expansive radial dispersion
+  { spread: 1.2, camera: 0.8, near: 0.2, alpha: 1.45, sweep: 0.3, turn: 0.5, swell: 3.8 },
+  // contact — solar → final: a soft, calm dissolve into the event horizon
   { spread: 0.45, camera: 0.96, near: 0, alpha: 1.12, sweep: 0, turn: 0.1, swell: 1.8 },
   // footer — final → void: the world gently disperses and fades away
   { spread: 0.5, camera: 0.98, near: 0, alpha: 1.05, sweep: 0, turn: 0.1, swell: 1.5 },

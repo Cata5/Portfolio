@@ -66,7 +66,6 @@ import {
   solarSphere,
 } from "./solar";
 import { clamp01, smoothstep, type P } from "./types";
-import { waveLight } from "./wave";
 
 /*
  * The global triangle scene. ONE fixed canvas behind the entire homepage
@@ -290,16 +289,28 @@ export function TriangleWorld() {
       // can still scroll, leaving the calm final gather holding at the bottom.
       const rawB = BOUNDARY_KEYS.map((key, i) => {
         let v = 0;
-        if (key === "ml") v = anchors.ml || 0;
-        else if (key === "footer") v = anchors.footer || 0;
-        else v = anchors[key] ?? 0;
+        if (key === "about") {
+          // Hand over from Earth to Galaxy as Hero scrolls out, giving Galaxy plenty of time to be fully assembled throughout About
+          v = anchors.about ? Math.min(anchors.about * 0.45, 0.45 * ih) : 0;
+        } else if (key === "work") {
+          // Hand over from Galaxy to Brain as Work arrives
+          v = anchors.work || 0;
+        } else if (key === "stack") {
+          // Hand over from Brain to Solar as Stack begins (keeps Brain tightly bound to Projects)
+          v = anchors.stack || 0;
+        } else if (key === "contact") {
+          v = anchors.contact || 0;
+        } else if (key === "footer") {
+          v = anchors.footer || 0;
+        } else {
+          v = anchors[key] ?? 0;
+        }
         if (v > 0) return v;
         // Missing section id — fall forward to the next boundary that
         // exists so the handover skips instead of collapsing to the top.
         for (let j = i + 1; j < BOUNDARY_KEYS.length; j++) {
           const k = BOUNDARY_KEYS[j];
-          const w2 =
-            k === "ml" ? anchors.ml : k === "footer" ? anchors.footer : anchors[k];
+          const w2 = anchors[k];
           if (w2 && w2 > 0) return w2;
         }
         return anchors.contact || 0;
@@ -318,11 +329,11 @@ export function TriangleWorld() {
       // equal-width so every handover stays linear and scrubbed.
       const totalScroll = Math.max(maxScroll, 1);
       const nB = B.length; // one boundary (and window) per form handover
-      const hw = Math.min(0.5 * ih, totalScroll / (4 * nB)); // transition half-width
+      const hw = Math.min(0.32 * ih, totalScroll / (5 * nB)); // transition half-width
       const C = B.slice();
       // No window may swallow the form between two of them — push later
       // boundaries forward so every form keeps a real moment on screen.
-      const MIN_LIFE = 0.5 * ih;
+      const MIN_LIFE = 0.22 * ih;
       for (let i = 1; i < C.length; i++) {
         C[i] = Math.max(C[i], C[i - 1] + 2 * hw + MIN_LIFE);
       }
@@ -344,9 +355,8 @@ export function TriangleWorld() {
       // The galaxy spins actively with its own internal density wave dynamics
       const galFreeze = 0;
       const wBrain = fw[2];
-      const wWave = fw[3];
-      const wSolar = fw[4];
-      const wFinal = fw[5];
+      const wSolar = fw[3];
+      const wFinal = fw[4];
 
       // The black hole powers up as the page closes: the deeper the scroll
       // (and the more the final form owns the scene), the faster the disc
@@ -357,13 +367,6 @@ export function TriangleWorld() {
       holeState.finalSpin = 1 + holeState.finalPower * 1.4;
       holeState.finalGrow = 1 + holeState.finalPower * 0.16;
 
-      // ---- Overscroll climax (the black hole burst) -------------------
-      // If the user keeps scrolling past the bottom of the page, the hole
-      // spins up violently, detonates — every piece blasted across the
-      // screen — then everything blacks out for a second while the page
-      // rides back to the top, the black lifting on the hero. The sequence
-      // is clock-driven (performance.now), so it plays even though the
-      // scroll can't move any further.
       // ---- Overscroll climax (the black hole burst) -------------------
       // If the user keeps scrolling past the bottom of the page, the hole
       // spins up violently, detonates — every piece blasted across the
@@ -460,7 +463,7 @@ export function TriangleWorld() {
       // hemisphere, the forms normalise a wider z range to 0..1 so far pieces
       // stay visible as small, dim shards.
       const depthFx =
-        wGalaxy * 0.5 + wBrain * 0.25 + wWave * 0.18 + wSolar * 0.4 + wFinal * 0.3;
+        wGalaxy * 0.5 + wBrain * 0.25 + wSolar * 0.4 + wFinal * 0.3;
 
       // ---- Active dispersion (the boundary currently being crossed) ---
       let dispI = -1;
@@ -527,7 +530,7 @@ export function TriangleWorld() {
       // forms sit where their section wants them. Composition blends by the
       // same normalised weights as the piece positions, so the whole scene —
       // position AND camera — moves as one.
-      const earthCx = w < 640 ? 0.5 : w < 1024 ? 0.64 : 0.73;
+      const earthCx = w < 640 ? 0.5 : w < 1024 ? 0.69 : 0.73;
       const cxBlend = fw.reduce((acc, wgt, i) => {
         const c = i === 0 ? earthCx : w < 640 ? 0.5 : FORMS[i].cx;
         return acc + wgt * c;
@@ -536,25 +539,28 @@ export function TriangleWorld() {
         // On mobile every form is centred behind the content, so the wave
         // drops low enough to stay clear of the Stack heading, and the
         // Earth rises to sit ABOVE the hero headline card (the glass would
-        // otherwise hide the whole globe behind it).
+        // otherwise hide the whole globe behind it). On tablet it sits
+        // balanced with the headline card.
         const oy =
           w < 640 && FORMS[i].key === "brain"
             ? 0.58
             : w < 640 && FORMS[i].key === "earth"
               ? 0.24
-              : FORMS[i].oy;
+              : w < 1024 && FORMS[i].key === "earth"
+                ? 0.46
+                : FORMS[i].oy;
         return acc + wgt * oy;
       }, 0);
       const zoom = fw.reduce((acc, wgt, i) => acc + wgt * FORMS[i].zoom, 0);
       const sizeMul = fw.reduce((acc, wgt, i) => acc + wgt * FORMS[i].size, 0);
 
-      const visualW = w < 640 ? w : w < 1024 ? w * 0.72 : w * 0.54;
+      const visualW = w < 640 ? w : w < 1024 ? w * 0.64 : w * 0.54;
       // On mobile the forms sit behind the content panels, so they render
       // ~28% smaller — a complete, readable object that shows through the
       // translucent glass instead of a giant shape spilling off-screen.
       const baseUnit =
         Math.min(visualW * 0.46, h * 0.44) *
-        (w < 640 ? 0.72 : 1) *
+        (w < 640 ? 0.72 : w < 1024 ? 0.9 : 1) *
         zoom *
         sizeMul *
         (1 + 0.012 * Math.sin(s * 0.25) * (1 - galFreeze)) *
@@ -892,7 +898,6 @@ export function TriangleWorld() {
         const appear = clamp01((asm * 1.4 - p.asmPhase) / 0.4);
         let light = 1;
         if (wBrain > 0.05) light *= brainLight(p, depth, s);
-        if (wWave > 0.05) light *= waveLight(p, s);
         if (wGalaxy > 0.05) light *= galaxyLight(p, depth, s);
         if (wSolar > 0.05) light *= solarLight(p, depth, s);
         if (wFinal > 0.05) {

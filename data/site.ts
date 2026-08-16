@@ -7,7 +7,7 @@
 
 export const site = {
   name: "Manu Catalin-Gabriel",
-  role: "Software Developer",
+  role: "Student @ ETTI CTI Bucharest",
 
   /**
    * PLACEHOLDER — replace with your real domain once deployed.
@@ -37,10 +37,10 @@ export const site = {
   source: "https://github.com/Cata5",
 
   tagline:
-    "I build web applications, experiment with machine learning, and make software for whatever problem I find interesting.",
+    "Computer & Information Technology student at ETTI Bucharest. I build web applications, experiment with machine learning, and craft software for whatever problem I find interesting.",
 
   description:
-    "I am a software developer building web applications, experimenting with machine learning, and making software for whatever problem he finds interesting.",
+    "Manu Catalin-Gabriel — Computer & Information Technology (CTI) student at ETTI Bucharest seeking software engineering roles and internships.",
 
   /**
    * Shown in the hero's "currently building" workspace panel.
