@@ -105,28 +105,35 @@ export const projects: Project[] = [
     id: "vortex",
     title: "Vortex",
     category: "Android",
-    platform: "Android · Android TV · PC",
+    platform: "Android · Android TV · Windows",
     year: 2026,
     status: "In Development",
     summary:
-      "Self-hosted media streaming across three runtimes — Android phones & tablets, Android TV and PC — one library from your own Google Drive, SMB, SFTP, FTP and WebDAV sources.",
+      "Self-hosted media streaming across three runtimes — Android phones & tablets, Android TV and Windows — one Kotlin codebase, one library from your own Google Drive, SMB, SFTP, FTP, WebDAV, NFS and UPnP sources, plus a YouTube-powered music library.",
     description:
-      "Vortex is a client-side, self-hosted media streaming application that runs on three targets — Android phones and tablets, Android TV, and PC. It aggregates personal media libraries from remote sources — Google Drive, SMB, SFTP, FTP/FTPS and WebDAV — into one unified library, enriches it with TMDB metadata, and plays everything with ExoPlayer/Media3. There is no Vortex server and no subscription: the app streams directly from sources you already own, including your Google Drive cloud storage.",
+      "Vortex is a client-side, self-hosted media streaming application with no backend and no subscription: it streams directly from sources you already own. A single Kotlin codebase ships three runtimes — Android phones and tablets, Android TV, and a Compose Multiplatform desktop app for Windows. It aggregates personal media libraries from Google Drive, SMB, SFTP, FTP/FTPS, WebDAV, NFS and UPnP into one unified library, enriches everything with TMDB metadata, and plays movies and TV with Media3/ExoPlayer on mobile and TV or an in-app mpv player on the desktop. On top of movies and TV it adds a YouTube-powered music library with real offline downloads, user profiles, custom collections, actor pages and more.",
     technologies: [
       "Kotlin",
       "Jetpack Compose",
+      "Compose Multiplatform (desktop)",
       "Media3 / ExoPlayer",
-      "Room",
+      "mpv / mediamp",
+      "Room (KMP)",
       "TMDB API",
       "Google Drive API",
-      "OAuth 2.0 (device + web)",
+      "OAuth 2.0 (WebView · device · loopback)",
       "SMB",
       "SFTP",
-      "FTP",
+      "FTP/FTPS",
       "WebDAV",
+      "NFS",
+      "UPnP",
       "Leanback TV",
+      "WorkManager",
+      "yt-dlp",
       "NewPipe extractor",
-      "ProGuard / R8",
+      "Android Keystore",
+      "R8 / ProGuard",
     ],
     // The wide TV shot leads the detail page hero and the flagship showcase
     // transition; the phone screenshot stays the first gallery image.
@@ -149,7 +156,7 @@ export const projects: Project[] = [
         device: "phone",
         shot: "/projects/vortex/01-phone.webp",
         description:
-          "Phones and tablets — touch UI with metadata, resume, downloads, profiles and offline support.",
+          "Phones and tablets — touch UI with metadata, resume, downloads, profiles, music and offline support.",
       },
       {
         id: "tv",
@@ -157,7 +164,7 @@ export const projects: Project[] = [
         device: "tv",
         shot: "/projects/vortex/02-tv.webp",
         description:
-          "Android TV — Leanback launcher, D-pad navigation and remote controls.",
+          "Android TV — Leanback launcher, D-pad navigation, remote controls and an ambient poster-slideshow screensaver.",
       },
       {
         id: "pc",
@@ -165,49 +172,61 @@ export const projects: Project[] = [
         device: "desktop",
         shot: "/projects/vortex/03-desktop.png",
         description:
-          "Desktop build — the same unified library and playback on your PC.",
+          "Windows desktop — Netflix-style library in Compose Multiplatform, in-app mpv player with external fallback, Drive sign-in via OAuth loopback and real 4K / HDR / Dolby Vision / Atmos quality badges.",
       },
     ],
     features: [
-      "Unified movie & TV library aggregated from multiple remote sources",
-      "TMDB metadata enrichment — posters, backdrops, cast, episode details",
-      "Manual metadata re-matching for misidentified titles",
-      "Per-title and per-episode playback resume",
-      "Subtitle track selection, styling and delay",
+      "Unified movie & TV library aggregated from Google Drive, SMB, SFTP, FTP/FTPS, WebDAV, NFS and UPnP",
+      "TMDB metadata enrichment — posters, backdrops, cast, episode details — with manual re-matching",
+      "Per-title and per-episode playback resume, scoped per profile",
+      "Subtitle track selection, styling, offset and per-show language memory; sidecar subtitle scanning",
       "Multi-track audio selection and playback speeds (0.5× – 2.0×)",
-      "Google Drive integration via OAuth (device flow for TV, WebView flow)",
-      "Network storage: SMB, SFTP, FTP/FTPS, WebDAV connection setup and scanning",
-      "Android TV: Leanback launcher, D-pad navigation, remote controls",
-      "Offline downloads managed through a download queue",
-      "LAN server discovery for SMB shares",
-      "Sidecar subtitle scanning for local media",
-      "Profiles with per-profile settings and resume positions",
-      "Backup and restore of library state",
-      "Equalizer and audio routing management",
-      "Ambient / always-on display mode while playing",
+      "Google Drive OAuth — embedded WebView flow on TV (device-flow fallback), Google Sign-In on phone, browser loopback on desktop",
+      "Offline downloads for every provider via a WorkManager queue with pause, resume, retry and progress",
+      "Download controls — storage location picker, Wi-Fi-only mode, free-space guard, quota-based auto cleanup",
+      "Android TV: Leanback launcher, D-pad navigation and an ambient poster-slideshow screensaver",
+      "LAN server discovery (NSD/mDNS) that pre-fills connection forms for SMB/SFTP/FTP/WebDAV",
+      "User profiles with per-profile favorites, watchlist, watched, resume and subtitle memory; kids profiles",
+      "Custom collections and watchlists with ordered membership",
+      "Music: on-device YouTube search, streaming playback, real offline audio downloads, playlists with M3U import/export",
+      "Actor & director pages and \"You May Also Like\" similar titles from clickable cast",
+      "Per-episode watched state (auto at 95%+) with season progress bars",
+      "Playback diagnostics overlay — codecs, resolution, dropped frames, bandwidth estimate",
+      "Backup & restore as versioned JSON (merge-only, secrets never exported)",
+      "Equalizer, audio routing and ambient display while playing",
+      "RAM-only stream buffering — no stream bytes ever written to disk",
+      "Desktop (Windows): in-app mpv player (mediamp) with external-mpv fallback, real 4K / HDR / Dolby Vision / Atmos quality probing and yt-dlp trailers",
     ],
     partialFeatures: [
-      "YouTube as a media source via the NewPipe extractor — present in code but not a headline flow",
+      "YouTube as a video media source via the NewPipe extractor — present in code, experimental, not a headline flow",
+      "Music screens are phone-only — TV music/equalizer is a documented follow-up",
     ],
     architecture:
-      "A single Android app with no backend. A remote-storage provider layer abstracts Google Drive, SMB, SFTP, FTP, WebDAV, NFS and UPnP behind one interface; a repository layer feeds a Room database that drives the Compose UI. TMDB metadata is fetched and cached locally. Playback is ExoPlayer/Media3 with a data-source factory that streams from the selected storage provider. Secrets (connection passwords, SSH keys, OAuth tokens) are kept in an Android Keystore-backed encrypted store, never in Room.",
+      "A single Kotlin codebase with no backend. A remote-storage provider layer abstracts Google Drive, SMB, SFTP, FTP, WebDAV, NFS and UPnP behind one interface, with LAN discovery (NSD/mDNS) to pre-fill connections; a repository layer feeds a Room database that drives the Compose UI on phones, TV and — via a shared Kotlin Multiplatform core — the Compose Multiplatform desktop app. TMDB metadata is fetched and cached locally (24 h TTL). Playback is Media3/ExoPlayer on mobile and TV, and an in-app mpv player (mediamp) on desktop, where a loopback DriveStreamProxy injects OAuth credentials so mpv can stream authenticated Drive URLs. Secrets (connection passwords, SSH keys, OAuth tokens) live in an Android Keystore-backed encrypted store — never in Room.",
     architectureDiagram: [
-      "UI (Jetpack Compose, Leanback)",
-      "        ↓",
-      "Repository layer (Room DB)",
+      "Presentation — Compose (phone) · Compose TV (TV) · Compose Multiplatform (desktop)",
+      "        ↓  shared Kotlin Multiplatform core",
+      "Repository layer — Room DB · per-profile state · TMDB cache",
       "        ↓",
       "Remote storage providers",
-      "Drive · SMB · SFTP · FTP · WebDAV · UPnP · NFS",
+      "Drive · SMB · SFTP · FTP · WebDAV · UPnP · NFS  (+ LAN discovery)",
       "        ↓",
-      "ExoPlayer / Media3 playback",
+      "Playback",
+      "Media3 / ExoPlayer (mobile · TV)  ·  mpv / mediamp (desktop)",
+      "Secrets — Android Keystore (never Room) · desktop loopback DriveStreamProxy",
     ].join("\n"),
     limitations: [
       "Requires TMDB and Google OAuth credentials in local.properties — the app cannot build without them",
       "Google TV OAuth client secrets live in gitignored files (TV SECRET.json / WEB Secret.json) and must not be committed",
       "No iOS build — Kotlin/Compose only",
+      "Backup & restore is gated off on Android TV (no DocumentsUI/SAF pickers)",
+      "Optional cross-device sync and the provider/add-on architecture are still pending design decisions",
     ],
     futureWork: [
-      "Documented in the repo's docs/plan and docs/code-analysis folders as the project grows",
+      "Cross-device sync — documented plan that needs a self-hosted service decision (auth, encryption, conflict resolution)",
+      "Provider / add-on architecture — manifest format and resolver isolation design pending",
+      "Release readiness: final signed release build and Play Console submission",
+      "On-device QA pass across the phone / tablet / TV device matrix",
     ],
   },
 
@@ -1139,6 +1158,18 @@ export const projects: Project[] = [
     ],
   },
 ];
+
+/**
+ * All projects sorted newest → oldest (year descending; unknown years last,
+ * keeping their data order). Every consumer renders this array in order — the
+ * explorer list, the detail-page prev/next navigation — so one sort fixes all
+ * of them, and newly added projects sort themselves without manual reordering.
+ */
+projects.sort((a, b) => {
+  if (a.year !== null && b.year !== null) return b.year - a.year;
+  if (a.year === null && b.year === null) return 0;
+  return a.year === null ? 1 : -1;
+});
 
 export function getProject(id: string) {
   return projects.find((p) => p.id === id);

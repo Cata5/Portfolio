@@ -1,6 +1,8 @@
 /**
  * Technology stack — a structured toolbox, not a wall of logos.
  * Every item here appears in at least one analyzed project (see data/projects.ts).
+ * Curated to core, demonstrable tools: one-off or thin exposures (single
+ * small project, tiny code footprint) are intentionally left out.
  */
 
 export type SkillGroup = {
@@ -13,7 +15,7 @@ export const skillGroups: SkillGroup[] = [
   {
     label: "Languages",
     note: "what I write most",
-    items: ["TypeScript", "Python", "Kotlin", "Rust", "C++"],
+    items: ["TypeScript", "Python", "Kotlin"],
   },
   {
     label: "Web",
@@ -23,7 +25,7 @@ export const skillGroups: SkillGroup[] = [
   {
     label: "Backend",
     note: "services behind the apps",
-    items: ["Node.js", "Flask", "FastAPI", "SQLite", "Redis"],
+    items: ["Node.js", "Flask", "FastAPI", "SQLite"],
   },
   {
     label: "Mobile & Desktop",
@@ -32,27 +34,18 @@ export const skillGroups: SkillGroup[] = [
       "Jetpack Compose",
       "ExoPlayer / Media3",
       "Electron",
-      "Tauri",
-      "Capacitor",
       "PySide6 / PyQt",
     ],
   },
   {
     label: "AI / ML",
     note: "training and experiments",
-    items: [
-      "PyTorch",
-      "Ultralytics YOLO",
-      "TensorFlow",
-      "llama.cpp",
-      "Segment Anything",
-      "RAG / Ollama",
-    ],
+    items: ["PyTorch", "Ultralytics YOLO", "llama.cpp", "RAG / Ollama"],
   },
   {
     label: "Systems",
     note: "closer to the metal",
-    items: ["ESP32 / PlatformIO", "Arduino", "Docker", "Linux", "Git"],
+    items: ["ESP32 / PlatformIO", "Docker", "Linux", "Git"],
   },
 ];
 

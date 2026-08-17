@@ -51,7 +51,11 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       const el = document.querySelector(href);
       if (!el) return;
       e.preventDefault();
-      lenis.scrollTo(el as HTMLElement, { offset: -64, duration: 1.2 });
+      // No extra offset here: Lenis already subtracts the target's
+      // scroll-margin-top (the sections' `scroll-mt-16`), which is the single
+      // source of the sticky-header offset. A manual offset double-counts it
+      // and makes every anchor landing stop a header-height too early.
+      lenis.scrollTo(el as HTMLElement, { offset: 0, duration: 1.2 });
     };
     document.addEventListener("click", onAnchorClick);
 

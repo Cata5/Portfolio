@@ -6,19 +6,20 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Cpu,
   Database,
   DownloadCloud,
   FileCode2,
+  Folder,
   HardDrive,
   Key,
   Layers,
   Lock,
   Monitor,
   Play,
-  Radio,
   Server,
   ShieldCheck,
   Smartphone,
@@ -225,76 +226,225 @@ function RuntimeFrame({
   return <DesktopFrame src={runtime.shot} alt={alt} />;
 }
 
-/** Real Platform Comparison Matrix Data from project evidence */
+/** Real Platform Comparison Matrix Data — verified against the Vortex source (app/ + VortexDesktop/) */
 const PLATFORM_MATRIX = [
   {
     dimension: "UI Architecture",
-    android: "Jetpack Compose Adaptive UI",
-    tv: "Android TV Leanback + Compose",
-    pc: "Desktop Compose Windowing",
+    icon: Layers,
+    android: "Jetpack Compose (Material 3)",
+    tv: "Compose TV + Leanback launcher",
+    pc: "Compose Multiplatform (desktop)",
   },
   {
     dimension: "Primary Input",
-    android: "Touch Gestures & Haptics",
-    tv: "5-Way D-Pad & HDMI-CEC",
-    pc: "Keyboard Hotkeys & Mouse",
+    icon: Zap,
+    android: "Touch & gestures",
+    tv: "5-way D-pad & remote controls",
+    pc: "Mouse, keyboard & mpv hotkeys",
   },
   {
     dimension: "OAuth 2.0 Auth",
-    android: "In-App WebView Flow",
-    tv: "Device Flow (QR / Code Pairing)",
-    pc: "System Browser Callback",
+    icon: Key,
+    android: "Google Sign-In SDK (Drive)",
+    tv: "Embedded WebView flow · device-flow fallback",
+    pc: "Browser loopback callback (localhost)",
   },
   {
     dimension: "Playback Pipeline",
-    android: "ExoPlayer / Media3 Battery-Aware",
-    tv: "ExoPlayer + Audio Passthrough",
-    pc: "ExoPlayer Direct Stream Decode",
+    icon: Play,
+    android: "Media3 / ExoPlayer · RAM-only buffering",
+    tv: "Media3 / ExoPlayer · audio routing & equalizer",
+    pc: "In-app mpv (mediamp) · external mpv fallback · DriveStreamProxy",
   },
   {
-    dimension: "Offline & Caching",
-    android: "Background Download Queue + Room",
-    tv: "Local TMDB Metadata Cache",
-    pc: "Direct Multi-Source Streaming",
+    dimension: "Offline & Downloads",
+    icon: DownloadCloud,
+    android: "Multi-provider queue · Wi-Fi-only · auto cleanup",
+    tv: "Same offline queue + local TMDB cache",
+    pc: "Streaming-first · trailer URL cache (6 h)",
   },
   {
     dimension: "Target Hardware",
-    android: "ARM64 Android 8.0+ Phones/Tablets",
-    tv: "Google TV / 1.5GB RAM TV Sticks",
-    pc: "Windows / Linux Multi-Threaded",
+    icon: Monitor,
+    android: "Android 11+ (minSdk 30) phones & tablets",
+    tv: "Android TV 11+ · Google TV",
+    pc: "Windows · JDK 17+ · packaged distributable",
   },
 ];
 
-/** Architecture Pipeline Layers */
+/** Architecture Pipeline Layers — verified against the Vortex source (app/ + VortexDesktop/) */
 const ARCH_LAYERS = [
   {
-    layer: "01 · Presentation Layer",
-    tech: "Jetpack Compose · Leanback TV · Desktop Windowing",
-    desc: "Single adaptive design system rendered natively across mobile touch, TV 10-foot D-Pad, and desktop hotkeys.",
+    layer: "01 · Presentation",
     icon: LayoutGridIcon,
+    tech: "Jetpack Compose · Compose TV · Compose Multiplatform",
+    desc: "One Kotlin UI framework across three runtimes — touch UI on phones, a 10-foot D-pad UI on Android TV, and a Netflix-style desktop app on Windows.",
+    flow: "view models · navigation · profile state",
   },
   {
     layer: "02 · State & Repository",
-    tech: "Room DB · SQLite · TMDB Metadata API",
-    desc: "Local-first reactive repository caches movie/TV posters, cast, episode tracking, and per-title resume timestamps.",
     icon: Database,
+    tech: "Room (KMP) · shared Kotlin core · TMDB cache",
+    desc: "A shared MediaRepository and library scanner feed a Room database — movies, TV, music, per-profile state, collections and resume positions — with TMDB metadata cached locally (24 h TTL).",
+    flow: "media queries · connection metadata",
   },
   {
     layer: "03 · Remote Storage Providers",
-    tech: "Google Drive API · SMB · SFTP · FTP · WebDAV",
-    desc: "Pluggable client-side storage provider abstraction. Streams directly from personal cloud & LAN shares with zero central server.",
     icon: HardDrive,
+    tech: "Drive · SMB · SFTP · FTP · WebDAV · NFS · UPnP",
+    desc: "Pluggable client-side provider abstraction with LAN discovery (NSD/mDNS). Streams directly from personal cloud & LAN shares — zero central server.",
+    flow: "authenticated stream URLs · range requests",
   },
   {
     layer: "04 · Playback & Security",
-    tech: "ExoPlayer / Media3 · Android Keystore",
-    desc: "Hardware-accelerated media streaming with multi-track audio, subtitle rendering, and Keystore-encrypted credentials.",
     icon: Lock,
+    tech: "Media3 / ExoPlayer · mpv (mediamp) · Android Keystore",
+    desc: "Hardware-accelerated playback — ExoPlayer on mobile and TV, an in-app mpv player with external fallback on desktop (via a loopback DriveStreamProxy). Secrets live in Keystore, never Room.",
+    flow: "audio tracks · subtitles · seek · resume",
   },
+];
+
+/** Real engineering metrics — counted / verified against the Vortex source on 2026-08-17. */
+const HUD_STATS = [
+  { icon: Smartphone, value: "3", label: "client runtimes" },
+  { icon: HardDrive, value: "7", label: "storage providers" },
+  { icon: FileCode2, value: "203", label: "kotlin files" },
+  { icon: ShieldCheck, value: "100", label: "unit tests" },
+  { icon: Server, value: "0", label: "backend servers" },
+  { icon: Database, value: "v21", label: "room schema" },
+];
+
+/** A node in a real source-tree map. */
+type ModuleNode = {
+  name: string;
+  /** Real package purpose — annotated from the source. */
+  note?: string;
+  children?: ModuleNode[];
+};
+
+/** Real module map — the Android app source tree (app/). */
+const ANDROID_TREE: ModuleNode[] = [
+  {
+    name: "app/src/main/java/com/cata/vortex",
+    children: [
+      {
+        name: "data",
+        children: [
+          { name: "local", note: "Room v21 · CredentialStore · Settings" },
+          { name: "model", note: "media · episode · season" },
+          {
+            name: "remote",
+            children: [
+              {
+                name: "storage",
+                note: "Drive · SMB · SFTP · FTP · WebDAV · NFS · UPnP + LAN discovery",
+              },
+              { name: "tmdb", note: "TmdbService + metadata cache" },
+              { name: "youtube", note: "NewPipeSource · downloader" },
+              { name: "music", note: "innertube audio" },
+            ],
+          },
+          { name: "repository", note: "MediaRepository · MusicRepository" },
+          { name: "util" },
+        ],
+      },
+      { name: "playback", note: "ExoPlayer services · equalizer · ambient dream" },
+      {
+        name: "ui",
+        children: [
+          {
+            name: "screens",
+            note: "home · details · player · downloads · music · person",
+          },
+          { name: "theme" },
+          { name: "viewmodel", note: "MediaViewModel" },
+        ],
+      },
+      { name: "worker", note: "Sync · Download · MusicImport" },
+      { name: "navigation", note: "NavRoutes" },
+    ],
+  },
+];
+
+/** Real module map — the Kotlin Multiplatform shared core (VortexDesktop/shared/). */
+const SHARED_TREE: ModuleNode[] = [
+  {
+    name: "VortexDesktop/shared/src",
+    children: [
+      {
+        name: "commonMain",
+        note: "portable · Room entities · models · MediaUtils · cache",
+      },
+      {
+        name: "jvmMain",
+        children: [
+          { name: "data/local/db", note: "Room KMP · DatabaseFactory" },
+          { name: "data/model", note: "TmdbModels" },
+          {
+            name: "data/remote",
+            children: [
+              { name: "drive", note: "DriveAuth · DriveClient · DriveStreamProxy" },
+              { name: "tmdb", note: "TmdbService + client factory" },
+            ],
+          },
+          { name: "data/repository", note: "LibraryScanner · MediaRepository" },
+          { name: "data/settings", note: "AppSettingsStore" },
+          {
+            name: "player",
+            note: "MpvLauncher · MediaQualityProbe · YtDlpDownloader · SubtitleStyle",
+          },
+          { name: "util", note: "SubtitleUtils · L" },
+        ],
+      },
+      { name: "jvmTest", note: "14 test files" },
+    ],
+  },
+];
+
+/** The pieces the desktop app reuses from the Android core via the KMP module. */
+const SHARED_CORE = [
+  "MediaRepository · library scanner",
+  "TmdbService + metadata cache",
+  "MediaUtils · title cleaning / matching",
+  "Media · episode · season models",
+  "Room entities + DAO",
+  "TextEncodingFix · charset repair",
 ];
 
 function LayoutGridIcon(props: { className?: string }) {
   return <Layers {...props} />;
+}
+
+/** Renders a real source tree with folder/file glyphs and indent guides. */
+function ModuleTree({ nodes }: { nodes: ModuleNode[] }) {
+  return (
+    <ul className="min-w-0 space-y-1">
+      {nodes.map((n) => (
+        <li key={n.name} className="min-w-0">
+          <div className="flex min-w-0 items-baseline gap-1.5">
+            {n.children ? (
+              <Folder className="size-3 shrink-0 translate-y-[1px] text-signal/80" />
+            ) : (
+              <FileCode2 className="size-3 shrink-0 translate-y-[1px] text-muted-foreground" />
+            )}
+            <span className="shrink-0 font-mono text-[11px] font-medium text-foreground/90">
+              {n.name}
+            </span>
+            {n.note && (
+              <span className="min-w-0 truncate font-mono text-[9.5px] text-muted-foreground/80">
+                — {n.note}
+              </span>
+            )}
+          </div>
+          {n.children && (
+            <div className="ml-[5px] mt-1 space-y-1 border-l border-border/40 pl-3">
+              <ModuleTree nodes={n.children} />
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 /**
@@ -303,7 +453,9 @@ function LayoutGridIcon(props: { className?: string }) {
  */
 export function FeaturedProjects() {
   const [index, setIndex] = useState(1); // Default to TV (index 1)
-  const [hudTab, setHudTab] = useState<"matrix" | "diagram" | "features">("matrix");
+  const [hudTab, setHudTab] = useState<
+    "matrix" | "diagram" | "modules" | "features"
+  >("matrix");
   const [direction, setDirection] = useState(1);
   const reduce = !!useReducedMotion();
 
@@ -361,7 +513,7 @@ export function FeaturedProjects() {
           <Reveal delay={0.1}>
             <p className="mt-3 text-sm font-extralight leading-relaxed text-muted-foreground sm:text-base">
               One unified architecture across three runtimes — Android, Android TV and PC.
-              Self-hosted direct media streaming from Google Drive, SMB, SFTP, FTP and WebDAV sources.
+              Self-hosted direct media streaming from Google Drive, SMB, SFTP, FTP, WebDAV, NFS and UPnP sources.
             </p>
           </Reveal>
         </GlassCard>
@@ -531,64 +683,113 @@ export function FeaturedProjects() {
 
       {/* Part 2: Engineering Architecture HUD & Platform Comparison Matrix */}
       <Container className="mt-12 md:mt-16">
-        <GlassCard className="p-5 sm:p-8 md:bg-card/70">
+        <GlassCard className="relative p-5 sm:p-8 md:bg-card/70">
+          {/* HUD corner brackets */}
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <span className="absolute left-0 top-0 size-3 border-l-2 border-t-2 border-signal/50" />
+            <span className="absolute right-0 top-0 size-3 border-r-2 border-t-2 border-signal/50" />
+            <span className="absolute bottom-0 left-0 size-3 border-b-2 border-l-2 border-signal/50" />
+            <span className="absolute bottom-0 right-0 size-3 border-b-2 border-r-2 border-signal/50" />
+          </div>
+
           {/* HUD Navigation Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-5">
-            <div>
-              <div className="flex items-center gap-2">
-                <Cpu className="size-4 text-signal" />
-                <h3 className="font-mono text-sm font-semibold uppercase tracking-wider text-foreground">
-                  Engineering Architecture HUD
-                </h3>
+          <div className="relative flex flex-col gap-5">
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Cpu className="size-4 text-signal" />
+                  <h3 className="font-mono text-sm font-semibold uppercase tracking-wider text-foreground">
+                    Engineering Architecture HUD
+                  </h3>
+                  <span className="flex items-center gap-1.5 rounded border border-signal/30 bg-signal/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-signal">
+                    <span className="size-1 animate-signal-pulse rounded-full bg-signal" />
+                    live
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Technical breakdown of 1 shared Kotlin core driving 3 distinct client runtimes
+                </p>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Technical breakdown of 1 shared Kotlin core driving 3 distinct client runtimes
-              </p>
+
+              {/* Mode Switcher Tabs */}
+              <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-border/60 bg-neutral-950/70 p-1">
+                <button
+                  type="button"
+                  onClick={() => setHudTab("matrix")}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-[11px] font-medium transition-all",
+                    hudTab === "matrix"
+                      ? "bg-signal/20 text-signal border border-signal/40 shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Table className="size-3.5" />
+                  <span>Matrix</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setHudTab("diagram")}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-[11px] font-medium transition-all",
+                    hudTab === "diagram"
+                      ? "bg-signal/20 text-signal border border-signal/40 shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Workflow className="size-3.5" />
+                  <span>Architecture</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setHudTab("modules")}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-[11px] font-medium transition-all",
+                    hudTab === "modules"
+                      ? "bg-signal/20 text-signal border border-signal/40 shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Layers className="size-3.5" />
+                  <span>Module Map</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setHudTab("features")}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-[11px] font-medium transition-all",
+                    hudTab === "features"
+                      ? "bg-signal/20 text-signal border border-signal/40 shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Sparkles className="size-3.5" />
+                  <span>Capabilities</span>
+                </button>
+              </div>
             </div>
 
-            {/* Mode Switcher Tabs */}
-            <div className="flex items-center gap-1.5 rounded-xl border border-border/60 bg-neutral-950/70 p-1">
-              <button
-                type="button"
-                onClick={() => setHudTab("matrix")}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-[11px] font-medium transition-all",
-                  hudTab === "matrix"
-                    ? "bg-signal/20 text-signal border border-signal/40 shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <Table className="size-3.5" />
-                <span>Runtime Matrix</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setHudTab("diagram")}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-[11px] font-medium transition-all",
-                  hudTab === "diagram"
-                    ? "bg-signal/20 text-signal border border-signal/40 shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <Workflow className="size-3.5" />
-                <span>Architecture</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setHudTab("features")}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-[11px] font-medium transition-all",
-                  hudTab === "features"
-                    ? "bg-signal/20 text-signal border border-signal/40 shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <Sparkles className="size-3.5" />
-                <span>Core Capabilities</span>
-              </button>
+            {/* Real metrics strip — counted from app/ + VortexDesktop/ on 2026-08-17 */}
+            <div className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border/50 bg-border/40 sm:grid-cols-6">
+              {HUD_STATS.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <div
+                    key={s.label}
+                    className="flex flex-col items-center gap-1.5 bg-neutral-950/80 px-2 py-3 text-center"
+                  >
+                    <Icon className="size-3.5 text-signal/80" />
+                    <span className="font-mono text-base font-semibold leading-none text-foreground">
+                      {s.value}
+                    </span>
+                    <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+                      {s.label}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -604,115 +805,255 @@ export function FeaturedProjects() {
                         Dimension
                       </th>
                       <th className="pb-3 font-semibold uppercase tracking-wider text-foreground w-[26%]">
-                        📱 Android Handset
+                        <span className="inline-flex items-center gap-1.5">
+                          <Smartphone className="size-3.5" />
+                          Android
+                        </span>
                       </th>
                       <th className="pb-3 font-semibold uppercase tracking-wider text-signal w-[26%]">
-                        📺 Android TV
+                        <span className="inline-flex items-center gap-1.5">
+                          <Tv className="size-3.5" />
+                          Android TV
+                        </span>
                       </th>
                       <th className="pb-3 font-semibold uppercase tracking-wider text-purple-400 w-[26%]">
-                        🖥️ PC Desktop
+                        <span className="inline-flex items-center gap-1.5">
+                          <Monitor className="size-3.5" />
+                          PC Desktop
+                        </span>
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
-                    {PLATFORM_MATRIX.map((row) => (
-                      <tr key={row.dimension} className="group hover:bg-neutral-900/40 transition-colors">
-                        <td className="py-3.5 font-semibold text-foreground/90">
-                          {row.dimension}
-                        </td>
-                        <td className="py-3.5 text-muted-foreground group-hover:text-foreground/90">
-                          {row.android}
-                        </td>
-                        <td className="py-3.5 text-signal/90 font-medium">
-                          {row.tv}
-                        </td>
-                        <td className="py-3.5 text-muted-foreground group-hover:text-foreground/90">
-                          {row.pc}
-                        </td>
-                      </tr>
-                    ))}
+                    {PLATFORM_MATRIX.map((row) => {
+                      const RowIcon = row.icon;
+                      return (
+                        <tr key={row.dimension} className="group hover:bg-neutral-900/40 transition-colors">
+                          <td className="py-3.5">
+                            <span className="flex items-center gap-2 font-semibold text-foreground/90">
+                              <RowIcon className="size-3.5 shrink-0 text-signal/80" />
+                              {row.dimension}
+                            </span>
+                          </td>
+                          <td className="py-3.5 text-muted-foreground group-hover:text-foreground/90">
+                            {row.android}
+                          </td>
+                          <td className="py-3.5 text-signal/90 font-medium">
+                            {row.tv}
+                          </td>
+                          <td className="py-3.5 text-muted-foreground group-hover:text-foreground/90">
+                            {row.pc}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
 
               {/* Mobile Stacked Matrix Cards (100% responsive, no horizontal scroll needed) */}
               <div className="md:hidden space-y-4">
-                {PLATFORM_MATRIX.map((row) => (
-                  <div
-                    key={row.dimension}
-                    className="rounded-xl border border-border/60 bg-neutral-950/60 p-3.5 space-y-2.5 font-mono text-[11px]"
-                  >
-                    <div className="font-semibold text-saffron uppercase tracking-wider text-[10px] pb-1 border-b border-white/5">
-                      {row.dimension}
+                {PLATFORM_MATRIX.map((row) => {
+                  const RowIcon = row.icon;
+                  return (
+                    <div
+                      key={row.dimension}
+                      className="rounded-xl border border-border/60 bg-neutral-950/60 p-3.5 space-y-2.5 font-mono text-[11px]"
+                    >
+                      <div className="flex items-center gap-2 font-semibold text-saffron uppercase tracking-wider text-[10px] pb-1 border-b border-white/5">
+                        <RowIcon className="size-3 text-signal/80" />
+                        {row.dimension}
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="flex items-center gap-1.5 text-muted-foreground shrink-0">
+                            <Smartphone className="size-3" />
+                            Android:
+                          </span>
+                          <span className="text-foreground text-right">{row.android}</span>
+                        </div>
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="flex items-center gap-1.5 text-signal shrink-0">
+                            <Tv className="size-3" />
+                            TV:
+                          </span>
+                          <span className="text-signal font-medium text-right">{row.tv}</span>
+                        </div>
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="flex items-center gap-1.5 text-purple-400 shrink-0">
+                            <Monitor className="size-3" />
+                            PC:
+                          </span>
+                          <span className="text-foreground text-right">{row.pc}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-start gap-2">
-                        <span className="text-muted-foreground shrink-0">📱 Android:</span>
-                        <span className="text-foreground text-right">{row.android}</span>
-                      </div>
-                      <div className="flex justify-between items-start gap-2">
-                        <span className="text-signal shrink-0">📺 TV:</span>
-                        <span className="text-signal font-medium text-right">{row.tv}</span>
-                      </div>
-                      <div className="flex justify-between items-start gap-2">
-                        <span className="text-purple-400 shrink-0">🖥️ PC:</span>
-                        <span className="text-foreground text-right">{row.pc}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
 
           {/* TAB 2: Layered Architecture Diagram */}
           {hudTab === "diagram" && (
-            <div className="mt-6 space-y-4 animate-in fade-in duration-200">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-6 animate-in fade-in duration-200">
+              <div className="space-y-0">
                 {ARCH_LAYERS.map((item, idx) => {
                   const Icon = item.icon;
+                  const last = idx === ARCH_LAYERS.length - 1;
                   return (
-                    <div
-                      key={item.layer}
-                      className="relative flex flex-col justify-between rounded-xl border border-border/60 bg-neutral-950/70 p-4"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between pb-2 border-b border-white/5">
-                          <span className="font-mono text-[10px] font-semibold text-saffron uppercase">
+                    <div key={item.layer}>
+                      <div className="relative grid gap-3 rounded-xl border border-border/60 bg-neutral-950/70 p-4 sm:grid-cols-[3.5rem_1fr_auto] sm:items-start">
+                        {/* Layer number + icon rail */}
+                        <div className="hidden flex-col items-center gap-1.5 pt-0.5 sm:flex">
+                          <span className="font-mono text-xl font-bold leading-none text-signal/90">
+                            {String(idx + 1).padStart(2, "0")}
+                          </span>
+                          <Icon className="size-4 text-signal/70" />
+                        </div>
+
+                        {/* Mobile-only header row */}
+                        <div className="flex items-center gap-2 border-b border-white/5 pb-2 sm:hidden">
+                          <Icon className="size-3.5 text-signal" />
+                          <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-saffron">
                             {item.layer}
                           </span>
-                          <Icon className="size-3.5 text-signal" />
                         </div>
-                        <p className="mt-2.5 font-mono text-[11px] font-semibold text-foreground">
-                          {item.tech}
-                        </p>
-                        <p className="mt-2 text-xs font-extralight leading-relaxed text-muted-foreground">
-                          {item.desc}
-                        </p>
+
+                        <div className="min-w-0">
+                          <span className="hidden font-mono text-[10px] font-semibold uppercase tracking-wider text-saffron sm:block">
+                            {item.layer}
+                          </span>
+                          <p className="mt-1.5 font-mono text-[11px] font-semibold text-foreground">
+                            {item.tech}
+                          </p>
+                          <p className="mt-1.5 text-xs font-extralight leading-relaxed text-muted-foreground">
+                            {item.desc}
+                          </p>
+                          <div className="mt-3 flex items-center gap-1.5 font-mono text-[9px] text-emerald-400">
+                            <Check className="size-3" />
+                            <span>Verified in source</span>
+                          </div>
+                        </div>
+
+                        {/* Platform badges */}
+                        <div className="flex items-center gap-1.5 sm:flex-col sm:items-end">
+                          {["Android", "TV", "PC"].map((p) => (
+                            <span
+                              key={p}
+                              className={cn(
+                                "rounded border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider",
+                                p === "TV"
+                                  ? "border-signal/40 bg-signal/10 text-signal"
+                                  : p === "PC"
+                                    ? "border-purple-400/40 bg-purple-500/10 text-purple-400"
+                                    : "border-border/50 bg-foreground/5 text-foreground/80",
+                              )}
+                            >
+                              {p}
+                            </span>
+                          ))}
+                        </div>
                       </div>
 
-                      <div className="mt-4 flex items-center gap-1.5 font-mono text-[9px] text-emerald-400">
-                        <Check className="size-3" />
-                        <span>Verified in source</span>
-                      </div>
+                      {/* Data-flow connector to the layer below */}
+                      {!last && (
+                        <div className="flex items-center gap-2 py-1.5 pl-4 sm:pl-10">
+                          <span className="h-3 w-px bg-border/40" />
+                          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+                            {item.flow}
+                          </span>
+                          <ChevronDown className="size-3 shrink-0 text-signal/70" />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
               </div>
 
               {/* Architecture Prose */}
-              <div className="rounded-xl border border-border/50 bg-neutral-950/50 p-4 font-mono text-[11px] text-muted-foreground">
-                <span className="text-foreground font-semibold uppercase tracking-wider block mb-1">
-                  // Zero-Backend Streaming Pipeline
+              <div className="mt-4 rounded-xl border border-border/50 bg-neutral-950/50 p-4 font-mono text-[11px] text-muted-foreground">
+                <span className="mb-1 block font-semibold uppercase tracking-wider text-foreground">
+                  {"// "}zero-backend streaming pipeline
                 </span>
-                <p className="leading-relaxed text-xs">
+                <p className="text-xs leading-relaxed">
                   {vortex.architecture}
                 </p>
               </div>
             </div>
           )}
 
-          {/* TAB 3: Core Capabilities & Implemented Features */}
+          {/* TAB 3: Real module map — app/ vs the shared KMP core */}
+          {hudTab === "modules" && (
+            <div className="mt-6 animate-in fade-in duration-200">
+              <div className="grid gap-4 lg:grid-cols-[1fr_auto_1fr] lg:items-stretch">
+                {/* Android app source tree */}
+                <div className="rounded-xl border border-border/60 bg-neutral-950/70 p-4">
+                  <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2.5">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Smartphone className="size-4 shrink-0 text-emerald-400" />
+                      <span className="truncate font-mono text-[11px] font-semibold uppercase tracking-wider text-foreground">
+                        app/ · Android
+                      </span>
+                    </div>
+                    <span className="shrink-0 font-mono text-[9px] uppercase tracking-wider text-emerald-400">
+                      139 files
+                    </span>
+                  </div>
+                  <div className="mt-3 overflow-x-auto">
+                    <ModuleTree nodes={ANDROID_TREE} />
+                  </div>
+                </div>
+
+                {/* Shared Kotlin core bridge */}
+                <div className="flex flex-col justify-center rounded-xl border border-dashed border-signal/40 bg-signal/5 p-4">
+                  <div className="flex items-center gap-2">
+                    <Workflow className="size-4 shrink-0 text-signal" />
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-signal">
+                      Shared Kotlin core
+                    </span>
+                  </div>
+                  <p className="mt-1.5 font-mono text-[9.5px] leading-relaxed text-muted-foreground">
+                    ported from app/ into the KMP module — reused by the desktop app
+                  </p>
+                  <ul className="mt-3 space-y-1.5">
+                    {SHARED_CORE.map((c) => (
+                      <li
+                        key={c}
+                        className="flex items-start gap-2 font-mono text-[10px] leading-snug text-foreground/85"
+                      >
+                        <span className="mt-[5px] size-1 shrink-0 bg-signal" />
+                        {c}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* KMP shared module source tree */}
+                <div className="rounded-xl border border-border/60 bg-neutral-950/70 p-4">
+                  <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2.5">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Layers className="size-4 shrink-0 text-signal" />
+                      <span className="truncate font-mono text-[11px] font-semibold uppercase tracking-wider text-foreground">
+                        VortexDesktop/shared/ · KMP
+                      </span>
+                    </div>
+                    <span className="shrink-0 font-mono text-[9px] uppercase tracking-wider text-signal">
+                      47 files
+                    </span>
+                  </div>
+                  <div className="mt-3 overflow-x-auto">
+                    <ModuleTree nodes={SHARED_TREE} />
+                  </div>
+                </div>
+              </div>
+              <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+                directory trees counted from app/ and VortexDesktop/ on 2026-08-17
+              </p>
+            </div>
+          )}
+
+          {/* TAB 4: Core Capabilities & Implemented Features */}
           {hudTab === "features" && (
             <div className="mt-6 animate-in fade-in duration-200">
               <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -732,6 +1073,15 @@ export function FeaturedProjects() {
               </div>
             </div>
           )}
+
+          {/* HUD status footer */}
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-3 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="size-1 rounded-full bg-emerald-400" />
+              all metrics verified against source · app/ + VortexDesktop/
+            </span>
+            <span>vortex :: architecture-hud</span>
+          </div>
         </GlassCard>
       </Container>
     </section>

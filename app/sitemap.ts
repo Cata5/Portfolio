@@ -9,16 +9,16 @@ export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = site.url.replace(/\/$/, "");
+  // URLs carry the trailing slash the static export emits (`/route/`), so
+  // sitemap entries match the canonical URLs exactly.
   return [
     {
-      url: base,
-      lastModified: new Date(),
+      url: `${base}/`,
       changeFrequency: "monthly",
       priority: 1,
     },
     ...realProjects.map((p) => ({
-      url: `${base}/projects/${p.id}`,
-      lastModified: new Date(),
+      url: `${base}/projects/${p.id}/`,
       changeFrequency: "monthly" as const,
       priority: 0.8,
     })),

@@ -10,10 +10,11 @@ export const site = {
   role: "Student @ ETTI CTI Bucharest",
 
   /**
-   * PLACEHOLDER — replace with your real domain once deployed.
-   * Used for canonical URLs, sitemap and Open Graph.
+   * The real deployed URL — this repo publishes as a GitHub Pages project
+   * site at cata5.github.io/Portofolio-V2/. Used for canonical URLs, sitemap
+   * and Open Graph. Point this at a custom domain if one is ever attached.
    */
-  url: "https://catalin.dev",
+  url: "https://cata5.github.io/Portofolio-V2",
 
   /**
    * Real address — the contact section's mailto link.
@@ -32,9 +33,9 @@ export const site = {
   instagram: "https://www.instagram.com/cata0617",
 
   /**
-   * PLACEHOLDER — link to the repository hosting this site's source.
+   * The repository hosting this site's source.
    */
-  source: "https://github.com/Cata5",
+  source: "https://github.com/Cata5/Portofolio-V2",
 
   tagline:
     "Computer & Information Technology student at ETTI Bucharest. I build web applications, experiment with machine learning, and craft software for whatever problem I find interesting.",
@@ -48,7 +49,7 @@ export const site = {
   currently: {
     label: "Currently building",
     project: "Vortex",
-    stack: "Kotlin · Jetpack Compose · ExoPlayer",
+    stack: "Kotlin · Compose Multiplatform · Media3 · mpv",
     status: "in progress",
   },
 } as const;

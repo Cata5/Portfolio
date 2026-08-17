@@ -16,31 +16,39 @@ Legend:
 
 ## Vortex
 
-- **Type:** Media streaming application
-- **Platform:** Android (phones, tablets, Android TV)
-- **Technologies:** Kotlin, Jetpack Compose, Media3/ExoPlayer, Room, TMDB API, Google Drive API (OAuth device + web), SMB, SFTP, FTP, WebDAV, UPnP, NFS, Leanback, NewPipe extractor
-- **Status:** In Development (34 commits, last 2026-08-09)
+- **Type:** Media streaming application (Android app + Kotlin Multiplatform desktop app)
+- **Platform:** Android (phones, tablets, Android TV) · Windows desktop (Compose Multiplatform)
+- **Technologies:** Kotlin, Jetpack Compose, Compose TV, Compose Multiplatform, Media3/ExoPlayer, mpv/mediamp, Room (KMP), TMDB API, Google Drive API (OAuth device + web + loopback), SMB, SFTP, FTP/FTPS, WebDAV, UPnP, NFS, Leanback, WorkManager, yt-dlp, NewPipe extractor, Android Keystore, R8/ProGuard
+- **Status:** In Development (last commit 2026-08-15; 100 unit tests, lint clean, release build green)
 - **GitHub:** https://github.com/Cata5/Infuse (repo name on GitHub; project name is Vortex)
 
-### Confirmed Features
+### Confirmed Features (re-verified 2026-08-17 against the source)
 
-- Unified movie/TV library aggregated from multiple remote sources
-- TMDB metadata (posters, backdrops, cast, episode details) + manual re-matching
-- Per-title/per-episode playback resume
-- Subtitle selection, styling, delay; multi-track audio; playback speed 0.5×–2.0×
-- Google Drive OAuth (device flow for TV, WebView flow for phone) + streaming
-- Network storage: SMB/SFTP/FTP/WebDAV connection setup and scanning; LAN server discovery
-- Android TV: Leanback launcher, D-pad navigation, remote controls
-- Offline downloads via DownloadManager; sidecar subtitle scanner; profiles; backup/restore; equalizer; audio routing; ambient display
+- Unified movie/TV library aggregated from Google Drive, SMB, SFTP, FTP/FTPS, WebDAV, NFS and UPnP
+- TMDB metadata (posters, backdrops, cast, episode details) + manual re-matching; 24 h in-memory metadata cache
+- Per-title/per-episode playback resume, scoped per profile
+- Subtitle selection, styling, offset (real parser shift) and per-show language memory; sidecar subtitle scanning
+- Multi-track audio; playback speed 0.5×–2.0×; equalizer; audio routing; RAM-only stream buffering
+- Google Drive OAuth: embedded WebView flow on TV (device-flow fallback for Workspace accounts), Google Sign-In SDK on phone, browser loopback on desktop
+- Offline downloads for every provider (WorkManager queue, pause/resume/retry, storage location picker, Wi-Fi-only mode, free-space guard, quota-based auto cleanup)
+- Android TV: Leanback launcher, D-pad navigation, ambient poster-slideshow screensaver (DreamService)
+- LAN server discovery (NSD/mDNS) pre-filling connection forms for SMB/SFTP/FTP/WebDAV
+- User profiles (per-profile favorites/watchlist/watched/resume/subtitle memory, kids profiles); custom collections & watchlists
+- Music: on-device YouTube search + streaming, real offline audio downloads, playlists with M3U import/export
+- Actor/director pages, clickable cast, "You May Also Like" similar titles
+- Per-episode watched state (auto at 95%+), season progress, playback diagnostics overlay
+- Backup & restore as versioned JSON (merge-only, secrets never exported)
+- Desktop (Windows): Netflix-style Compose Multiplatform UI, in-app mpv player (mediamp) with external-mpv fallback, loopback DriveStreamProxy for authenticated streaming, real 4K/HDR/Dolby Vision/Atmos quality probing, yt-dlp trailers, sidecar subtitles
 - Secrets stored in Android Keystore-backed encrypted store (never Room)
 
 ### Partial Features
 
-- YouTube source via NewPipe extractor — code exists, not a headline flow
+- YouTube as a video media source via NewPipe extractor — code exists, experimental, not a headline flow
+- Music screens are phone-only — TV music/equalizer is a documented follow-up
 
 ### How It Works
 
-Single Android app, no backend. Remote-storage provider abstraction → repository → Room → Compose UI. ExoPlayer streams through a per-provider data source. TMDB metadata cached locally.
+Single Kotlin codebase, no backend. Remote-storage provider abstraction → repository → Room → Compose UI on phones, TV and the desktop app (which shares the MediaRepository/TmdbService/models via a Kotlin Multiplatform module). ExoPlayer streams through a per-provider data source on mobile/TV; the desktop app plays via mpv (mediamp) with a loopback DriveStreamProxy for auth. TMDB metadata cached locally.
 
 ### Documentation Status
 

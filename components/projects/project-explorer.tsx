@@ -72,6 +72,9 @@ export function ProjectExplorer() {
 
   return (
     <Section id="projects" eyebrow="All Projects">
+      {/* Real h2 for the section — the eyebrow is a styled label, not a
+          heading. Visually hidden so the UI stays exactly the same. */}
+      <h2 className="sr-only">All Projects</h2>
       {/* The whole project index floats on the same frosted glass as the
           other sections — the persistent triangle material reads through
           the blur behind the rows. */}

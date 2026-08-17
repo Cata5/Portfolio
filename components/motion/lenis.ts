@@ -17,8 +17,12 @@ export function getLenis() {
 /**
  * Smooth-scroll to a section id. Uses Lenis when it is active; falls back to
  * native behaviour otherwise (reduced motion, no JS, older browsers).
+ *
+ * No offset is added here on purpose: Lenis (and the native fallback) already
+ * honour the target's `scroll-mt`, so adding one would double-count it and
+ * land every anchor a header-height too early.
  */
-export function scrollToId(id: string, offset = -64) {
+export function scrollToId(id: string, offset = 0) {
   if (lenis) {
     lenis.scrollTo(`#${id}`, { offset, duration: 1.2 });
     return;

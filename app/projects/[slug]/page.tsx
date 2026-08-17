@@ -11,6 +11,7 @@ import { ScrollScale } from "@/components/motion/scroll-scale";
 import { TextReveal } from "@/components/motion/text-reveal";
 import { ProjectVisual } from "@/components/project-visual";
 import { ScreenshotGallery } from "@/components/projects/screenshot-gallery";
+import { site } from "@/data/site";
 import {
   getProject,
   getRelatedProjects,
@@ -32,10 +33,24 @@ export async function generateMetadata({
   return {
     title: project.title,
     description: project.summary,
+    alternates: {
+      canonical: `${site.url}/projects/${slug}/`,
+    },
     openGraph: {
       type: "article",
+      url: `${site.url}/projects/${slug}/`,
       title: project.title,
       description: project.summary,
+      // Page-level openGraph replaces the layout's, so the shared og.png
+      // must be repeated here (same treatment as app/layout.tsx).
+      images: [
+        {
+          url: "/og.png",
+          width: 1200,
+          height: 630,
+          alt: `${site.name} — ${site.role}`,
+        },
+      ],
     },
   };
 }
