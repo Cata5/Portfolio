@@ -1,8 +1,13 @@
+"use client";
+
 import { Container } from "@/components/container";
 import { CurrentYear } from "@/components/current-year";
-import { site } from "@/data/site";
+import { useEditor } from "@/components/editor/editor-context";
 
 export function Footer() {
+  const { content } = useEditor();
+  const site = content.site;
+
   return (
     <footer className="relative overflow-hidden border-t border-border/40">
       <Container className="relative z-10 flex flex-col gap-4 py-12 md:flex-row md:items-center md:justify-between">

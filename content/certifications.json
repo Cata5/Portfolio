@@ -1,0 +1,22 @@
+[
+  {
+    "id": "ccna",
+    "title": "CCNA 1",
+    "subtitle": "Introduction to Networks",
+    "issuer": "Cisco Networking Academy",
+    "year": "2024",
+    "tags": ["Networking", "TCP/IP", "Routing", "Switching"],
+    "poster": "/certificates/ccna.webp",
+    "file": "/certificates/ccna.pdf"
+  },
+  {
+    "id": "ic3",
+    "title": "IC3 GS6",
+    "subtitle": "Digital Literacy Certification",
+    "issuer": "Certiport",
+    "year": "2025",
+    "tags": ["Computing Fundamentals", "Key Applications", "Living Online"],
+    "poster": "/certificates/ic3.webp",
+    "file": "/certificates/ic3.pdf"
+  }
+]

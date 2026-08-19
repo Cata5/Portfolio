@@ -5,20 +5,29 @@ import { useMemo, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
+import { Editable } from "@/components/editor/editable";
+import { useEditor } from "@/components/editor/editor-context";
 import { GlassCard } from "@/components/glass-card";
 import { Counter } from "@/components/motion/counter";
 import { gsap } from "@/components/motion/gsap";
 import { Section } from "@/components/section";
-import { projectCategories, projects } from "@/data/projects";
 import type { Project, ProjectCategory } from "@/data/projects";
 import { cn } from "@/lib/utils";
 import { EASE, prefersReducedMotion, useIsomorphicLayoutEffect } from "@/lib/motion";
 
 type Filter = "All" | ProjectCategory;
 
-const FILTERS: Filter[] = ["All", ...projectCategories];
-
 export function ProjectExplorer() {
+  const { content, isEditing } = useEditor();
+  const projects = content.projects;
+
+  const projectCategories = useMemo(
+    () => Array.from(new Set(projects.map((p) => p.category))),
+    [projects],
+  );
+
+  const filters: Filter[] = useMemo(() => ["All", ...projectCategories], [projectCategories]);
+
   const [filter, setFilter] = useState<Filter>("All");
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -27,7 +36,7 @@ export function ProjectExplorer() {
       filter === "All"
         ? projects
         : projects.filter((p) => p.category === filter),
-    [filter],
+    [filter, projects],
   );
 
   const changeFilter = (f: Filter) => {
@@ -72,15 +81,10 @@ export function ProjectExplorer() {
 
   return (
     <Section id="projects" eyebrow="All Projects">
-      {/* Real h2 for the section — the eyebrow is a styled label, not a
-          heading. Visually hidden so the UI stays exactly the same. */}
       <h2 className="sr-only">All Projects</h2>
-      {/* The whole project index floats on the same frosted glass as the
-          other sections — the persistent triangle material reads through
-          the blur behind the rows. */}
       <GlassCard className="p-6 sm:p-10 lg:p-12">
         <div className="mb-8 flex flex-wrap items-center gap-x-2 gap-y-2">
-          {FILTERS.map((f) => (
+          {filters.map((f) => (
             <button
               key={f}
               type="button"
@@ -105,9 +109,18 @@ export function ProjectExplorer() {
         </p>
 
         <ul ref={listRef} className="border-t border-border/40">
-          {filtered.map((project, i) => (
-            <ExplorerRow key={project.id} project={project} index={i} />
-          ))}
+          {filtered.map((project, i) => {
+            const originalIndex = projects.findIndex((p) => p.id === project.id);
+            return (
+              <ExplorerRow
+                key={project.id}
+                project={project}
+                index={i}
+                originalIndex={originalIndex}
+                isEditing={isEditing}
+              />
+            );
+          })}
           {filtered.length === 0 && (
             <li className="border-b border-border/40 py-12 text-center font-mono text-[12px] text-muted-foreground">
               No projects in this category yet — real work lands here.
@@ -119,7 +132,17 @@ export function ProjectExplorer() {
   );
 }
 
-function ExplorerRow({ project, index }: { project: Project; index: number }) {
+function ExplorerRow({
+  project,
+  index,
+  originalIndex,
+  isEditing,
+}: {
+  project: Project;
+  index: number;
+  originalIndex: number;
+  isEditing: boolean;
+}) {
   const row = (
     <div className="group grid items-center gap-x-6 gap-y-1 border-b border-border/40 px-1 py-5 transition-colors hover:bg-muted/30 sm:grid-cols-[3rem_minmax(0,1fr)_auto] md:grid-cols-[3rem_minmax(0,1fr)_minmax(0,16rem)_auto]">
       <span className="font-mono text-[12px] text-muted-foreground transition-colors group-hover:text-signal">
@@ -133,6 +156,7 @@ function ExplorerRow({ project, index }: { project: Project; index: number }) {
           {project.category}
           {project.year ? ` — ${project.year}` : ""}
           {project.placeholder ? " — placeholder" : ""}
+          {project.featured ? " · featured" : ""}
         </span>
       </span>
       <span className="hidden truncate font-mono text-[12px] text-muted-foreground md:block">
@@ -144,13 +168,31 @@ function ExplorerRow({ project, index }: { project: Project; index: number }) {
     </div>
   );
 
+  if (isEditing) {
+    return (
+      <li>
+        <Editable
+          path={`projects.${originalIndex}`}
+          label={`Project: ${project.title}`}
+          type="project"
+          value={project}
+        >
+          {row}
+        </Editable>
+      </li>
+    );
+  }
+
   if (project.placeholder) {
-    return row;
+    return <li>{row}</li>;
   }
 
   return (
-    <Link href={`/projects/${project.id}`} className="block">
-      {row}
-    </Link>
+    <li>
+      <Link href={`/projects/${project.id}`} className="block">
+        {row}
+      </Link>
+    </li>
   );
 }
+

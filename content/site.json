@@ -1,0 +1,18 @@
+{
+  "name": "Manu Catalin-Gabriel",
+  "role": "Student @ ETTI CTI Bucharest",
+  "url": "https://cata5.github.io/Portofolio-V2",
+  "email": "cata.manu06@gmail.com",
+  "github": "https://github.com/Cata5",
+  "linkedin": "https://www.linkedin.com/in/cata5",
+  "instagram": "https://www.instagram.com/cata0617",
+  "source": "https://github.com/Cata5/Portofolio-V2",
+  "tagline": "Computer & Information Technology student at ETTI Bucharest. I build web applications, experiment with machine learning, and craft software for whatever problem I find interesting.",
+  "description": "Manu Catalin-Gabriel — Computer & Information Technology (CTI) student at ETTI Bucharest seeking software engineering roles and internships.",
+  "currently": {
+    "label": "Currently building",
+    "project": "Vortex",
+    "stack": "Kotlin · Compose Multiplatform · Media3 · mpv",
+    "status": "in progress"
+  }
+}

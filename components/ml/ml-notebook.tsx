@@ -1,19 +1,23 @@
+"use client";
+
 import { ArrowUpRight } from "lucide-react";
 
+import { Editable } from "@/components/editor/editable";
+import { useEditor } from "@/components/editor/editor-context";
 import { GlassCard } from "@/components/glass-card";
 import { MLFlowDiagram } from "@/components/ml/ml-flow-diagram";
 import { Reveal } from "@/components/motion/reveal";
 import { Stagger } from "@/components/motion/stagger";
 import { Section } from "@/components/section";
 import { TextReveal } from "@/components/motion/text-reveal";
-import { ml } from "@/data/ml";
-import { skillGroups } from "@/data/skills";
 import { cn } from "@/lib/utils";
 
-const mlStack = skillGroups.find((g) => g.label === "AI / ML")?.items ?? [];
-
 export function MLNotebook() {
-  const run = ml.runs[ml.runs.length - 1] ?? null;
+  const { content } = useEditor();
+  const ml = content.ml;
+  const mlStack = content.skills.skillGroups.find((g) => g.label === "AI / ML")?.items ?? [];
+  const latestIndex = ml.runs.length - 1;
+  const run = ml.runs[latestIndex] ?? null;
 
   return (
     <Section id="ml" eyebrow="ML / Notebook">
@@ -26,64 +30,71 @@ export function MLNotebook() {
             >
               Machine learning
             </TextReveal>
-            <div>
-              <div className="flex items-center justify-between pb-3">
-                <span className="text-[13px] font-semibold uppercase tracking-[0.03em] text-saffron">
-                  model experiment
-                </span>
-                <span className="font-mono text-[11px] text-muted-foreground">
-                  log — {ml.runs.length} run{ml.runs.length === 1 ? "" : "s"}
-                </span>
-              </div>
-              <Stagger as="dl" className="font-mono text-[12.5px]">
-                {ml.fields.map((field) => (
-                  <div
-                    key={field}
-                    className="flex gap-6 border-t border-border/40 py-3.5"
-                  >
-                    <dt className="w-28 shrink-0 uppercase tracking-[0.12em] text-muted-foreground">
-                      {field}
-                    </dt>
-                    <dd
-                      className={cn(
-                        "text-foreground/85",
-                        !run && "text-muted-foreground/50",
-                      )}
-                    >
-                      {field === "dataset" && run?.datasetUrl ? (
-                        <a
-                          href={run.datasetUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="group/ds inline-flex items-center gap-1.5 transition-colors hover:text-signal"
-                        >
-                          <span className="underline decoration-signal/40 underline-offset-4 transition-colors group-hover/ds:decoration-signal">
-                            {run.dataset}
-                          </span>
-                          <ArrowUpRight
-                            className="size-3 shrink-0 transition-transform duration-200 group-hover/ds:translate-x-0.5 group-hover/ds:-translate-y-0.5"
-                            aria-hidden="true"
-                          />
-                        </a>
-                      ) : run ? (
-                        run[field]
-                      ) : (
-                        "—"
-                      )}
-                    </dd>
-                  </div>
-                ))}
-              </Stagger>
-              <Reveal y={16}>
-                <div className="border-t border-border/40 pt-4">
-                  <p className="font-mono text-[11px] leading-relaxed text-muted-foreground">
-                    {run
-                      ? run.notes
-                      : "No runs logged yet — real training results get published here when a run finishes. Nothing on this page is fabricated."}
-                  </p>
+            <Editable
+              path={latestIndex >= 0 ? `ml.runs.${latestIndex}` : "ml.runs"}
+              label="Latest ML Run Log"
+              type="mlRun"
+              value={run}
+            >
+              <div>
+                <div className="flex items-center justify-between pb-3">
+                  <span className="text-[13px] font-semibold uppercase tracking-[0.03em] text-saffron">
+                    model experiment
+                  </span>
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    log — {ml.runs.length} run{ml.runs.length === 1 ? "" : "s"}
+                  </span>
                 </div>
-              </Reveal>
-            </div>
+                <Stagger as="dl" className="font-mono text-[12.5px]">
+                  {ml.fields.map((field) => (
+                    <div
+                      key={field}
+                      className="flex gap-6 border-t border-border/40 py-3.5"
+                    >
+                      <dt className="w-28 shrink-0 uppercase tracking-[0.12em] text-muted-foreground">
+                        {field}
+                      </dt>
+                      <dd
+                        className={cn(
+                          "text-foreground/85",
+                          !run && "text-muted-foreground/50",
+                        )}
+                      >
+                        {field === "dataset" && run?.datasetUrl ? (
+                          <a
+                            href={run.datasetUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group/ds inline-flex items-center gap-1.5 transition-colors hover:text-signal"
+                          >
+                            <span className="underline decoration-signal/40 underline-offset-4 transition-colors group-hover/ds:decoration-signal">
+                              {run.dataset}
+                            </span>
+                            <ArrowUpRight
+                              className="size-3 shrink-0 transition-transform duration-200 group-hover/ds:translate-x-0.5 group-hover/ds:-translate-y-0.5"
+                              aria-hidden="true"
+                            />
+                          </a>
+                        ) : run ? (
+                          run[field as keyof typeof run]
+                        ) : (
+                          "—"
+                        )}
+                      </dd>
+                    </div>
+                  ))}
+                </Stagger>
+                <Reveal y={16}>
+                  <div className="border-t border-border/40 pt-4">
+                    <p className="font-mono text-[11px] leading-relaxed text-muted-foreground">
+                      {run
+                        ? run.notes
+                        : "No runs logged yet — real training results get published here when a run finishes. Nothing on this page is fabricated."}
+                    </p>
+                  </div>
+                </Reveal>
+              </div>
+            </Editable>
           </div>
           <div className="lg:col-span-5">
             <Reveal delay={0.08}>
@@ -97,9 +108,11 @@ export function MLNotebook() {
                 <p className="mb-5 mt-8 text-[13px] font-semibold uppercase tracking-[0.03em] text-saffron">
                   Hardware
                 </p>
-                <p className="font-mono text-[13px] leading-loose text-foreground/85">
-                  {ml.hardware}
-                </p>
+                <Editable path="ml.hardware" label="ML Hardware Specs" inline>
+                  <p className="font-mono text-[13px] leading-loose text-foreground/85">
+                    {ml.hardware}
+                  </p>
+                </Editable>
                 <MLFlowDiagram className="mt-10" />
                 <p className="mt-10 max-w-sm text-lg font-extralight leading-relaxed text-muted-foreground">
                   When an experiment completes, its configuration and loss

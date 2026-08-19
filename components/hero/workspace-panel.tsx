@@ -1,6 +1,9 @@
+"use client";
+
 import type { ReactNode } from "react";
 
-import { site } from "@/data/site";
+import { Editable } from "@/components/editor/editable";
+import { useEditor } from "@/components/editor/editor-context";
 
 function Cell({ k, children }: { k: string; children: ReactNode }) {
   return (
@@ -15,22 +18,22 @@ function Cell({ k, children }: { k: string; children: ReactNode }) {
   );
 }
 
-/**
- * A compact floating card of what is being built right now — the hero's
- * foreground object. Real data lives in data/site.ts. The card overlaps the
- * headline slightly on desktop, then stacks below on mobile.
- */
 export function WorkspacePanel() {
+  const { content } = useEditor();
+  const currently = content.site.currently;
+
   return (
     <div
       role="region"
-      aria-label={site.currently.label}
+      aria-label={currently.label}
       className="hero-workspace w-full max-w-[300px] border border-border/50 bg-card/85 p-4 backdrop-blur-sm"
     >
       <div className="flex items-center justify-between gap-4 pb-3">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.04em] text-saffron">
-          {site.currently.label}
-        </span>
+        <Editable path="site.currently.label" label="Widget Label" inline>
+          <span className="text-[12px] font-semibold uppercase tracking-[0.04em] text-saffron">
+            {currently.label}
+          </span>
+        </Editable>
         <span className="flex shrink-0 items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
           <span
             className="size-1.5 animate-signal-pulse rounded-full bg-signal"
@@ -40,15 +43,26 @@ export function WorkspacePanel() {
         </span>
       </div>
       <dl className="space-y-3 border-t border-border/40 pt-3">
-        <Cell k="project">{site.currently.project}</Cell>
-        <Cell k="stack">{site.currently.stack}</Cell>
+        <Cell k="project">
+          <Editable path="site.currently.project" label="Project Name" inline>
+            {currently.project}
+          </Editable>
+        </Cell>
+        <Cell k="stack">
+          <Editable path="site.currently.stack" label="Stack Details" inline>
+            {currently.stack}
+          </Editable>
+        </Cell>
         <Cell k="status">
-          <span className="text-saffron">{site.currently.status}</span>
+          <Editable path="site.currently.status" label="Status" inline>
+            <span className="text-saffron">{currently.status}</span>
+          </Editable>
         </Cell>
       </dl>
       <p className="mt-3 border-t border-border/40 pt-2 font-mono text-[10px] text-muted-foreground/70">
-        {`// data/site.ts`}
+        {`// content/site.json`}
       </p>
     </div>
   );
 }
+

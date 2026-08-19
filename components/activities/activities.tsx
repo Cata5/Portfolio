@@ -1,24 +1,30 @@
+"use client";
+
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 
+import { Editable } from "@/components/editor/editable";
+import { useEditor } from "@/components/editor/editor-context";
 import { GlassCard } from "@/components/glass-card";
 import { Stagger } from "@/components/motion/stagger";
 import { TextReveal } from "@/components/motion/text-reveal";
 import { Section } from "@/components/section";
-import { activities } from "@/data/activities";
 import type { Activity } from "@/data/activities";
 import { cn } from "@/lib/utils";
 
-// Chips use theme tokens (signal violet, saffron amber) so they stay readable
-// on both the dark and the pale theme — the old site's hardcoded greens were
-// dark-only and vanished on white cards.
 const typeColor: Record<string, string> = {
   Hackathon: "text-signal border-signal/30",
   Event: "text-saffron border-saffron/30",
   Competition: "text-foreground/70 border-border/60",
 };
 
-function ActivityCard({ activity }: { activity: Activity }) {
+function ActivityCard({
+  activity,
+  index,
+}: {
+  activity: Activity;
+  index: number;
+}) {
   const inner = (
     <>
       {activity.image && (
@@ -83,16 +89,22 @@ function ActivityCard({ activity }: { activity: Activity }) {
 
   return (
     <li className="group flex flex-col overflow-hidden rounded-xl border border-border/50 bg-muted/20 transition-colors duration-300 hover:border-border">
-      {inner}
+      <Editable
+        path={`activities.${index}`}
+        label={`Activity: ${activity.title}`}
+        type="activity"
+        value={activity}
+      >
+        {inner}
+      </Editable>
     </li>
   );
 }
 
-/**
- * Activities — the competitions, hackathons and events Catalin actually
- * showed up for, in the same frosted section as the rest of the homepage.
- */
 export function Activities() {
+  const { content } = useEditor();
+  const activities = content.activities;
+
   return (
     <Section id="activities" eyebrow="Activities">
       <GlassCard className="p-6 sm:p-10 lg:p-14">
@@ -107,8 +119,8 @@ export function Activities() {
           className="grid gap-6 sm:grid-cols-2 lg:gap-8"
           stagger={0.07}
         >
-          {activities.map((activity) => (
-            <ActivityCard key={activity.id} activity={activity} />
+          {activities.map((activity, idx) => (
+            <ActivityCard key={activity.id || idx} activity={activity} index={idx} />
           ))}
         </Stagger>
       </GlassCard>

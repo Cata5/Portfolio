@@ -20,7 +20,7 @@ export const FORMS: FormDef[] = [
   { key: "galaxy", cx: 0.5, oy: 0.48, zoom: 1.05, size: 1 },
   { key: "brain", cx: 0.68, oy: 0.50, zoom: 1.38, size: 1.18 },
   { key: "solar", cx: 0.5, oy: 0.5, zoom: 1, size: 1 },
-  { key: "final", cx: 0.84, oy: 0.5, zoom: 0.9, size: 0.9 },
+  { key: "final", cx: 0.84, oy: 0.5, zoom: 0.9, size: 1 },
 ];
 
 /** boundary[i] = the scroll position where form i hands over to form i+1. */

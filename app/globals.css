@@ -300,3 +300,10 @@ html.theme-transition *::after {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* In visual edit mode, ensure text masks don't clip outlines or badges */
+html[data-cms-editing="true"] .hero-line-mask,
+html[data-cms-editing="true"] .about-heading-mask {
+  overflow: visible !important;
+}
+

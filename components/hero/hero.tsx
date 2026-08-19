@@ -13,24 +13,14 @@ import { WorkspacePanel } from "@/components/hero/workspace-panel";
 import { gsap } from "@/components/motion/gsap";
 import { Magnetic } from "@/components/motion/magnetic";
 import { Button } from "@/components/ui/button";
-import { site } from "@/data/site";
+import { Editable } from "@/components/editor/editable";
+import { useEditor } from "@/components/editor/editor-context";
 import { EASE, prefersReducedMotion, useIsomorphicLayoutEffect } from "@/lib/motion";
 
-/**
- * The hero — a short pinned poster that frames the Earth, not a self-contained
- * animation. The globe itself lives on the page-wide TriangleWorld canvas
- * (fixed behind everything), so this section only owns the typography:
- *
- *   entrance    grid → eyebrow → headline lines rise through their masks →
- *               tagline/CTAs → card → labels → scroll cue
- *   scroll      the hero pins for two viewport-heights (1.5 on mobile) so the
- *               globe's load-time assembly and slow rotation get breathing
- *               room, then the typography drifts away and the section
- *               releases. The same pieces keep migrating into the orbital
- *               form as About arrives — one continuous world, never a cut.
- */
 export function Hero() {
   const rootRef = useRef<HTMLElement>(null);
+  const { content } = useEditor();
+  const site = content.site;
 
   useIsomorphicLayoutEffect(() => {
     const el = rootRef.current;
@@ -216,9 +206,11 @@ export function Hero() {
               workspace card — the fixed triangle canvas blurs behind it. */}
           <GlassCard className="hero-glass w-fit max-w-full md:max-w-[520px] lg:max-w-[640px] xl:max-w-[720px] p-5 sm:p-7 lg:p-9">
             <HeroTypography />
-            <p className="hero-tagline mt-6 sm:mt-8 lg:mt-10 max-w-md text-base sm:text-lg md:text-lg lg:text-xl font-extralight leading-relaxed text-muted-foreground">
-              {site.tagline}
-            </p>
+            <Editable path="site.tagline" label="Tagline" type="textarea">
+              <p className="hero-tagline mt-6 sm:mt-8 lg:mt-10 max-w-md text-base sm:text-lg md:text-lg lg:text-xl font-extralight leading-relaxed text-muted-foreground">
+                {site.tagline}
+              </p>
+            </Editable>
             <div className="hero-ctas mt-8 sm:mt-10 lg:mt-12 flex flex-wrap items-center gap-6 sm:gap-8">
               <Magnetic>
                 <Button nativeButton={false} render={<a href="#work" />}>

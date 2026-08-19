@@ -15,11 +15,11 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { useEditor } from "@/components/editor/editor-context";
 import { scrollToId } from "@/components/motion/lenis";
 import { site } from "@/data/site";
 
 const sections = [
-
   { label: "About", target: "about", hint: "background" },
   { label: "My best project", target: "work", hint: "flagship" },
   { label: "Stack", target: "stack", hint: "tools" },
@@ -30,11 +30,13 @@ const sections = [
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { setTheme, resolvedTheme } = useTheme();
+  const { toggleEdit, isEditing } = useEditor();
 
   const isMac =
     typeof navigator !== "undefined" &&
     /Mac|iPhone|iPad/.test(navigator.platform);
   const shortcut = isMac ? "⌘K" : "Ctrl K";
+  const editShortcut = isMac ? "⌘E" : "Ctrl E";
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -87,6 +89,16 @@ export function CommandMenu() {
             </CommandGroup>
             <CommandSeparator />
             <CommandGroup heading="Actions">
+              <CommandItem
+                value="toggle-editor"
+                onSelect={() => {
+                  setOpen(false);
+                  toggleEdit();
+                }}
+              >
+                <span>{isEditing ? "Exit Editor" : "Visual Editor (CMS)"}</span>
+                <CommandShortcut>{editShortcut}</CommandShortcut>
+              </CommandItem>
               <CommandItem
                 value="open-github"
                 onSelect={() => openExternal(site.github)}

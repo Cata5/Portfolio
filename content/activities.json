@@ -1,0 +1,66 @@
+[
+  {
+    "id": "unihack-1st",
+    "type": "Hackathon",
+    "year": "2024",
+    "location": "Romania, Timisoara",
+    "title": "UniHack — 1st Place",
+    "description": "Won first place at UniHack on my second participation. Built an innovative project under time pressure competing against teams from across the country.",
+    "link": "https://unihack.eu",
+    "image": "/activities/unihack-1st.webp"
+  },
+  {
+    "id": "ftc-national",
+    "type": "Event",
+    "year": "2024",
+    "location": "Romania, Iasi",
+    "title": "FTC Robotics — National Championship",
+    "description": "Competed in FIRST Tech Challenge robotics competition and qualified for the National Championship. Built autonomous and tele-operated systems for the competition robot.",
+    "image": "/activities/ftc-national.webp"
+  },
+  {
+    "id": "unihack-first",
+    "type": "Hackathon",
+    "year": "2023",
+    "location": "Romania, Timisoara",
+    "title": "UniHack — First Participation",
+    "description": "First time competing at UniHack. Gained valuable experience in rapid prototyping, teamwork under pressure, and presenting to judges — even if we didn't win, the experience we gained helped us a lot in the future that came after.",
+    "link": "https://unihack.eu"
+  },
+  {
+    "id": "infoeducatie-2025",
+    "type": "Competition",
+    "year": "2025",
+    "location": "Romania, Pitesti",
+    "title": "InfoEducatie 2025",
+    "description": "Third time was also good — winning 2nd place with the Automotive Website, a complex modern solution to part selling.",
+    "link": "https://infoeducatie.ro/"
+  },
+  {
+    "id": "infoeducatie-2024",
+    "type": "Competition",
+    "year": "2024",
+    "location": "Romania, Pitesti",
+    "title": "InfoEducatie 2024",
+    "description": "The second time I competed it was a success — I got 2nd place with a project not so difficult, but usable in the real world (Ezy-Aid, an EasyBox-like app specialized in donating to people in need).",
+    "link": "https://infoeducatie.ro/"
+  },
+  {
+    "id": "ftc-regionals-2025",
+    "type": "Event",
+    "year": "2025",
+    "location": "Romania, Pitesti",
+    "title": "FTC Robotics — Regionals 2025 (as Mentor)",
+    "description": "This time I was a mentor for the team that came after us. Even if the outcome wasn't great because of a lack of good parts and teamwork, it was an experience I want to feel again.",
+    "link": "https://github.com/Cata5/CoralTechFTC"
+  },
+  {
+    "id": "infoeducatie-2023",
+    "type": "Competition",
+    "year": "2023",
+    "location": "Romania, Pitesti",
+    "title": "InfoEducatie 2023",
+    "description": "InfoEducație is a Romanian national IT competition where students create and present software, web and tech projects, promoting creativity and digital skills. This was my first time exploring the competition. Even if the outcome was not what I wanted, it taught me how to present to a jury and make a better project for future competitions.",
+    "link": "https://infoeducatie.ro/"
+  }
+]
