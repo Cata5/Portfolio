@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { rag } from "@/lib/rag/rag-facade";
 import type { RAGStreamEvent } from "@/lib/rag/types/events";
 
-export const dynamic = "force-dynamic";
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRAGConfig } from "@/lib/rag/config";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
 const FALLBACK_UNSLOTH_KEY = "sk-unsloth-f4823b690552e8812ba5884dc4cccb26";
 
