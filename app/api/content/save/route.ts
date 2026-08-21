@@ -2,16 +2,18 @@ import { promises as fs } from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
 
-const VALID_STORES = [
-  "site",
-  "projects",
-  "skills",
-  "journey",
-  "activities",
-  "certifications",
-  "ml",
-  "copy",
-];
+const VALID_STORES: Record<string, string> = {
+  site: "site.json",
+  projects: "projects.json",
+  skills: "skills.json",
+  journey: "journey.json",
+  activities: "activities.json",
+  certifications: "certifications.json",
+  ml: "ml.json",
+  copy: "copy.json",
+  offlineThemes: "offline-themes.json",
+  "offline-themes": "offline-themes.json",
+};
 
 export async function POST(request: Request) {
   try {
@@ -25,19 +27,21 @@ export async function POST(request: Request) {
 
     // Support single store save or multi-store batch save
     if (payload.store && payload.data !== undefined) {
-      if (!VALID_STORES.includes(payload.store)) {
+      const fileName = VALID_STORES[payload.store];
+      if (!fileName) {
         return NextResponse.json(
           { success: false, error: `Invalid store: ${payload.store}` },
           { status: 400 },
         );
       }
-      const filePath = path.join(contentDir, `${payload.store}.json`);
+      const filePath = path.join(contentDir, fileName);
       await fs.writeFile(filePath, JSON.stringify(payload.data, null, 2), "utf8");
       saved.push(payload.store);
     } else if (payload.stores && typeof payload.stores === "object") {
       for (const [store, data] of Object.entries(payload.stores)) {
-        if (VALID_STORES.includes(store)) {
-          const filePath = path.join(contentDir, `${store}.json`);
+        const fileName = VALID_STORES[store];
+        if (fileName) {
+          const filePath = path.join(contentDir, fileName);
           await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
           saved.push(store);
         }

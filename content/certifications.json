@@ -5,7 +5,12 @@
     "subtitle": "Introduction to Networks",
     "issuer": "Cisco Networking Academy",
     "year": "2024",
-    "tags": ["Networking", "TCP/IP", "Routing", "Switching"],
+    "tags": [
+      "Networking",
+      "TCP/IP",
+      "Routing",
+      "Switching"
+    ],
     "poster": "/certificates/ccna.webp",
     "file": "/certificates/ccna.pdf"
   },
@@ -15,7 +20,11 @@
     "subtitle": "Digital Literacy Certification",
     "issuer": "Certiport",
     "year": "2025",
-    "tags": ["Computing Fundamentals", "Key Applications", "Living Online"],
+    "tags": [
+      "Computing Fundamentals",
+      "Key Applications",
+      "Living Online"
+    ],
     "poster": "/certificates/ic3.webp",
     "file": "/certificates/ic3.pdf"
   }

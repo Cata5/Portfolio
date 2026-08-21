@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Lock, Sparkles, X } from "lucide-react";
+import { Eye, EyeOff, Lock, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { useEditor } from "./editor-context";
@@ -144,7 +144,7 @@ export function AuthDialog() {
                 {isLoading ? (
                   <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
-                  <Sparkles className="size-4" />
+                  <Lock className="size-4" />
                 )}
                 Unlock Editor
               </Button>

@@ -307,3 +307,87 @@ html[data-cms-editing="true"] .about-heading-mask {
   overflow: visible !important;
 }
 
+/* ------------------------------------------------------------------ */
+/* RAG Auto-Scroll Section & Card Highlight (Clean Editorial Outline) */
+/* ------------------------------------------------------------------ */
+@keyframes rag-outline-flash {
+  0% {
+    outline: 1.5px solid transparent;
+    outline-offset: 4px;
+  }
+  15% {
+    outline: 1.5px solid var(--signal);
+    outline-offset: 4px;
+  }
+  70% {
+    outline: 1.5px solid var(--signal);
+    outline-offset: 4px;
+  }
+  100% {
+    outline: 1.5px solid transparent;
+    outline-offset: 4px;
+  }
+}
+
+.rag-section-highlight {
+  animation: rag-outline-flash 2.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  position: relative !important;
+  z-index: 20 !important;
+}
+
+.rag-card-spotlight {
+  animation: rag-outline-flash 2.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  position: relative !important;
+  z-index: 25 !important;
+}
+
+/* Hide scrollbar for clean horizontal/vertical navigation */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Cybernetic Text Glitch & Jitter Effects (Subtle Editorial Cyber)    */
+/* ------------------------------------------------------------------ */
+@keyframes text-glitch-skew {
+  0% {
+    transform: skew(0deg);
+  }
+  20% {
+    transform: skew(-1deg);
+  }
+  40% {
+    transform: skew(1.5deg);
+  }
+  60% {
+    transform: skew(-0.5deg);
+  }
+  80% {
+    transform: skew(1deg);
+  }
+  100% {
+    transform: skew(0deg);
+  }
+}
+
+@keyframes glitch-chromatic-pulse {
+  0%, 100% {
+    text-shadow: -1px 0 rgba(239, 68, 68, 0.45), 1px 0 rgba(6, 182, 212, 0.45);
+  }
+  50% {
+    text-shadow: 1.5px 0 rgba(239, 68, 68, 0.65), -1.5px 0 rgba(139, 92, 246, 0.65);
+  }
+}
+
+.glitch-text-active {
+  animation: text-glitch-skew 1.6s infinite ease-in-out, glitch-chromatic-pulse 2s infinite ease-in-out;
+}
+
+
+

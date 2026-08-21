@@ -1,0 +1,42 @@
+{
+  "common": {
+    "badge": "ERROR 0x503: LOCAL LLM UNREACHABLE // READING OFFLINE ARCHIVE",
+    "status": "STANDBY",
+    "assistantTitle": "Catalin AI Guide // [OFFLINE ARCHIVE]",
+    "welcomeDescription": "Local workstation neural weights (Gemma 4 via Unsloth) are in standby on this static deployment. Select a topic or type any question below to decrypt the verified portfolio archive.",
+    "inputPlaceholder": "Ask offline archive (e.g. hardest project, stack, contact)...",
+    "footerHost": "HOST: STATIC GITHUB PAGES",
+    "footerAction": "ENTER TO QUERY ARCHIVE"
+  },
+  "glitchedAssistant": {
+    "bannerText": "[ ERROR 0x503: LOCAL LLM UNREACHABLE // READING OFFLINE ARCHIVE ]",
+    "handshakeLog": [
+      "POST http://127.0.0.1:8000/v1/chat/completions (Local Workstation)",
+      "STATUS 503 SERVICE UNAVAILABLE (ERR_CONNECTION_REFUSED)",
+      "HOST SANDBOX: cata5.github.io/Portofolio-V2 (Static Cloud Target)",
+      "PROTOCOL: Auto-switched to Pre-Compiled Verified Knowledge Archive"
+    ],
+    "vortexSummary": "Vortex is Catalin's flagship and most technically challenging project: a client-side media player across Android (phones & tablets), Android TV, and Windows desktop built with a unified Kotlin Multiplatform codebase.",
+    "stackSummary": "Core languages, web architectures, backend engines, and machine learning stacks actively used across projects: TypeScript, Python, Kotlin, Next.js 16, React 19, FastAPI, PyTorch.",
+    "contactSummary": "Catalin is open for full-time software engineering roles and high-impact internships. Reachable directly via email: cata.manu06@gmail.com, GitHub, and LinkedIn."
+  },
+  "cyberpunk": {
+    "telemetryTitle": "SYSTEM TELEMETRY // GH-PAGES",
+    "host": "cata5.github.io",
+    "status": "STANDALONE DEPLOY",
+    "inference": "Local (Unsloth)",
+    "fallback": "Grounded Offline Index"
+  },
+  "cyberdeck": {
+    "headerTitle": "NEURAL_CLI // OFFLINE_ARCHIVE",
+    "bootBanner": [
+      "CATALIN MANU // NEURAL_OS v2.4 [OFFLINE STANDBY]",
+      "------------------------------------------------------------",
+      "[HANDSHAKE]: POST http://127.0.0.1:8000/v1 ... 503 OFFLINE",
+      "[RUNTIME]: GitHub Pages Static Export (Cloud Sandboxed)",
+      "[FALLBACK]: Decrypted local knowledge base into memory.",
+      "",
+      "Available commands: vortex, stack, contact, projects, about, ml, ping, clear"
+    ]
+  }
+}

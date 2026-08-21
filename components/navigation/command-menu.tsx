@@ -16,6 +16,7 @@ import {
   CommandShortcut,
 } from "@/components/ui/command";
 import { useEditor } from "@/components/editor/editor-context";
+import { useRAG } from "@/components/rag/rag-context";
 import { scrollToId } from "@/components/motion/lenis";
 import { site } from "@/data/site";
 
@@ -27,16 +28,29 @@ const sections = [
   { label: "Contact", target: "contact", hint: "write to me" },
 ] as const;
 
+import { usePathname, useRouter } from "next/navigation";
+import { withBasePath } from "@/lib/base-path";
+
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { setTheme, resolvedTheme } = useTheme();
   const { toggleEdit, isEditing } = useEditor();
+  const { setIsOpen: setIsRAGOpen } = useRAG();
+  const pathname = usePathname();
+  const router = useRouter();
+  const isHome = pathname === "/" || pathname === "" || pathname.endsWith("/Portofolio-V2/");
 
-  const isMac =
-    typeof navigator !== "undefined" &&
-    /Mac|iPhone|iPad/.test(navigator.platform);
-  const shortcut = isMac ? "⌘K" : "Ctrl K";
-  const editShortcut = isMac ? "⌘E" : "Ctrl E";
+  const [shortcut, setShortcut] = useState("Ctrl K");
+  const [editShortcut, setEditShortcut] = useState("Ctrl E");
+  const [ragShortcut, setRagShortcut] = useState("Ctrl J");
+
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)) {
+      setShortcut("⌘K");
+      setEditShortcut("⌘E");
+      setRagShortcut("⌘J");
+    }
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -54,7 +68,14 @@ export function CommandMenu() {
     window.setTimeout(fn, 60);
   };
 
-  const goTo = (id: string) => close(() => scrollToId(id));
+  const goTo = (id: string) =>
+    close(() => {
+      if (isHome) {
+        scrollToId(id);
+      } else {
+        router.push(`/#${id}`);
+      }
+    });
 
   const openExternal = (href: string) =>
     close(() => window.open(href, "_blank", "noopener,noreferrer"));
@@ -89,6 +110,25 @@ export function CommandMenu() {
             </CommandGroup>
             <CommandSeparator />
             <CommandGroup heading="Actions">
+              <CommandItem
+                value="ask-rag-ai"
+                onSelect={() => {
+                  setOpen(false);
+                  setIsRAGOpen(true);
+                }}
+              >
+                <span>Ask Portfolio AI Assistant</span>
+                <CommandShortcut>{ragShortcut}</CommandShortcut>
+              </CommandItem>
+              <CommandItem
+                value="admin-control-center"
+                onSelect={() => {
+                  setOpen(false);
+                  router.push(withBasePath("/admin"));
+                }}
+              >
+                <span>Portfolio Control Center (Admin)</span>
+              </CommandItem>
               <CommandItem
                 value="toggle-editor"
                 onSelect={() => {

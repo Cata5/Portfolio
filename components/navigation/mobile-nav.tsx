@@ -11,7 +11,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { site } from "@/data/site";
+import { withBasePath } from "@/lib/base-path";
 
 const links = [
   { label: "About", href: "#about" },
@@ -22,6 +25,9 @@ const links = [
 ] as const;
 
 export function MobileNav() {
+  const pathname = usePathname();
+  const isHome = pathname === "/" || pathname === "" || pathname.endsWith("/Portofolio-V2/");
+
   return (
     <Sheet>
       <SheetTrigger
@@ -44,21 +50,24 @@ export function MobileNav() {
           </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col px-2" aria-label="Mobile navigation">
-          {links.map((link) => (
-            <SheetClose
-              key={link.href}
-              nativeButton={false}
-              render={
-                <a
-                  href={link.href}
-                  className="flex items-center gap-3 px-3 py-3 text-[15px] text-muted-foreground transition-colors hover:text-foreground"
-                />
-              }
-            >
-              <span className="size-1 bg-border" aria-hidden="true" />
-              {link.label}
-            </SheetClose>
-          ))}
+          {links.map((link) => {
+            const targetHref = isHome ? link.href : withBasePath(`/${link.href}`);
+            return (
+              <SheetClose
+                key={link.href}
+                nativeButton={false}
+                render={
+                  <Link
+                    href={targetHref}
+                    className="flex items-center gap-3 px-3 py-3 text-[15px] text-muted-foreground transition-colors hover:text-foreground"
+                  />
+                }
+              >
+                <span className="size-1 bg-border" aria-hidden="true" />
+                {link.label}
+              </SheetClose>
+            );
+          })}
         </nav>
         <div className="mt-auto border-t border-border p-4 font-mono text-[11px] text-muted-foreground">
           {site.role}

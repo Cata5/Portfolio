@@ -23,7 +23,6 @@ import {
   Server,
   ShieldCheck,
   Smartphone,
-  Sparkles,
   Table,
   Tv,
   Workflow,
@@ -582,7 +581,7 @@ export function FeaturedProjects() {
 
                           {selected && (
                             <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-signal font-semibold">
-                              <span className="size-1.5 rounded-full bg-signal animate-ping" />
+                              <span className="size-1.5 rounded-full bg-signal" />
                               active
                             </span>
                           )}
@@ -765,7 +764,7 @@ export function FeaturedProjects() {
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  <Sparkles className="size-3.5" />
+                  <Layers className="size-3.5" />
                   <span>Capabilities</span>
                 </button>
               </div>

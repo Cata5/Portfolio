@@ -23,6 +23,15 @@ export function getLenis() {
  * land every anchor a header-height too early.
  */
 export function scrollToId(id: string, offset = 0) {
+  if (id === "top" || id === "home" || !id) {
+    if (lenis) {
+      lenis.scrollTo(0, { duration: 1.2 });
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    return;
+  }
+
   if (lenis) {
     lenis.scrollTo(`#${id}`, { offset, duration: 1.2 });
     return;

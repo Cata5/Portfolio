@@ -383,14 +383,14 @@
   },
   {
     "id": "primarie",
-    "title": "Vortex Primarie",
+    "title": "Primarie (E-Services Portal)",
     "category": "Web",
     "platform": "Web",
     "year": 2026,
     "status": "In Development",
     "demo": "https://cata5.github.io/Primarie/",
     "summary": "A municipal e-services portal — declarations, tax certificates and fine payments in one account — with scrypt auth, role-based dashboards, audit logging and SQLite storage.",
-    "description": "Vortex Primarie is a Next.js portal for municipal e-services. It ships with a seeded demo user, scrypt password hashing with an optional pepper, brute-force throttling on login, a guided declaration wizard, role-based dashboard views (an OWASP A01 access-control pass is recorded in git history), audit logging, and a performance pass that lifted its audit score to 84/100. Data lives in SQLite (node:sqlite) with a JSON store for legacy content, and the whole thing deploys via a multi-stage Dockerfile. A fully interactive static demo (client-side state in localStorage) is published on GitHub Pages.",
+    "description": "Primarie is a Next.js portal for municipal e-services. It ships with a seeded demo user, scrypt password hashing with an optional pepper, brute-force throttling on login, a guided declaration wizard, role-based dashboard views (an OWASP A01 access-control pass is recorded in git history), audit logging, and a performance pass that lifted its audit score to 84/100. Data lives in SQLite (node:sqlite) with a JSON store for legacy content, and the whole thing deploys via a multi-stage Dockerfile. A fully interactive static demo (client-side state in localStorage) is published on GitHub Pages.",
     "technologies": [
       "Next.js 16",
       "React 19",

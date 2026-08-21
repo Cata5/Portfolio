@@ -18,6 +18,7 @@ import activitiesData from "@/content/activities.json";
 import certsData from "@/content/certifications.json";
 import mlData from "@/content/ml.json";
 import projectsData from "@/content/projects.json";
+import offlineThemesData from "@/content/offline-themes.json";
 import type { Project } from "@/data/projects";
 import type { Activity } from "@/data/activities";
 import type { Certification } from "@/data/certifications";
@@ -34,6 +35,7 @@ export type ContentState = {
   certifications: Certification[];
   ml: typeof mlData;
   projects: Project[];
+  offlineThemes: typeof offlineThemesData;
 };
 
 export type FieldType =
@@ -107,18 +109,20 @@ function setByPath<T>(obj: T, path: string, value: unknown): T {
 }
 
 export function EditorProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      return sessionStorage.getItem(SESSION_AUTH_KEY) === "true";
-    } catch {
-      return false;
-    }
-  });
-
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState<SelectedField | null>(null);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(SESSION_AUTH_KEY) === "true") {
+        setIsAuthenticated(true);
+      }
+    } catch {
+      // Ignore
+    }
+  }, []);
 
   const [content, setContent] = useState<ContentState>(() => ({
     site: siteData,
@@ -129,6 +133,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     certifications: certsData as Certification[],
     ml: mlData,
     projects: projectsData as unknown as Project[],
+    offlineThemes: offlineThemesData,
   }));
 
   const [isDirty, setIsDirty] = useState(false);

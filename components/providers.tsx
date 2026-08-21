@@ -12,6 +12,10 @@ import { Cursor } from "@/components/motion/cursor";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+import { RAGProvider } from "@/components/rag/rag-context";
+import { RAGChatModal } from "@/components/rag/rag-chat-modal";
+import { RAGFloatingTrigger } from "@/components/rag/rag-floating-trigger";
+
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <TooltipProvider delay={250}>
@@ -22,13 +26,17 @@ export function Providers({ children }: { children: ReactNode }) {
         disableTransitionOnChange
       >
         <EditorProvider>
-          <SmoothScroll>
-            <Cursor />
-            {children}
-          </SmoothScroll>
-          <AuthDialog />
-          <EditorBar />
-          <InspectorDrawer />
+          <RAGProvider>
+            <SmoothScroll>
+              <Cursor />
+              {children}
+            </SmoothScroll>
+            <AuthDialog />
+            <EditorBar />
+            <InspectorDrawer />
+            <RAGChatModal />
+            <RAGFloatingTrigger />
+          </RAGProvider>
         </EditorProvider>
       </ThemeProvider>
     </TooltipProvider>

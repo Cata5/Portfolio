@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
+import Link from "next/link";
+import { withBasePath } from "@/lib/base-path";
 import { useEditor } from "./editor-context";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +40,11 @@ export function EditorBar() {
   } = useEditor();
 
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Global Ctrl+S / ⌘S save shortcut when editing
   useEffect(() => {
@@ -53,8 +60,8 @@ export function EditorBar() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isAuthenticated, isDirty, saveChanges]);
 
-  // If not authenticated, render nothing on screen (access via Ctrl+E or Command Palette Ctrl+K)
-  if (!isAuthenticated) {
+  // If not authenticated or not mounted, render nothing on screen (access via Ctrl+E or Command Palette Ctrl+K)
+  if (!mounted || !isAuthenticated) {
     return null;
   }
 
@@ -208,6 +215,18 @@ export function EditorBar() {
             </>
           )}
         </button>
+
+        <div className="h-4 w-px bg-border/80" />
+
+        {/* Main Admin Console Link */}
+        <Link
+          href={withBasePath("/admin")}
+          title="Open Portfolio Control Center"
+          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-neutral-900 hover:text-signal"
+        >
+          <Cpu className="size-3 text-signal" />
+          <span className="hidden sm:inline">Admin Panel</span>
+        </Link>
 
         {/* Lock button */}
         <button

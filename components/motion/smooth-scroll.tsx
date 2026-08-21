@@ -1,25 +1,21 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 
 import { gsap, ScrollTrigger } from "@/components/motion/gsap";
-import { setLenis } from "@/components/motion/lenis";
+import { setLenis, scrollToId } from "@/components/motion/lenis";
 import { prefersReducedMotion } from "@/lib/motion";
 
 /**
  * Wires Lenis (smooth wheel scrolling) into GSAP's ticker so ScrollTrigger
  * and scrub timelines stay perfectly in sync with the smoothed scroll.
- *
- * - Skipped entirely for reduced-motion users — native scroll wins.
- * - Anchor links (`href="#…"`) are intercepted and eased through Lenis so the
- *   sticky header offset is applied and mobile never fights the browser.
- * - ScrollTrigger.refresh() runs once fonts/images have settled so pinned
- *   measurements are correct.
- * - Back/forward navigation jumps straight to the restored position.
+ * Also handles cross-page hash navigation (e.g. jumping from /projects/vortex to /#stack).
  */
 export function SmoothScroll({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+
   useEffect(() => {
     if (prefersReducedMotion()) return;
 
@@ -38,24 +34,26 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     gsap.ticker.lagSmoothing(0);
 
     // Anchor links — route through Lenis for a buttery, offset-aware jump.
-    // Modifier clicks (new tab / new window) always fall through to native.
     const onAnchorClick = (e: MouseEvent) => {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) {
         return;
       }
       const target = e.target as HTMLElement | null;
-      const anchor = target?.closest?.<HTMLAnchorElement>('a[href^="#"]');
+      const anchor = target?.closest?.<HTMLAnchorElement>('a[href*="#"]');
       if (!anchor) return;
       const href = anchor.getAttribute("href");
-      if (!href || href === "#") return;
-      const el = document.querySelector(href);
-      if (!el) return;
-      e.preventDefault();
-      // No extra offset here: Lenis already subtracts the target's
-      // scroll-margin-top (the sections' `scroll-mt-16`), which is the single
-      // source of the sticky-header offset. A manual offset double-counts it
-      // and makes every anchor landing stop a header-height too early.
-      lenis.scrollTo(el as HTMLElement, { offset: 0, duration: 1.2 });
+      if (!href) return;
+
+      const hashIndex = href.indexOf("#");
+      if (hashIndex === -1) return;
+      const hash = href.slice(hashIndex);
+      if (hash === "#") return;
+
+      const el = document.querySelector(hash);
+      if (el) {
+        e.preventDefault();
+        lenis.scrollTo(el as HTMLElement, { offset: 0, duration: 1.2 });
+      }
     };
     document.addEventListener("click", onAnchorClick);
 
@@ -79,6 +77,37 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       setLenis(null);
     };
   }, []);
+
+  // Handle cross-page and dynamic hash navigation (e.g. landing from another route on /#stack)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleHashScroll = () => {
+      const hash = window.location.hash;
+      if (!hash || hash === "#") return;
+      const sectionId = hash.replace(/^#/, "");
+
+      const attemptScroll = (attempts = 0) => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          scrollToId(sectionId);
+        } else if (attempts < 10) {
+          setTimeout(() => attemptScroll(attempts + 1), 80);
+        }
+      };
+
+      setTimeout(() => attemptScroll(), 100);
+    };
+
+    window.addEventListener("hashchange", handleHashScroll);
+    if (window.location.hash) {
+      handleHashScroll();
+    }
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashScroll);
+    };
+  }, [pathname]);
 
   return <>{children}</>;
 }
