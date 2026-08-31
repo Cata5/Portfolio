@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 
-import { ArrowDown, ArrowUpRight } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Layers } from "lucide-react";
 
 import { Container } from "@/components/container";
 import { CurrentYear } from "@/components/current-year";
@@ -15,12 +15,34 @@ import { Magnetic } from "@/components/motion/magnetic";
 import { Button } from "@/components/ui/button";
 import { Editable } from "@/components/editor/editable";
 import { useEditor } from "@/components/editor/editor-context";
+import { scrollToId } from "@/components/motion/lenis";
 import { EASE, prefersReducedMotion, useIsomorphicLayoutEffect } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
 export function Hero() {
   const rootRef = useRef<HTMLElement>(null);
-  const { content } = useEditor();
+  const { content, isEditing, selectedField, setSelectedField } = useEditor();
   const site = content.site;
+
+  const isSectionSelected =
+    isEditing &&
+    selectedField?.type === "section" &&
+    (selectedField?.meta as { sectionId?: string })?.sectionId === "top";
+
+  const handleHeroClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (!isEditing) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("button, a, input, textarea, select, [data-editable-field='true']")) {
+      return;
+    }
+    setSelectedField({
+      path: "section.top",
+      label: "Section: Hero (Identity & Bio)",
+      type: "section",
+      meta: { sectionId: "top" },
+    });
+    scrollToId("top");
+  };
 
   useIsomorphicLayoutEffect(() => {
     const el = rootRef.current;
@@ -189,8 +211,22 @@ export function Hero() {
     <section
       id="top"
       ref={rootRef}
-      className="relative min-h-[100svh] overflow-hidden"
+      onClick={handleHeroClick}
+      className={cn(
+        "relative min-h-[100svh] overflow-hidden transition-all duration-200",
+        isEditing && "cursor-pointer group/section",
+        isEditing && !isSectionSelected && "hover:ring-1 hover:ring-signal/40 hover:ring-offset-4 hover:ring-offset-background",
+        isSectionSelected && "ring-2 ring-signal ring-offset-6 ring-offset-background bg-signal/[0.015]",
+      )}
     >
+      {/* Floating Section Status Badge when Selected in Edit Mode */}
+      {isEditing && isSectionSelected && (
+        <div className="pointer-events-none absolute right-6 top-6 z-40 inline-flex items-center gap-1.5 rounded-full bg-signal px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-signal-ink shadow-xl shadow-signal/30 animate-in fade-in zoom-in-95 duration-150">
+          <Layers className="size-3" />
+          <span>Section: Hero (Editing All Text)</span>
+        </div>
+      )}
+
       {/* Background — faint technical grid, masked to fade at the edges */}
       <div
         className="hero-grid pointer-events-none absolute inset-0"

@@ -48,7 +48,8 @@ export type FieldType =
   | "activity"
   | "cert"
   | "mlRun"
-  | "journeyItem";
+  | "journeyItem"
+  | "section";
 
 export type SelectedField = {
   path: string;
@@ -114,10 +115,15 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState<SelectedField | null>(null);
 
+  const [authSecret, setAuthSecret] = useState<string>("");
+
   useEffect(() => {
     try {
-      if (sessionStorage.getItem(SESSION_AUTH_KEY) === "true") {
+      const storedAuth = sessionStorage.getItem(SESSION_AUTH_KEY) === "true";
+      const storedSecret = sessionStorage.getItem("portfolio_admin_token") || "";
+      if (storedAuth) {
         setIsAuthenticated(true);
+        if (storedSecret) setAuthSecret(storedSecret);
       }
     } catch {
       // Ignore
@@ -215,8 +221,10 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
         setIsEditing(true);
         setIsAuthModalOpen(false);
+        setAuthSecret(password);
         try {
           sessionStorage.setItem(SESSION_AUTH_KEY, "true");
+          sessionStorage.setItem("portfolio_admin_token", password);
         } catch {
           // ignore
         }
@@ -232,8 +240,10 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     setIsEditing(false);
     setIsAuthenticated(false);
     setSelectedField(null);
+    setAuthSecret("");
     try {
       sessionStorage.removeItem(SESSION_AUTH_KEY);
+      sessionStorage.removeItem("portfolio_admin_token");
     } catch {
       // ignore
     }
@@ -253,9 +263,13 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     setSaveMessage("Saving to filesystem...");
 
     try {
+      const token = authSecret || (typeof window !== "undefined" ? sessionStorage.getItem("portfolio_admin_token") : "");
       const res = await fetch("/api/content/save/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ stores: content }),
       });
       const data = await res.json();
@@ -281,7 +295,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false);
     }
-  }, [content]);
+  }, [content, authSecret]);
 
   // Project actions
   const addNewProject = useCallback(() => {

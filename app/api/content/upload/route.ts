@@ -1,9 +1,30 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
+import { extractBearerToken, verifyAdminAuth } from "@/lib/auth-guard";
+
+const ALLOWED_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "image/gif",
+  "image/svg+xml",
+  "application/pdf",
+]);
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: Request) {
   try {
+    const token = extractBearerToken(request);
+    if (!verifyAdminAuth(token)) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized: Valid admin credentials required" },
+        { status: 401 },
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const folder = (formData.get("folder") as string) || "projects";
@@ -11,6 +32,20 @@ export async function POST(request: Request) {
     if (!file) {
       return NextResponse.json(
         { success: false, error: "No file provided" },
+        { status: 400 },
+      );
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { success: false, error: "File exceeds 10MB maximum size limit" },
+        { status: 400 },
+      );
+    }
+
+    if (!ALLOWED_MIME_TYPES.has(file.type)) {
+      return NextResponse.json(
+        { success: false, error: `Unsupported file type: ${file.type}` },
         { status: 400 },
       );
     }

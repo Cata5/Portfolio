@@ -81,6 +81,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   // Handle cross-page and dynamic hash navigation (e.g. landing from another route on /#stack)
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const timers: number[] = [];
 
     const handleHashScroll = () => {
       const hash = window.location.hash;
@@ -92,11 +93,13 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
         if (el) {
           scrollToId(sectionId);
         } else if (attempts < 10) {
-          setTimeout(() => attemptScroll(attempts + 1), 80);
+          const t = window.setTimeout(() => attemptScroll(attempts + 1), 80);
+          timers.push(t);
         }
       };
 
-      setTimeout(() => attemptScroll(), 100);
+      const initialT = window.setTimeout(() => attemptScroll(), 100);
+      timers.push(initialT);
     };
 
     window.addEventListener("hashchange", handleHashScroll);
@@ -106,6 +109,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
 
     return () => {
       window.removeEventListener("hashchange", handleHashScroll);
+      timers.forEach((t) => window.clearTimeout(t));
     };
   }, [pathname]);
 

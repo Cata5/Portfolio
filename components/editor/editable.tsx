@@ -52,6 +52,7 @@ export function Editable({
 
   return (
     <Component
+      data-editable-field="true"
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

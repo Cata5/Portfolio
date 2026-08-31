@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Plus,
   Trash2,
@@ -11,7 +11,9 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 
 import { useEditor } from "./editor-context";
+import { SectionInspector } from "./section-inspector";
 import { Button } from "@/components/ui/button";
+import { getLenis } from "@/components/motion/lenis";
 import type { Project, ProjectCategory, ProjectStatus } from "@/data/projects";
 import type { Activity } from "@/data/activities";
 import type { Certification } from "@/data/certifications";
@@ -55,7 +57,19 @@ export function InspectorDrawer() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!isEditing || !selectedField) return null;
+  // Prevent background page scrolling while inspector drawer is active
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (isEditing && selectedField) {
+      getLenis()?.stop();
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prevOverflow;
+        getLenis()?.start();
+      };
+    }
+  }, [isEditing, selectedField]);
 
   // Resolve current value from deep path
   const getNestedValue = (path: string): unknown => {
@@ -67,9 +81,10 @@ export function InspectorDrawer() {
     }, content as unknown);
   };
 
-  const currentValue = getNestedValue(selectedField.path);
+  const currentValue = selectedField ? getNestedValue(selectedField.path) : undefined;
 
   const handleTextChange = (val: unknown) => {
+    if (!selectedField) return;
     updateField(selectedField.path, val);
   };
 
@@ -83,8 +98,12 @@ export function InspectorDrawer() {
     formData.append("folder", folder);
 
     try {
+      const token = typeof window !== "undefined" ? sessionStorage.getItem("portfolio_admin_token") : "";
       const res = await fetch("/api/content/upload/", {
         method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: formData,
       });
       const data = await res.json();
@@ -102,28 +121,44 @@ export function InspectorDrawer() {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-y-0 right-0 z-[70] flex max-w-full pl-10">
-        <motion.div
-          initial={{ x: "100%", opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: "100%", opacity: 0 }}
-          transition={{ type: "spring", damping: 28, stiffness: 300 }}
-          className="w-screen max-w-md border-l border-border/80 bg-neutral-950/95 shadow-2xl shadow-black/90 ring-1 ring-white/10 backdrop-blur-2xl"
-        >
-          <div className="flex h-full flex-col">
-            {/* Drawer Header */}
-            <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
-              <div className="min-w-0 flex-1">
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-signal">
-                  Inspector
-                </span>
-                <h3 className="truncate text-base font-semibold text-foreground">
-                  {selectedField.label}
-                </h3>
-                <p className="truncate font-mono text-[10px] text-muted-foreground/70">
-                  {selectedField.path}
-                </p>
-              </div>
+      {isEditing && selectedField && (
+        <>
+          {/* Dimmed Backdrop Lock - Prevents background interaction & scrolling */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setSelectedField(null)}
+            className="fixed inset-0 z-[65] bg-black/60 backdrop-blur-[2px] cursor-pointer"
+          />
+
+          {/* Drawer Panel */}
+          <div
+            data-lenis-prevent="true"
+            className="fixed inset-y-0 right-0 z-[70] flex max-w-full pl-10 pointer-events-auto"
+          >
+            <motion.div
+              initial={{ x: "100%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "100%", opacity: 0 }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="w-screen max-w-md border-l border-border/80 bg-neutral-950/95 shadow-2xl shadow-black/90 ring-1 ring-white/10 backdrop-blur-2xl"
+            >
+              <div className="flex h-full flex-col">
+                {/* Drawer Header */}
+                <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
+                  <div className="min-w-0 flex-1">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-signal">
+                      Inspector
+                    </span>
+                    <h3 className="truncate text-base font-semibold text-foreground">
+                      {selectedField.label}
+                    </h3>
+                    <p className="truncate font-mono text-[10px] text-muted-foreground/70">
+                      {selectedField.path}
+                    </p>
+                  </div>
               <button
                 type="button"
                 onClick={() => setSelectedField(null)}
@@ -136,8 +171,13 @@ export function InspectorDrawer() {
 
             {/* Drawer Body Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Specialized Project Form */}
-              {selectedField.type === "project" ? (
+              {/* Specialized Section Form (Edit all text in section) */}
+              {selectedField.type === "section" ? (
+                <SectionInspector
+                  sectionId={(selectedField.meta as { sectionId?: string })?.sectionId || selectedField.path.replace(/^section\./, "")}
+                  label={selectedField.label}
+                />
+              ) : selectedField.type === "project" ? (
                 <ProjectInspector
                   path={selectedField.path}
                   project={currentValue as Project}
@@ -274,7 +314,9 @@ export function InspectorDrawer() {
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </>
+  )}
+</AnimatePresence>
   );
 }
 

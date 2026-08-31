@@ -56,9 +56,9 @@ export async function scanPortfolioFiles(rootDir?: string): Promise<ScannedFile[
   ];
 
   for (const item of candidatePaths) {
-    const fullPath = path.join(cwd, item.rel);
+    const fullPath = path.join(/* turbopackIgnore: true */ cwd, item.rel);
     try {
-      const content = await fs.readFile(fullPath, "utf8");
+      const content = await fs.readFile(/* turbopackIgnore: true */ fullPath, "utf8");
       const hash = computeContentHash(content);
       const id = item.rel.replace(/[/\\]/g, "_").replace(/\.[a-zA-Z0-9]+$/, "");
 

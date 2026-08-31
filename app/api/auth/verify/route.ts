@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
+import { verifyAdminAuth } from "@/lib/auth-guard";
 
 export async function POST(request: Request) {
   try {
     const { password } = await request.json();
-    const adminPassword = process.env.ADMIN_PASSWORD || "admin";
 
-    if (password === adminPassword) {
+    if (verifyAdminAuth(password)) {
       return NextResponse.json({ success: true });
     }
 
@@ -20,3 +20,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

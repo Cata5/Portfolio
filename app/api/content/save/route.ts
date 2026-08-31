@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
+import { extractBearerToken, verifyAdminAuth } from "@/lib/auth-guard";
 
 const VALID_STORES: Record<string, string> = {
   site: "site.json",
@@ -17,6 +18,14 @@ const VALID_STORES: Record<string, string> = {
 
 export async function POST(request: Request) {
   try {
+    const token = extractBearerToken(request);
+    if (!verifyAdminAuth(token)) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized: Valid admin credentials required" },
+        { status: 401 },
+      );
+    }
+
     const payload = await request.json();
     const contentDir = path.join(process.cwd(), "content");
 
