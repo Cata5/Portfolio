@@ -584,10 +584,11 @@ function JourneyInspector({
           onChange={(e) => updateField(`${path}.category`, e.target.value)}
           className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
         >
-          <option value="main">main</option>
-          <option value="education">education</option>
-          <option value="competitions">competitions</option>
-          <option value="side">side</option>
+          <option value="main">main (Core & AI Systems)</option>
+          <option value="competitions">competitions (Hackathons & Contests)</option>
+          <option value="community">community (Robotics Mentorship & Community)</option>
+          <option value="education">education (Certifications & Education)</option>
+          <option value="side">side (Open Source & Developer Tools)</option>
         </select>
       </div>
       <div>
@@ -599,6 +600,42 @@ function JourneyInspector({
           value={item.title}
           onChange={(e) => updateField(`${path}.title`, e.target.value)}
           className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 text-sm text-foreground focus:border-signal focus:outline-none"
+        />
+      </div>
+      <div>
+        <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+          Location (optional)
+        </label>
+        <input
+          type="text"
+          placeholder="e.g. Romania, Timisoara"
+          value={item.location ?? ""}
+          onChange={(e) => updateField(`${path}.location`, e.target.value)}
+          className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
+        />
+      </div>
+      <div>
+        <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+          Action Link (optional)
+        </label>
+        <input
+          type="text"
+          placeholder="https://..."
+          value={item.link ?? ""}
+          onChange={(e) => updateField(`${path}.link`, e.target.value)}
+          className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
+        />
+      </div>
+      <div>
+        <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+          Image Path (optional)
+        </label>
+        <input
+          type="text"
+          placeholder="/activities/photo.webp"
+          value={item.image ?? ""}
+          onChange={(e) => updateField(`${path}.image`, e.target.value)}
+          className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
         />
       </div>
       <div>

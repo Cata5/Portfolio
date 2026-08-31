@@ -23,6 +23,7 @@ const links = [
   { label: "Featured Work", href: "#work", desc: "Vortex multi-platform system" },
   { label: "Stack", href: "#stack", desc: "Technologies & tools" },
   { label: "ML", href: "#ml", desc: "Experiments & models" },
+  { label: "Journey", href: "#journey", desc: "Timeline & milestones" },
   { label: "Contact", href: "#contact", desc: "Get in touch" },
 ] as const;
 

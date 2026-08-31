@@ -38,6 +38,7 @@ const links = [
   { label: "Featured Work", href: "#work" },
   { label: "Stack", href: "#stack" },
   { label: "ML", href: "#ml" },
+  { label: "Journey", href: "#journey" },
   { label: "Contact", href: "#contact" },
 ] as const;
 
@@ -81,45 +82,7 @@ export function SiteHeader() {
     return () => ctx.revert();
   }, []);
 
-  // Hide on scroll down, reveal on scroll up (desktop only; permanently visible on mobile).
-  useEffect(() => {
-    const header = headerRef.current;
-    if (!header || prefersReducedMotion()) return;
-    let lastY = window.scrollY;
-    let ticking = false;
 
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
-        const delta = y - lastY;
-        const isMobile = window.innerWidth < 768;
-        const hidden = !isMobile && delta > 6 && y > 140;
-        gsap.to(header, {
-          yPercent: hidden ? -100 : 0,
-          duration: 0.35,
-          ease: EASE.inOut,
-          overwrite: "auto",
-        });
-        lastY = y;
-        ticking = false;
-      });
-    };
-
-    const onResize = () => {
-      if (window.innerWidth < 768) {
-        gsap.set(header, { yPercent: 0 });
-      }
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
 
   return (
     <header

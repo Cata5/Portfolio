@@ -832,6 +832,29 @@ function JourneySectionForm({
               onChange={(e) => updateField(`journey.${jIdx}.title`, e.target.value)}
               className="w-full rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-xs text-foreground"
             />
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <input
+                type="text"
+                placeholder="Location (e.g. Romania, Timisoara)"
+                value={item.location || ""}
+                onChange={(e) => updateField(`journey.${jIdx}.location`, e.target.value)}
+                className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+              />
+              <input
+                type="text"
+                placeholder="Link (https://...)"
+                value={item.link || ""}
+                onChange={(e) => updateField(`journey.${jIdx}.link`, e.target.value)}
+                className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+              />
+            </div>
+            <input
+              type="text"
+              placeholder="Image path (/activities/photo.webp)"
+              value={item.image || ""}
+              onChange={(e) => updateField(`journey.${jIdx}.image`, e.target.value)}
+              className="w-full rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 font-mono text-[11px] text-muted-foreground"
+            />
             <textarea
               rows={2}
               placeholder="Note"

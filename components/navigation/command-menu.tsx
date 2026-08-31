@@ -25,6 +25,7 @@ const sections = [
   { label: "My best project", target: "work", hint: "flagship" },
   { label: "Stack", target: "stack", hint: "tools" },
   { label: "ML", target: "ml", hint: "notebook" },
+  { label: "Journey", target: "journey", hint: "milestones" },
   { label: "Contact", target: "contact", hint: "write to me" },
 ] as const;
 

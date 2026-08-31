@@ -1,5 +1,4 @@
 import { About } from "@/components/about/about";
-import { Activities } from "@/components/activities/activities";
 import { Certifications } from "@/components/certifications/certifications";
 import { Contact } from "@/components/contact/contact";
 import { Hero } from "@/components/hero/hero";
@@ -26,7 +25,6 @@ export default function Home() {
         <Certifications />
         <MLNotebook />
         <Journey />
-        <Activities />
         <Contact />
       </div>
     </>

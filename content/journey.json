@@ -30,51 +30,52 @@
     "tags": [
       "Next.js",
       "TypeScript",
-      "Framer Motion"
+      "Tailwind CSS"
     ]
   },
   {
-    "date": "Jan 2026",
-    "category": "education",
-    "title": "CCNA 1 Certification",
-    "note": "Earned Cisco CCNA 1 — Introduction to Networks certification.",
+    "date": "2025",
+    "category": "competitions",
+    "title": "InfoEducatie 2025 — 2nd Place",
+    "note": "Won 2nd place with Automotive Website, a complex modern solution to vehicle part cataloging and digital sales.",
+    "image": "/projects/siteauto/01-home.webp",
+    "link": "https://infoeducatie.ro/",
+    "location": "Romania, Pitesti",
     "tags": [
-      "Cisco",
-      "Networking",
-      "TCP/IP"
-    ]
-  },
-  {
-    "date": "Feb 2025",
-    "category": "education",
-    "title": "IC3 GS6 Certification",
-    "note": "Earned IC3 Global Standard 6 digital literacy certification.",
-    "tags": [
-      "IC3",
-      "Digital Literacy",
-      "Certiport"
+      "Competition",
+      "Web",
+      "Automotive",
+      "Silver Medal"
     ]
   },
   {
     "date": "Jan 2025",
-    "category": "competitions",
+    "category": "community",
     "title": "FTC Robotics — Regionals (Mentor)",
-    "note": "Mentored the next generation of FTC robotics competitors.",
+    "note": "Mentored the next generation of FIRST Tech Challenge robotics competitors (Coral Tech #28260), sharing technical knowledge in autonomous Java coding and mechanical design.",
+    "image": "/projects/coraltech/01-home.webp",
+    "link": "https://github.com/Cata5/CoralTechFTC",
+    "location": "Romania, Pitesti",
     "tags": [
       "Robotics",
       "FTC",
-      "Mentoring"
+      "Mentoring",
+      "Java"
     ]
   },
   {
     "date": "Nov 2024",
-    "category": "main",
-    "title": "UniHack — 1st Place",
-    "note": "Won first place at UniHack hackathon on my second participation.",
+    "category": "competitions",
+    "title": "UniHack — 1st Place Winner",
+    "note": "Won first place at UniHack on my second participation. Built an innovative full-stack project under strict 48-hour pressure competing against teams from across the country.",
+    "image": "/activities/unihack-1st.webp",
+    "link": "https://unihack.eu",
+    "location": "Romania, Timisoara",
     "tags": [
       "Hackathon",
+      "1st Place",
       "Winner",
-      "Teamwork"
+      "Rapid Prototyping"
     ]
   },
   {
@@ -90,13 +91,30 @@
     ]
   },
   {
+    "date": "2024",
+    "category": "competitions",
+    "title": "InfoEducatie 2024 — 2nd Place",
+    "note": "Awarded 2nd place with Ezy-Aid, an EasyBox-like smart hardware/software ecosystem specialized in community donations for people in need.",
+    "link": "https://infoeducatie.ro/",
+    "location": "Romania, Pitesti",
+    "tags": [
+      "Competition",
+      "Hardware",
+      "IoT",
+      "Silver Medal"
+    ]
+  },
+  {
     "date": "Mar 2024",
     "category": "competitions",
-    "title": "FTC Robotics — Nationals",
-    "note": "Competed in FIRST Tech Challenge and qualified for the National Championship.",
+    "title": "FTC Robotics — National Championship",
+    "note": "Competed in FIRST Tech Challenge robotics competition and qualified for the National Championship. Built autonomous and tele-operated systems for the competition robot.",
+    "image": "/activities/ftc-national.webp",
+    "location": "Romania, Iasi",
     "tags": [
       "Robotics",
       "FTC",
+      "Nationals",
       "Java"
     ]
   },
@@ -104,7 +122,9 @@
     "date": "Nov 2023",
     "category": "competitions",
     "title": "UniHack — First Participation",
-    "note": "First time competing at UniHack hackathon.",
+    "note": "First time competing at UniHack. Gained valuable experience in rapid prototyping, teamwork under intense pressure, and presenting to judges.",
+    "link": "https://unihack.eu",
+    "location": "Romania, Timisoara",
     "tags": [
       "Hackathon",
       "Learning",
@@ -113,9 +133,22 @@
   },
   {
     "date": "2023",
+    "category": "competitions",
+    "title": "InfoEducatie 2023",
+    "note": "First time exploring InfoEducație national IT competition. Learned to design, construct, and present software solutions to professional juries.",
+    "link": "https://infoeducatie.ro/",
+    "location": "Romania, Pitesti",
+    "tags": [
+      "Competition",
+      "Learning",
+      "Presentation"
+    ]
+  },
+  {
+    "date": "2023",
     "category": "side",
     "title": "Desktop Apps & Developer Tools",
-    "note": "Built SSH Electron, rclone Upload UI, Google Drive Player, and more.",
+    "note": "Built SSH Electron, rclone Upload UI, Google Drive Player, and custom workflow utilities.",
     "tags": [
       "Electron",
       "Node.js",
@@ -129,7 +162,8 @@
     "note": "Published first repositories on GitHub, beginning a growing collection of 40+ projects.",
     "tags": [
       "GitHub",
-      "Open Source"
+      "Open Source",
+      "Genesis"
     ]
   }
 ]
