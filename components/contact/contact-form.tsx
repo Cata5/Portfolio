@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { CheckCircle2, Loader2, Send, AlertCircle } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { useRef, useState } from "react";
+import { AlertCircle, CheckCircle2, Loader2, Send } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
+import { gsap } from "@/components/motion/gsap";
+import { holeState } from "@/components/triangle-world/black-hole";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,20 +14,23 @@ interface ContactFormProps {
   recipientEmail?: string;
 }
 
-export function ContactForm({ recipientEmail = "cata.manu06@gmail.com" }: ContactFormProps) {
+export function ContactForm({
+  recipientEmail = "cata.manu06@gmail.com",
+}: ContactFormProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
-    _botField: "", // Honeypot field
+    _botField: "",
   });
 
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const formWrapperRef = useRef<HTMLDivElement>(null);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -36,7 +41,7 @@ export function ContactForm({ recipientEmail = "cata.manu06@gmail.com" }: Contac
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Honeypot check: If bot filled this hidden field, fake success
+    // Honeypot field protection
     if (formData._botField) {
       setStatus("success");
       return;
@@ -46,48 +51,130 @@ export function ContactForm({ recipientEmail = "cata.manu06@gmail.com" }: Contac
       process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL ||
       "https://script.google.com/macros/s/AKfycbxVQP7DtOk4uj0j13DR-_UzKSSQJksNFslVDo__TYsE5mp2hUQPeab-dM22i1wEFCEXZQ/exec";
 
-    if (!scriptUrl) {
-      setStatus("error");
-      setErrorMessage(
-        "Contact endpoint is not configured. Please set NEXT_PUBLIC_GOOGLE_SCRIPT_URL or email directly."
-      );
-      return;
-    }
+    const payload = JSON.stringify({
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      subject: formData.subject.trim() || "Portfolio Message",
+      message: formData.message.trim(),
+    });
 
-    try {
-      setStatus("submitting");
-      setErrorMessage("");
+    setStatus("submitting");
+    setErrorMessage("");
 
-      const payload = JSON.stringify({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        subject: formData.subject.trim() || "Portfolio Message",
-        message: formData.message.trim(),
-      });
+    // 1. Dispatch background POST request
+    const postPromise = fetch(scriptUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+      body: payload,
+      mode: "no-cors",
+    }).catch((err) => {
+      console.warn("Background transmission warning:", err);
+    });
 
-      // Send to Google Apps Script Web App
-      // text/plain prevents CORS preflight, mode: 'no-cors' allows Google redirect
-      await fetch(scriptUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8",
+    // 2. Animate the 3D Black Hole over the text, suck the message around its ring, and return
+    const formEl = formWrapperRef.current;
+    if (formEl) {
+      const rect = formEl.getBoundingClientRect();
+      const formCenterX = (rect.left + rect.width / 2) / window.innerWidth;
+      const formCenterY = (rect.top + rect.height / 2) / window.innerHeight;
+      const initialCx = window.innerWidth < 640 ? 0.5 : 0.84;
+      const initialOy = 0.50;
+
+      // Elevate canvas above the text & content
+      holeState.suctionActive = true;
+      holeState.canvasZIndex = 50;
+      holeState.targetCx = initialCx;
+      holeState.targetOy = initialOy;
+      holeState.scaleMul = 1.0;
+
+      const tl = gsap.timeline({
+        onComplete: async () => {
+          await postPromise;
+
+          // Reset canvas z-index and state
+          holeState.canvasZIndex = 0;
+          holeState.suctionActive = false;
+          holeState.targetCx = initialCx;
+          holeState.targetOy = initialOy;
+          holeState.scaleMul = 1.0;
+          holeState.finalSpin = 1.0;
+          holeState.finalPower = 0;
+
+          // Clear GSAP transforms on the form element
+          gsap.set(formEl, { clearProps: "all" });
+
+          setStatus("success");
+          setFormData({
+            name: "",
+            email: "",
+            subject: "",
+            message: "",
+            _botField: "",
+          });
         },
-        body: payload,
-        mode: "no-cors",
       });
 
+      // Phase 1: Black Hole glides directly over the form text (0.0s -> 0.85s)
+      tl.to(
+        holeState,
+        {
+          targetCx: formCenterX,
+          targetOy: formCenterY,
+          scaleMul: 1.5,
+          finalSpin: 3.5,
+          finalPower: 1,
+          duration: 0.85,
+          ease: "power2.inOut",
+        },
+        0,
+      );
+
+      // Phase 2: Form text swirls around the spinning accretion ring & shrinks into singularity (0.75s -> 1.95s)
+      tl.to(
+        holeState,
+        {
+          finalSpin: 6.5,
+          duration: 1.2,
+          ease: "power1.in",
+        },
+        0.75,
+      );
+
+      tl.to(
+        formEl,
+        {
+          scale: 0.02,
+          rotation: 720,
+          skewX: 30,
+          skewY: -15,
+          filter: "blur(8px)",
+          opacity: 0,
+          transformOrigin: "50% 50%",
+          duration: 1.2,
+          ease: "power3.in",
+        },
+        0.75,
+      );
+
+      // Phase 3: Black Hole glides back to resting position (1.95s -> 3.05s)
+      tl.to(
+        holeState,
+        {
+          targetCx: initialCx,
+          targetOy: initialOy,
+          scaleMul: 1.0,
+          finalSpin: 1.0,
+          finalPower: 0,
+          duration: 1.1,
+          ease: "power2.out",
+        },
+        1.95,
+      );
+    } else {
+      await postPromise;
       setStatus("success");
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-        _botField: "",
-      });
-    } catch (err) {
-      console.error("Failed to submit contact form:", err);
-      setStatus("error");
-      setErrorMessage("Transmission failed. Please check your connection or send an email directly.");
     }
   };
 
@@ -102,175 +189,167 @@ export function ContactForm({ recipientEmail = "cata.manu06@gmail.com" }: Contac
         {status === "success" ? (
           <motion.div
             key="success-state"
-            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-col items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center backdrop-blur-md"
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="flex flex-col items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center backdrop-blur-md"
           >
-            <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40">
+            <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40 shadow-[0_0_20px_rgba(52,211,153,0.3)]">
               <CheckCircle2 className="size-7" />
             </div>
             <h3 className="font-mono text-lg font-medium text-foreground">
-              Message Transmitted
+              Message Sent
             </h3>
-            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-              Thank you for reaching out. Your note has been logged directly into my sheet and sent to my inbox. I will get back to you shortly!
+            <p className="mt-2 max-w-sm text-sm text-muted-foreground leading-relaxed">
+              Thank you for reaching out! Your note has been sucked through the event horizon
+              and delivered directly to my inbox. I will reply shortly.
             </p>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={handleReset}
-              className="mt-6 font-mono text-xs uppercase tracking-wider"
+              className="mt-6 font-mono text-xs uppercase tracking-wider cursor-pointer"
             >
               Send Another Note
             </Button>
           </motion.div>
         ) : (
-          <motion.form
-            key="form-state"
-            onSubmit={handleSubmit}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="space-y-4"
-          >
-            {/* Honeypot field (hidden from real users) */}
-            <div className="sr-only" aria-hidden="true">
-              <label htmlFor="_botField">Do not fill this field</label>
-              <input
-                id="_botField"
-                type="text"
-                name="_botField"
-                value={formData._botField}
-                onChange={handleChange}
-                tabIndex={-1}
-                autoComplete="off"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="name"
-                  className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground"
-                >
-                  Name <span className="text-saffron">*</span>
-                </label>
-                <Input
-                  id="name"
-                  name="name"
-                  required
-                  placeholder="Ada Lovelace"
-                  value={formData.name}
+          <div ref={formWrapperRef}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Honeypot field (hidden from real users) */}
+              <div className="sr-only" aria-hidden="true">
+                <label htmlFor="_botField">Do not fill this field</label>
+                <input
+                  id="_botField"
+                  type="text"
+                  name="_botField"
+                  value={formData._botField}
                   onChange={handleChange}
-                  disabled={status === "submitting"}
-                  className="h-10 border-border/60 bg-background/50 text-sm focus-visible:border-saffron/60 focus-visible:ring-saffron/20"
+                  tabIndex={-1}
+                  autoComplete="off"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="email"
-                  className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground"
-                >
-                  Email <span className="text-saffron">*</span>
-                </label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="ada@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  disabled={status === "submitting"}
-                  className="h-10 border-border/60 bg-background/50 text-sm focus-visible:border-saffron/60 focus-visible:ring-saffron/20"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label
-                htmlFor="subject"
-                className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground"
-              >
-                Subject
-              </label>
-              <Input
-                id="subject"
-                name="subject"
-                placeholder="Software Role / Collaboration / Question"
-                value={formData.subject}
-                onChange={handleChange}
-                disabled={status === "submitting"}
-                className="h-10 border-border/60 bg-background/50 text-sm focus-visible:border-saffron/60 focus-visible:ring-saffron/20"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label
-                htmlFor="message"
-                className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground"
-              >
-                Message <span className="text-saffron">*</span>
-              </label>
-              <Textarea
-                id="message"
-                name="message"
-                required
-                rows={4}
-                placeholder="Tell me about your project, idea, or role..."
-                value={formData.message}
-                onChange={handleChange}
-                disabled={status === "submitting"}
-                className="min-h-[110px] resize-none border-border/60 bg-background/50 text-sm focus-visible:border-saffron/60 focus-visible:ring-saffron/20"
-              />
-            </div>
-
-            {status === "error" && (
-              <motion.div
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive-foreground"
-              >
-                <AlertCircle className="size-4 shrink-0 text-destructive mt-0.5" />
-                <div className="space-y-1">
-                  <p className="font-medium">{errorMessage}</p>
-                  <p className="text-muted-foreground">
-                    You can also email me directly at{" "}
-                    <a
-                      href={`mailto:${recipientEmail}`}
-                      className="text-saffron underline hover:text-foreground"
-                    >
-                      {recipientEmail}
-                    </a>
-                  </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="name"
+                    className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground"
+                  >
+                    Name <span className="text-saffron">*</span>
+                  </label>
+                  <Input
+                    id="name"
+                    name="name"
+                    required
+                    placeholder="Ada Lovelace"
+                    value={formData.name}
+                    onChange={handleChange}
+                    disabled={status === "submitting"}
+                    className="h-10 border-border/60 bg-background/50 text-sm focus-visible:border-saffron/60 focus-visible:ring-saffron/20"
+                  />
                 </div>
-              </motion.div>
-            )}
 
-            <div className="pt-2">
-              <Button
-                type="submit"
-                disabled={status === "submitting"}
-                className="w-full sm:w-auto h-11 px-8 rounded-lg bg-saffron text-black hover:bg-saffron/90 font-mono text-xs uppercase tracking-wider font-semibold transition-all duration-200 shadow-md hover:shadow-saffron/20"
-              >
-                {status === "submitting" ? (
-                  <>
-                    <Loader2 className="mr-2 size-4 animate-spin" />
-                    Transmitting...
-                  </>
-                ) : (
-                  <>
-                    <Send className="mr-2 size-3.5" />
-                    Transmit Message
-                  </>
-                )}
-              </Button>
-            </div>
-          </motion.form>
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="email"
+                    className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground"
+                  >
+                    Email <span className="text-saffron">*</span>
+                  </label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="ada@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={status === "submitting"}
+                    className="h-10 border-border/60 bg-background/50 text-sm focus-visible:border-saffron/60 focus-visible:ring-saffron/20"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="subject"
+                  className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground"
+                >
+                  Subject
+                </label>
+                <Input
+                  id="subject"
+                  name="subject"
+                  placeholder="Software Role / AI Collaboration / Question"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  disabled={status === "submitting"}
+                  className="h-10 border-border/60 bg-background/50 text-sm focus-visible:border-saffron/60 focus-visible:ring-saffron/20"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="message"
+                  className="block font-mono text-[11px] uppercase tracking-wider text-muted-foreground"
+                >
+                  Message <span className="text-saffron">*</span>
+                </label>
+                <Textarea
+                  id="message"
+                  name="message"
+                  required
+                  rows={4}
+                  placeholder="Tell me about your project, idea, or role..."
+                  value={formData.message}
+                  onChange={handleChange}
+                  disabled={status === "submitting"}
+                  className="min-h-[110px] resize-none border-border/60 bg-background/50 text-sm focus-visible:border-saffron/60 focus-visible:ring-saffron/20"
+                />
+              </div>
+
+              {status === "error" && (
+                <div className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive-foreground">
+                  <AlertCircle className="size-4 shrink-0 text-destructive mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="font-medium">{errorMessage}</p>
+                    <p className="text-muted-foreground">
+                      You can also email me directly at{" "}
+                      <a
+                        href={`mailto:${recipientEmail}`}
+                        className="text-saffron underline hover:text-foreground"
+                      >
+                        {recipientEmail}
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  disabled={status === "submitting"}
+                  className="w-full sm:w-auto h-11 px-8 rounded-lg bg-saffron text-black hover:bg-saffron/90 font-mono text-xs uppercase tracking-wider font-semibold transition-all duration-200 shadow-md hover:shadow-saffron/20 cursor-pointer"
+                >
+                  {status === "submitting" ? (
+                    <>
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      Sucking into Black Hole...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 size-3.5" />
+                      Send Message
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
         )}
       </AnimatePresence>
     </div>

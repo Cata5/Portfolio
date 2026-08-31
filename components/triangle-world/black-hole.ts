@@ -32,6 +32,12 @@ export const holeState = {
   // and the burst override key off this, so the black can never lift before
   // the page is at the top and the earth is in place.
   rideDoneMs: -1,
+  // Dynamic over-text suction overrides for contact form animation
+  suctionActive: false,
+  targetCx: 0.84,
+  targetOy: 0.50,
+  scaleMul: 1.0,
+  canvasZIndex: 0,
 };
 
 // Black hole inclination — face-on tilted disc with clean horizontal major axis

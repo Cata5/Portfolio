@@ -526,13 +526,31 @@ export function TriangleWorld() {
       const cx = Math.cos(rotX);
       const sx = Math.sin(rotX);
 
+      // Dynamically reflect canvas elevation zIndex (for suction over text)
+      if (canvas) {
+        const desiredZ = holeState.canvasZIndex > 0 ? String(holeState.canvasZIndex) : "0";
+        if (canvas.style.zIndex !== desiredZ) {
+          canvas.style.zIndex = desiredZ;
+        }
+      }
+
       // Earth keeps its poster framing (right of the hero type); the other
       // forms sit where their section wants them. Composition blends by the
       // same normalised weights as the piece positions, so the whole scene —
       // position AND camera — moves as one.
       const earthCx = w < 640 ? 0.5 : w < 1024 ? 0.69 : 0.73;
+      const finalIndex = 4; // Final form (Black Hole)
+      const finalCx = holeState.suctionActive
+        ? holeState.targetCx
+        : w < 640
+          ? 0.5
+          : FORMS[finalIndex].cx;
+      const finalOy = holeState.suctionActive ? holeState.targetOy : FORMS[finalIndex].oy;
+      const finalScale = holeState.suctionActive ? holeState.scaleMul : 1.0;
+
       const cxBlend = fw.reduce((acc, wgt, i) => {
-        const c = i === 0 ? earthCx : w < 640 ? 0.5 : FORMS[i].cx;
+        const c =
+          i === 0 ? earthCx : i === finalIndex ? finalCx : w < 640 ? 0.5 : FORMS[i].cx;
         return acc + wgt * c;
       }, 0);
       const oyBlend = fw.reduce((acc, wgt, i) => {
@@ -548,11 +566,16 @@ export function TriangleWorld() {
               ? 0.24
               : w < 1024 && FORMS[i].key === "earth"
                 ? 0.46
-                : FORMS[i].oy;
+                : i === finalIndex
+                  ? finalOy
+                  : FORMS[i].oy;
         return acc + wgt * oy;
       }, 0);
       const zoom = fw.reduce((acc, wgt, i) => acc + wgt * FORMS[i].zoom, 0);
-      const sizeMul = fw.reduce((acc, wgt, i) => acc + wgt * FORMS[i].size, 0);
+      const sizeMul = fw.reduce(
+        (acc, wgt, i) => acc + wgt * FORMS[i].size * (i === finalIndex ? finalScale : 1),
+        0,
+      );
 
       const visualW = w < 640 ? w : w < 1024 ? w * 0.64 : w * 0.54;
       // On mobile the forms sit behind the content panels, so they render
