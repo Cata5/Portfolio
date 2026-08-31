@@ -169,7 +169,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
   // Keyboard shortcut listener: ⌘J / Ctrl+J
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
+      if ((e.metaKey || e.ctrlKey) && e.key?.toLowerCase() === "j") {
         e.preventDefault();
         setIsOpen((prev) => !prev);
       }

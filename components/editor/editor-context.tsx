@@ -151,7 +151,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   // Keyboard shortcut Ctrl+E / ⌘E to toggle edit mode
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === "e" && (e.metaKey || e.ctrlKey)) {
+      if (e.key?.toLowerCase() === "e" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         if (isAuthenticated) {
           setIsEditing((prev) => !prev);

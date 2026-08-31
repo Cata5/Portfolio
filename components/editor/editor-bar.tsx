@@ -49,7 +49,7 @@ export function EditorBar() {
   // Global Ctrl+S / ⌘S save shortcut when editing
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === "s" && (e.metaKey || e.ctrlKey)) {
+      if (e.key?.toLowerCase() === "s" && (e.metaKey || e.ctrlKey)) {
         if (isAuthenticated && isDirty) {
           e.preventDefault();
           saveChanges();
