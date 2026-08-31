@@ -81,7 +81,7 @@ export function SiteHeader() {
     return () => ctx.revert();
   }, []);
 
-  // Hide on scroll down, reveal on scroll up (never below the fold).
+  // Hide on scroll down, reveal on scroll up (desktop only; permanently visible on mobile).
   useEffect(() => {
     const header = headerRef.current;
     if (!header || prefersReducedMotion()) return;
@@ -94,7 +94,8 @@ export function SiteHeader() {
       requestAnimationFrame(() => {
         const y = window.scrollY;
         const delta = y - lastY;
-        const hidden = delta > 6 && y > 140;
+        const isMobile = window.innerWidth < 768;
+        const hidden = !isMobile && delta > 6 && y > 140;
         gsap.to(header, {
           yPercent: hidden ? -100 : 0,
           duration: 0.35,
@@ -106,32 +107,66 @@ export function SiteHeader() {
       });
     };
 
+    const onResize = () => {
+      if (window.innerWidth < 768) {
+        gsap.set(header, { yPercent: 0 });
+      }
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
 
   return (
-    <header ref={headerRef} className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm">
-      <div data-header-inner className="mx-auto flex h-16 w-full max-w-[1120px] items-center justify-between px-5 sm:px-8">
-        <Link
-          href={isHome ? "#top" : "/"}
-          onClick={(e) => {
-            if (isHome) {
-              e.preventDefault();
-              scrollToId("top");
-            }
-          }}
-          className="group flex items-center gap-2.5"
-          aria-label={`${site.name} — back to top`}
-        >
-          <span
-            className="size-2 bg-signal transition-transform duration-200 group-hover:scale-125"
-            aria-hidden="true"
-          />
-          <span className="text-[15px] font-semibold tracking-[-0.01em]">
-            {site.name}
-          </span>
-        </Link>
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-40 w-full pt-3 px-3.5 pb-1 md:p-0 bg-transparent md:bg-background/80 md:backdrop-blur-sm pointer-events-none md:pointer-events-auto transition-[background-color,backdrop-filter] duration-200"
+    >
+      <div
+        data-header-inner
+        className={cn(
+          "pointer-events-auto mx-auto flex h-12 w-full max-w-[540px] items-center justify-between px-3.5 sm:px-4",
+          "rounded-full border border-border/60 bg-background/70 backdrop-blur-xl",
+          "shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-black/60 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] dark:ring-1 dark:ring-white/10",
+          "md:h-16 md:max-w-[1120px] md:rounded-none md:border-0 md:bg-transparent md:backdrop-blur-none md:shadow-none md:ring-0 md:px-8",
+        )}
+      >
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href={isHome ? "#top" : "/"}
+            onClick={(e) => {
+              if (isHome) {
+                e.preventDefault();
+                scrollToId("top");
+              }
+            }}
+            className="group flex items-center gap-2 sm:gap-2.5"
+            aria-label={`${site.name} — back to top`}
+          >
+            <span
+              className="size-2 rounded-full bg-signal shadow-[0_0_8px_var(--color-signal)] transition-transform duration-200 group-hover:scale-125"
+              aria-hidden="true"
+            />
+            <span className="text-[14px] md:text-[15px] font-semibold tracking-[-0.01em] whitespace-nowrap">
+              {site.name}
+            </span>
+          </Link>
+
+          {/* Active section micro-pill indicator on mobile */}
+          {currentActive && (
+            <span
+              className="hidden min-[420px]:inline-flex md:hidden items-center gap-1 font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground bg-accent/60 px-2 py-0.5 rounded-full border border-border/40"
+              aria-label={`Current section: ${currentActive}`}
+            >
+              <span className="size-1 rounded-full bg-signal" />
+              {currentActive === "work" ? "projects" : currentActive}
+            </span>
+          )}
+        </div>
 
         <nav
           className="hidden items-center gap-1 md:flex"
@@ -171,10 +206,10 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <CommandMenu />
           <ThemeToggle />
-          <MobileNav />
+          <MobileNav activeSection={currentActive} />
         </div>
       </div>
     </header>

@@ -6,6 +6,7 @@
 # Local copies of the analyzed projects — kept for reference only.
 # Never commit: they contain credential files (Vortex secret JSONs,
 # local.properties, siteauto/.env.local, Detectie Wi-Fi credentials).
+
 /Worthy-projects
 /.pnp
 .pnp.*

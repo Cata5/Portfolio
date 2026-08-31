@@ -24,11 +24,7 @@ export function ThemeToggle() {
   const dark = resolvedTheme === "dark";
 
   const toggle = () => {
-    // One-shot subtle transition — see globals.css .theme-transition
-    const root = document.documentElement;
-    root.classList.add("theme-transition");
     setTheme(dark ? "light" : "dark");
-    window.setTimeout(() => root.classList.remove("theme-transition"), 350);
   };
 
   return (

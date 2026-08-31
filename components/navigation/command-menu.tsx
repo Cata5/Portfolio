@@ -31,6 +31,9 @@ const sections = [
 import { usePathname, useRouter } from "next/navigation";
 import { withBasePath } from "@/lib/base-path";
 
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { setTheme, resolvedTheme } = useTheme();
@@ -82,10 +85,23 @@ export function CommandMenu() {
 
   return (
     <>
+      {/* Mobile search trigger */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => setOpen(true)}
+        className="sm:hidden size-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent/60"
+        aria-label="Open search and commands"
+      >
+        <Search className="size-3.5" />
+      </Button>
+
+      {/* Desktop keyboard shortcut */}
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="hidden items-center gap-1.5 px-2 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+        className="hidden items-center gap-1.5 px-2 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:text-foreground sm:inline-flex cursor-pointer"
         aria-label={`Open command palette (${shortcut})`}
       >
         <kbd>{shortcut}</kbd>

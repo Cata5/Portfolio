@@ -71,19 +71,25 @@ export function MotesField({ className }: { className?: string }) {
   const { resolvedTheme } = useTheme();
   const reduce = !!useReducedMotion();
 
+  const rgbRef = useRef<[number, number, number][]>(
+    DARK_PALETTE.map(hexToRgb),
+  );
+
   useEffect(() => {
     seedRef.current = seedRef.current || ((Math.random() * 2 ** 31) | 0);
   }, []);
+
+  useEffect(() => {
+    const light = resolvedTheme === "light";
+    const palette = light ? LIGHT_PALETTE : DARK_PALETTE;
+    rgbRef.current = palette.map(hexToRgb);
+  }, [resolvedTheme]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const light = resolvedTheme === "light";
-    const palette = light ? LIGHT_PALETTE : DARK_PALETTE;
-    const rgb = palette.map(hexToRgb);
 
     let w = 0;
     let h = 0;
@@ -102,7 +108,8 @@ export function MotesField({ className }: { className?: string }) {
     };
 
     const drawMote = (m: Mote, px: number, py: number, alpha: number) => {
-      const [r, g, b] = rgb[m.color];
+      const rgb = rgbRef.current[m.color] || rgbRef.current[0];
+      const [r, g, b] = rgb;
       ctx.save();
       ctx.translate(px, py);
       ctx.rotate(m.rot);
@@ -165,7 +172,7 @@ export function MotesField({ className }: { className?: string }) {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
     };
-  }, [resolvedTheme, reduce]);
+  }, [reduce]);
 
   return (
     <canvas
