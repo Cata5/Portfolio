@@ -274,28 +274,28 @@ const PLATFORM_MATRIX = [
 /** Architecture Pipeline Layers — verified against the Vortex source (app/ + VortexDesktop/) */
 const ARCH_LAYERS = [
   {
-    layer: "01 · Presentation",
+    layer: "Presentation Tier",
     icon: LayoutGridIcon,
     tech: "Jetpack Compose · Compose TV · Compose Multiplatform",
     desc: "One Kotlin UI framework across three runtimes — touch UI on phones, a 10-foot D-pad UI on Android TV, and a Netflix-style desktop app on Windows.",
     flow: "view models · navigation · profile state",
   },
   {
-    layer: "02 · State & Repository",
+    layer: "State & Repository Engine",
     icon: Database,
     tech: "Room (KMP) · shared Kotlin core · TMDB cache",
     desc: "A shared MediaRepository and library scanner feed a Room database — movies, TV, music, per-profile state, collections and resume positions — with TMDB metadata cached locally (24 h TTL).",
     flow: "media queries · connection metadata",
   },
   {
-    layer: "03 · Remote Storage Providers",
+    layer: "Storage & Provider Protocols",
     icon: HardDrive,
     tech: "Drive · SMB · SFTP · FTP · WebDAV · NFS · UPnP",
     desc: "Pluggable client-side provider abstraction with LAN discovery (NSD/mDNS). Streams directly from personal cloud & LAN shares — zero central server.",
     flow: "authenticated stream URLs · range requests",
   },
   {
-    layer: "04 · Playback & Security",
+    layer: "Playback & Security Pipeline",
     icon: Lock,
     tech: "Media3 / ExoPlayer · mpv (mediamp) · Android Keystore",
     desc: "Hardware-accelerated playback — ExoPlayer on mobile and TV, an in-app mpv player with external fallback on desktop (via a loopback DriveStreamProxy). Secrets live in Keystore, never Room.",
@@ -500,7 +500,7 @@ export function FeaturedProjects() {
   return (
     <section id="work" className="relative scroll-mt-16">
       <Container className="pt-24 md:pt-36">
-        <SectionHeader eyebrow="My best project" />
+        <SectionHeader eyebrow="Featured System" />
 
         <GlassCard className="mt-4 w-fit max-w-lg p-5 sm:p-6 md:bg-card/70">
           <TextReveal
@@ -698,11 +698,10 @@ export function FeaturedProjects() {
                 <div className="flex items-center gap-2">
                   <Cpu className="size-4 text-signal" />
                   <h3 className="font-mono text-sm font-semibold uppercase tracking-wider text-foreground">
-                    Engineering Architecture HUD
+                    Engineering Architecture Spec
                   </h3>
-                  <span className="flex items-center gap-1.5 rounded border border-signal/30 bg-signal/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-signal">
-                    <span className="size-1 animate-signal-pulse rounded-full bg-signal" />
-                    live
+                  <span className="rounded border border-border/60 bg-muted/30 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+                    verified
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">

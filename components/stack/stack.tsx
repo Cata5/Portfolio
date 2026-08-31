@@ -18,7 +18,7 @@ export function Stack() {
           as="h2"
           className="mb-16 text-3xl font-normal tracking-[-0.02em] md:text-4xl"
         >
-          Tools I work with
+          Technologies &amp; Tools
         </TextReveal>
         <Stagger
           className="grid gap-x-14 gap-y-12 md:grid-cols-2 lg:grid-cols-3"

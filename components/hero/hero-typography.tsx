@@ -21,7 +21,7 @@ export function HeroTypography() {
         <span className="hero-line-mask block overflow-hidden pb-[0.06em]">
           <span className="hero-line block whitespace-nowrap">
             <Editable path="copy.hero.word1" label="Hero Word 1" inline>
-              {copy.hero?.word1 ?? "STUDENT"}
+              {copy.hero?.word1 ?? "SYSTEMS &"}
             </Editable>
             <span
               aria-hidden="true"
@@ -32,7 +32,7 @@ export function HeroTypography() {
         <span className="hero-line-mask block overflow-hidden pl-[0.18em] sm:pl-[0.24em] pb-[0.04em]">
           <span className="hero-line block whitespace-nowrap text-foreground/85">
             <Editable path="copy.hero.word2" label="Hero Word 2" inline>
-              {copy.hero?.word2 ?? "DEVELOPER"}
+              {copy.hero?.word2 ?? "APPLICATIONS"}
             </Editable>
           </span>
         </span>

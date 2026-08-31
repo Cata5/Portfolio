@@ -44,7 +44,7 @@ export function Contact() {
               <div className="mt-10 lg:mt-12 space-y-6">
                 <div>
                   <span className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground/80 mb-1.5">
-                    Direct Channel
+                    Email
                   </span>
                   <Magnetic>
                     <Editable path="site.email" label="Contact Email" inline>
@@ -106,10 +106,10 @@ export function Contact() {
             <Reveal delay={0.2}>
               <div className="mb-4">
                 <span className="font-mono text-xs uppercase tracking-wider text-saffron/90 font-medium">
-                  Transmit Note
+                  Send a message
                 </span>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Submissions are logged directly and dispatched to my inbox.
+                  Send a note directly to my inbox.
                 </p>
               </div>
               <ContactForm recipientEmail={site.email} />

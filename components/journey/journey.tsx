@@ -65,7 +65,7 @@ export function Journey() {
           as="h2"
           className="mb-16 text-3xl font-normal tracking-[-0.02em] md:text-4xl"
         >
-          Where I&apos;ve been
+          Milestones &amp; Experience
         </TextReveal>
 
         <div ref={wrapRef} className="relative max-w-2xl">

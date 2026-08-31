@@ -112,7 +112,7 @@ export function Activities() {
           as="h2"
           className="mb-14 text-3xl font-normal tracking-[-0.02em] md:text-4xl"
         >
-          Things I show up for
+          Hackathons &amp; Community
         </TextReveal>
         <Stagger
           as="ul"

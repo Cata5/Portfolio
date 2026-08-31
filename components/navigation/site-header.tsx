@@ -35,7 +35,7 @@ const CommandMenu = dynamic(
 
 const links = [
   { label: "About", href: "#about" },
-  { label: "My best project", href: "#work" },
+  { label: "Featured Work", href: "#work" },
   { label: "Stack", href: "#stack" },
   { label: "ML", href: "#ml" },
   { label: "Contact", href: "#contact" },

@@ -20,9 +20,9 @@ import { cn } from "@/lib/utils";
 
 const links = [
   { label: "About", href: "#about", desc: "Background & focus" },
-  { label: "My best project", href: "#work", desc: "Flagship work" },
+  { label: "Featured Work", href: "#work", desc: "Vortex multi-platform system" },
   { label: "Stack", href: "#stack", desc: "Technologies & tools" },
-  { label: "ML", href: "#ml", desc: "Machine learning research" },
+  { label: "ML", href: "#ml", desc: "Experiments & models" },
   { label: "Contact", href: "#contact", desc: "Get in touch" },
 ] as const;
 

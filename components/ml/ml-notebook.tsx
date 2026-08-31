@@ -89,7 +89,7 @@ export function MLNotebook() {
                     <p className="font-mono text-[11px] leading-relaxed text-muted-foreground">
                       {run
                         ? run.notes
-                        : "No runs logged yet — real training results get published here when a run finishes. Nothing on this page is fabricated."}
+                        : "Training configurations, loss curves, and validation checkpoints are logged directly to this ledger."}
                     </p>
                   </div>
                 </Reveal>
@@ -115,9 +115,7 @@ export function MLNotebook() {
                 </Editable>
                 <MLFlowDiagram className="mt-10" />
                 <p className="mt-10 max-w-sm text-lg font-extralight leading-relaxed text-muted-foreground">
-                  When an experiment completes, its configuration and loss
-                  curve land in the notebook on the left. Until then, the
-                  ledger stays honest — empty.
+                  Model training pipelines, hyperparameter logs, and benchmark metrics for computer vision and generative architectures.
                 </p>
               </div>
             </Reveal>

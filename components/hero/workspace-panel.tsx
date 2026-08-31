@@ -34,12 +34,8 @@ export function WorkspacePanel() {
             {currently.label}
           </span>
         </Editable>
-        <span className="flex shrink-0 items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
-          <span
-            className="size-1.5 animate-signal-pulse rounded-full bg-signal"
-            aria-hidden="true"
-          />
-          live
+        <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+          active
         </span>
       </div>
       <dl className="space-y-3 border-t border-border/40 pt-3">
@@ -59,9 +55,6 @@ export function WorkspacePanel() {
           </Editable>
         </Cell>
       </dl>
-      <p className="mt-3 border-t border-border/40 pt-2 font-mono text-[10px] text-muted-foreground/70">
-        {`// content/site.json`}
-      </p>
     </div>
   );
 }
