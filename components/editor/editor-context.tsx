@@ -19,16 +19,18 @@ import certsData from "@/content/certifications.json";
 import mlData from "@/content/ml.json";
 import projectsData from "@/content/projects.json";
 import offlineThemesData from "@/content/offline-themes.json";
+import sectionsData from "@/content/sections.json";
 import type { Project } from "@/data/projects";
 import type { Activity } from "@/data/activities";
 import type { Certification } from "@/data/certifications";
 import type { JourneyEntry } from "@/data/journey";
 import type { MlRun } from "@/data/ml";
+import type { PageSection, SectionType } from "@/data/sections";
 import { ScrollTrigger } from "@/components/motion/gsap";
 
 export type ContentState = {
   site: typeof siteData;
-  copy: typeof copyData;
+  copy: typeof copyData & Record<string, any>;
   skills: typeof skillsData;
   journey: JourneyEntry[];
   activities: Activity[];
@@ -36,6 +38,7 @@ export type ContentState = {
   ml: typeof mlData;
   projects: Project[];
   offlineThemes: typeof offlineThemesData;
+  sections: PageSection[];
 };
 
 export type FieldType =
@@ -87,6 +90,14 @@ interface EditorContextValue {
   deleteCert: (id: string) => void;
   addNewMlRun: () => void;
   deleteMlRun: (index: number) => void;
+  moveSection: (target: number | string, direction: "up" | "down") => void;
+  reorderSections: (fromIndex: number, toIndex: number) => void;
+  toggleSectionVisibility: (id: string) => void;
+  duplicateSection: (id: string) => string | undefined;
+  deleteSection: (id: string) => void;
+  addSection: (sectionOrType: SectionType | PageSection, name?: string) => string;
+  updateSectionSettings: (id: string, newSettings: Record<string, any>) => void;
+  updateSection: (id: string, updates: Partial<PageSection>) => void;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -140,6 +151,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     ml: mlData,
     projects: projectsData as unknown as Project[],
     offlineThemes: offlineThemesData,
+    sections: sectionsData as PageSection[],
   }));
 
   const [isDirty, setIsDirty] = useState(false);
@@ -514,6 +526,161 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     [refreshScrollTrigger],
   );
 
+  // Section layout actions
+  const moveSection = useCallback(
+    (target: number | string, direction: "up" | "down") => {
+      setContent((prev) => {
+        const list = [...(prev.sections || [])];
+        const index =
+          typeof target === "number"
+            ? target
+            : list.findIndex((s) => s.id === target);
+        if (index === -1) return prev;
+        const targetIndex = direction === "up" ? index - 1 : index + 1;
+        if (targetIndex < 0 || targetIndex >= list.length) return prev;
+        const temp = list[index];
+        list[index] = list[targetIndex];
+        list[targetIndex] = temp;
+        return { ...prev, sections: list };
+      });
+      setIsDirty(true);
+      refreshScrollTrigger();
+    },
+    [refreshScrollTrigger],
+  );
+
+  const reorderSections = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      setContent((prev) => {
+        const list = [...(prev.sections || [])];
+        if (
+          fromIndex < 0 ||
+          fromIndex >= list.length ||
+          toIndex < 0 ||
+          toIndex >= list.length
+        )
+          return prev;
+        const [moved] = list.splice(fromIndex, 1);
+        list.splice(toIndex, 0, moved);
+        return { ...prev, sections: list };
+      });
+      setIsDirty(true);
+      refreshScrollTrigger();
+    },
+    [refreshScrollTrigger],
+  );
+
+  const toggleSectionVisibility = useCallback(
+    (id: string) => {
+      setContent((prev) => {
+        const list = (prev.sections || []).map((s) =>
+          s.id === id ? { ...s, enabled: !s.enabled } : s,
+        );
+        return { ...prev, sections: list };
+      });
+      setIsDirty(true);
+      refreshScrollTrigger();
+    },
+    [refreshScrollTrigger],
+  );
+
+  const duplicateSection = useCallback(
+    (id: string) => {
+      const newId = `section-${Date.now().toString(36)}`;
+      setContent((prev) => {
+        const index = (prev.sections || []).findIndex((s) => s.id === id);
+        if (index === -1) return prev;
+        const original = prev.sections[index];
+        const copy: PageSection = {
+          ...original,
+          id: newId,
+          name: `${original.name} (Copy)`,
+          settings: JSON.parse(JSON.stringify(original.settings || {})),
+        };
+        const list = [...prev.sections];
+        list.splice(index + 1, 0, copy);
+        return { ...prev, sections: list };
+      });
+      setIsDirty(true);
+      refreshScrollTrigger();
+      return newId;
+    },
+    [refreshScrollTrigger],
+  );
+
+  const deleteSection = useCallback(
+    (id: string) => {
+      setContent((prev) => ({
+        ...prev,
+        sections: (prev.sections || []).filter((s) => s.id !== id),
+      }));
+      setIsDirty(true);
+      refreshScrollTrigger();
+    },
+    [refreshScrollTrigger],
+  );
+
+  const addSection = useCallback(
+    (sectionOrType: SectionType | PageSection, name?: string) => {
+      let newSection: PageSection;
+      if (typeof sectionOrType === "object") {
+        newSection = sectionOrType;
+      } else {
+        const type = sectionOrType;
+        const newId = `section-${type}-${Date.now().toString(36)}`;
+        newSection = {
+          id: newId,
+          type,
+          name: name || `${type.charAt(0).toUpperCase() + type.slice(1)} Section`,
+          enabled: true,
+          settings: {},
+        };
+      }
+      setContent((prev) => ({
+        ...prev,
+        sections: [...(prev.sections || []), newSection],
+      }));
+      setIsDirty(true);
+      refreshScrollTrigger();
+      return newSection.id;
+    },
+    [refreshScrollTrigger],
+  );
+
+  const updateSectionSettings = useCallback(
+    (id: string, newSettings: Record<string, any>) => {
+      setContent((prev) => ({
+        ...prev,
+        sections: (prev.sections || []).map((s) =>
+          s.id === id ? { ...s, settings: { ...(s.settings || {}), ...newSettings } } : s,
+        ),
+      }));
+      setIsDirty(true);
+      refreshScrollTrigger();
+    },
+    [refreshScrollTrigger],
+  );
+
+  const updateSection = useCallback(
+    (id: string, updates: Partial<PageSection>) => {
+      setContent((prev) => ({
+        ...prev,
+        sections: (prev.sections || []).map((s) =>
+          s.id === id
+            ? {
+                ...s,
+                ...updates,
+                settings: { ...(s.settings || {}), ...(updates.settings || {}) },
+              }
+            : s,
+        ),
+      }));
+      setIsDirty(true);
+      refreshScrollTrigger();
+    },
+    [refreshScrollTrigger],
+  );
+
   const value = useMemo(
     () => ({
       isAuthenticated,
@@ -543,6 +710,14 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       deleteCert,
       addNewMlRun,
       deleteMlRun,
+      moveSection,
+      reorderSections,
+      toggleSectionVisibility,
+      duplicateSection,
+      deleteSection,
+      addSection,
+      updateSectionSettings,
+      updateSection,
     }),
     [
       isAuthenticated,
@@ -570,6 +745,14 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       deleteCert,
       addNewMlRun,
       deleteMlRun,
+      moveSection,
+      reorderSections,
+      toggleSectionVisibility,
+      duplicateSection,
+      deleteSection,
+      addSection,
+      updateSectionSettings,
+      updateSection,
     ],
   );
 

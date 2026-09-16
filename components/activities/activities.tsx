@@ -104,16 +104,21 @@ function ActivityCard({
 export function Activities() {
   const { content } = useEditor();
   const activities = content.activities;
+  const activitiesCopy = content.copy?.activities as Record<string, string> | undefined;
+  const eyebrow = activitiesCopy?.eyebrow || "Activities";
+  const title = activitiesCopy?.title || "Hackathons & Community";
 
   return (
-    <Section id="activities" eyebrow="Activities">
+    <Section id="activities" eyebrow={eyebrow}>
       <GlassCard className="p-6 sm:p-10 lg:p-14">
-        <TextReveal
-          as="h2"
-          className="mb-14 text-3xl font-normal tracking-[-0.02em] md:text-4xl"
-        >
-          Hackathons &amp; Community
-        </TextReveal>
+        <Editable path="copy.activities.title" label="Activities Title">
+          <TextReveal
+            as="h2"
+            className="mb-14 text-3xl font-normal tracking-[-0.02em] md:text-4xl"
+          >
+            {title}
+          </TextReveal>
+        </Editable>
         <Stagger
           as="ul"
           className="grid gap-6 sm:grid-cols-2 lg:gap-8"

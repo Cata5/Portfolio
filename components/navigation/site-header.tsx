@@ -33,21 +33,24 @@ const CommandMenu = dynamic(
   },
 );
 
-const links = [
-  { label: "About", href: "#about" },
-  { label: "Featured Work", href: "#work" },
-  { label: "Stack", href: "#stack" },
-  { label: "ML", href: "#ml" },
-  { label: "Journey", href: "#journey" },
-  { label: "Contact", href: "#contact" },
-] as const;
+import { useEditor } from "@/components/editor/editor-context";
+import { sections as defaultSections } from "@/data/sections";
 
 export function SiteHeader() {
+  const { content } = useEditor();
   const [active, setActive] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
   const isHome = pathname === "/" || pathname === "" || pathname.endsWith("/Portofolio-V2/");
   const currentActive = isHome ? active : null;
+
+  const pageSections = content?.sections || defaultSections;
+  const links = pageSections
+    .filter((s) => s.enabled && s.navLabel && s.type !== "hero")
+    .map((s) => ({
+      label: s.navLabel!,
+      href: s.type === "featured-projects" ? "#work" : `#${s.id}`,
+    }));
 
   // Section highlighting (only on homepage)
   useEffect(() => {
@@ -66,7 +69,7 @@ export function SiteHeader() {
       if (el) observer.observe(el);
     }
     return () => observer.disconnect();
-  }, [isHome]);
+  }, [isHome, JSON.stringify(links.map((l) => l.href))]);
 
   // Entrance reveal.
   useIsomorphicLayoutEffect(() => {

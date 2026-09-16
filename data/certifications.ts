@@ -7,8 +7,8 @@ export type Certification = {
   issuer: string;
   year: string;
   tags: string[];
-  poster: string;
-  file: string;
+  poster?: string;
+  file?: string;
 };
 
 export const certifications: Certification[] = certificationsJson as Certification[];

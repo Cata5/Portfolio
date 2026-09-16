@@ -12,6 +12,7 @@ const VALID_STORES: Record<string, string> = {
   certifications: "certifications.json",
   ml: "ml.json",
   copy: "copy.json",
+  sections: "sections.json",
   offlineThemes: "offline-themes.json",
   "offline-themes": "offline-themes.json",
 };

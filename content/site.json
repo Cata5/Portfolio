@@ -11,8 +11,8 @@
   "description": "Manu Catalin-Gabriel — Computer & Information Technology (CTI) student at ETTI Bucharest seeking software engineering roles and internships.",
   "currently": {
     "label": "Currently building",
-    "project": "Vortex - iOS porting",
-    "stack": "SwiftUI - XCode 26.5",
+    "project": "Vortex",
+    "stack": "Kotlin",
     "status": "in progress"
   }
 }

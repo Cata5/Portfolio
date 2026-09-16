@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 
@@ -15,6 +15,7 @@ import { prefersReducedMotion } from "@/lib/motion";
  */
 export function SmoothScroll({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -25,6 +26,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       smoothWheel: true,
       touchMultiplier: 1.2,
     });
+    lenisRef.current = lenis;
     setLenis(lenis);
 
     // Keep ScrollTrigger in lockstep with Lenis' smoothed scroll position.
@@ -75,8 +77,11 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       gsap.ticker.remove(tick);
       lenis.destroy();
       setLenis(null);
+      lenisRef.current = null;
     };
   }, []);
+
+
 
   // Handle cross-page and dynamic hash navigation (e.g. landing from another route on /#stack)
   useEffect(() => {

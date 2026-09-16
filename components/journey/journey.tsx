@@ -118,6 +118,35 @@ export function Journey() {
   const lineRef = useRef<HTMLDivElement>(null);
   const { content } = useEditor();
   const rawJourney = content.journey || [];
+  const journeyCopy = content.copy?.journey as Record<string, string> | undefined;
+
+  const eyebrow = journeyCopy?.eyebrow || "Engineering Trajectory";
+  const title = journeyCopy?.title || "Circuit Timeline & Milestones";
+  const description =
+    journeyCopy?.description ||
+    "A dual-sided neural circuit charting core software platforms, hackathon victories, FIRST Tech Challenge robotics, and open-source infrastructure from 2023 to 2026.";
+  const statusText = journeyCopy?.status || "Active Branch Trajectory";
+  const streamLabel = journeyCopy?.streamLabel || "Stream:";
+  const allBranchesLabel = journeyCopy?.allBranchesLabel || "All Branches";
+
+  const statSpanLabel = journeyCopy?.statSpanLabel || "Span";
+  const statSpanValue = journeyCopy?.statSpanValue || "2023 – 2026";
+  const statSpanSub = journeyCopy?.statSpanSub || "4 Years";
+
+  const statMilestonesLabel = journeyCopy?.statMilestonesLabel || "Milestones";
+  const statMilestonesSub = journeyCopy?.statMilestonesSub || "Records";
+
+  const statHackathonsLabel = journeyCopy?.statHackathonsLabel || "Hackathons";
+  const statHackathonsValue = journeyCopy?.statHackathonsValue || "1st Place";
+  const statHackathonsSub = journeyCopy?.statHackathonsSub || "UniHack Winner";
+
+  const statRoboticsLabel = journeyCopy?.statRoboticsLabel || "Robotics";
+  const statRoboticsValue = journeyCopy?.statRoboticsValue || "FTC";
+  const statRoboticsSub = journeyCopy?.statRoboticsSub || "Nationals & Mentor";
+
+  const statOpenSourceLabel = journeyCopy?.statOpenSourceLabel || "Open Source";
+  const statOpenSourceValue = journeyCopy?.statOpenSourceValue || "40+";
+  const statOpenSourceSub = journeyCopy?.statOpenSourceSub || "Repositories";
 
   // Retain original index bindings for CMS Visual Editor
   const indexedJourney = useMemo(() => {
@@ -193,7 +222,7 @@ export function Journey() {
   }, [activeCategory]);
 
   return (
-    <Section id="journey" eyebrow="Engineering Trajectory">
+    <Section id="journey" eyebrow={eyebrow}>
       <div className="space-y-10">
         {/* Section Header Card */}
         <GlassCard className="p-6 sm:p-10 lg:p-12 relative overflow-hidden">
@@ -210,85 +239,97 @@ export function Journey() {
           <div className="relative z-10 space-y-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between pb-8 border-b border-border/50">
               <div className="max-w-2xl space-y-3">
-                <TextReveal
-                  as="h2"
-                  className="text-3xl font-normal tracking-[-0.02em] md:text-4xl text-foreground"
-                >
-                  Circuit Timeline &amp; Milestones
-                </TextReveal>
-                <p className="text-base font-extralight text-muted-foreground leading-relaxed">
-                  A dual-sided neural circuit charting core software platforms, hackathon
-                  victories, FIRST Tech Challenge robotics, and open-source infrastructure from 2023
-                  to 2026.
-                </p>
+                <Editable path="copy.journey.title" label="Timeline Title">
+                  <TextReveal
+                    as="h2"
+                    className="text-3xl font-normal tracking-[-0.02em] md:text-4xl text-foreground"
+                  >
+                    {title}
+                  </TextReveal>
+                </Editable>
+                <Editable path="copy.journey.description" label="Timeline Description" type="textarea">
+                  <p className="text-base font-extralight text-muted-foreground leading-relaxed">
+                    {description}
+                  </p>
+                </Editable>
               </div>
 
               {/* Status Indicator */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-signal/10 border border-signal/30 font-mono text-xs text-signal shrink-0">
-                <span className="size-2 rounded-full bg-signal shadow-[0_0_8px_var(--color-signal)] animate-pulse" />
-                <span>Active Branch Trajectory</span>
-              </div>
+              <Editable path="copy.journey.status" label="Timeline Status Badge">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-signal/10 border border-signal/30 font-mono text-xs text-signal shrink-0">
+                  <span className="size-2 rounded-full bg-signal shadow-[0_0_8px_var(--color-signal)] animate-pulse" />
+                  <span>{statusText}</span>
+                </div>
+              </Editable>
             </div>
 
             {/* Quick Career Telemetry Metrics */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Span
-                </span>
-                <div className="flex items-baseline gap-1.5 mt-1.5">
-                  <span className="font-mono text-xl font-bold text-foreground">2023 – 2026</span>
-                  <span className="text-xs text-muted-foreground">4 Years</span>
+              <Editable path="copy.journey.statSpanValue" label="Span Metric">
+                <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {statSpanLabel}
+                  </span>
+                  <div className="flex items-baseline gap-1.5 mt-1.5">
+                    <span className="font-mono text-xl font-bold text-foreground">{statSpanValue}</span>
+                    <span className="text-xs text-muted-foreground">{statSpanSub}</span>
+                  </div>
                 </div>
-              </div>
+              </Editable>
 
               <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Milestones
+                  {statMilestonesLabel}
                 </span>
                 <div className="flex items-baseline gap-1.5 mt-1.5">
                   <span className="font-mono text-xl font-bold text-signal">
                     {rawJourney.length}
                   </span>
-                  <span className="text-xs text-muted-foreground">Records</span>
+                  <span className="text-xs text-muted-foreground">{statMilestonesSub}</span>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Hackathons
-                </span>
-                <div className="flex items-baseline gap-1.5 mt-1.5">
-                  <span className="font-mono text-xl font-bold text-saffron">1st Place</span>
-                  <span className="text-xs text-muted-foreground">UniHack Winner</span>
+              <Editable path="copy.journey.statHackathonsValue" label="Hackathons Metric">
+                <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {statHackathonsLabel}
+                  </span>
+                  <div className="flex items-baseline gap-1.5 mt-1.5">
+                    <span className="font-mono text-xl font-bold text-saffron">{statHackathonsValue}</span>
+                    <span className="text-xs text-muted-foreground">{statHackathonsSub}</span>
+                  </div>
                 </div>
-              </div>
+              </Editable>
 
-              <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Robotics
-                </span>
-                <div className="flex items-baseline gap-1.5 mt-1.5">
-                  <span className="font-mono text-xl font-bold text-foreground">FTC</span>
-                  <span className="text-xs text-muted-foreground">Nationals &amp; Mentor</span>
+              <Editable path="copy.journey.statRoboticsValue" label="Robotics Metric">
+                <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {statRoboticsLabel}
+                  </span>
+                  <div className="flex items-baseline gap-1.5 mt-1.5">
+                    <span className="font-mono text-xl font-bold text-foreground">{statRoboticsValue}</span>
+                    <span className="text-xs text-muted-foreground">{statRoboticsSub}</span>
+                  </div>
                 </div>
-              </div>
+              </Editable>
 
-              <div className="col-span-2 sm:col-span-1 rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Open Source
-                </span>
-                <div className="flex items-baseline gap-1.5 mt-1.5">
-                  <span className="font-mono text-xl font-bold text-sky-400">40+</span>
-                  <span className="text-xs text-muted-foreground">Repositories</span>
+              <Editable path="copy.journey.statOpenSourceValue" label="Open Source Metric">
+                <div className="col-span-2 sm:col-span-1 rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {statOpenSourceLabel}
+                  </span>
+                  <div className="flex items-baseline gap-1.5 mt-1.5">
+                    <span className="font-mono text-xl font-bold text-sky-400">{statOpenSourceValue}</span>
+                    <span className="text-xs text-muted-foreground">{statOpenSourceSub}</span>
+                  </div>
                 </div>
-              </div>
+              </Editable>
             </div>
 
             {/* Stream Filter Pills */}
             <div className="flex flex-wrap items-center gap-2 pt-2">
               <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground mr-1 hidden sm:inline-block">
-                Stream:
+                {streamLabel}
               </span>
               <button
                 type="button"
@@ -300,7 +341,7 @@ export function Journey() {
                     : "bg-accent/40 text-muted-foreground hover:text-foreground hover:bg-accent border-border/60",
                 )}
               >
-                <span>All Branches</span>
+                <span>{allBranchesLabel}</span>
                 <span className="text-[11px] opacity-75">({rawJourney.length})</span>
               </button>
 

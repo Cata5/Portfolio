@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEditor } from "./editor-context";
 import { SectionInspector } from "./section-inspector";
 import { Button } from "@/components/ui/button";
+import { TagInput } from "@/components/ui/tag-input";
 import { getLenis } from "@/components/motion/lenis";
 import type { Project, ProjectCategory, ProjectStatus } from "@/data/projects";
 import type { Activity } from "@/data/activities";
@@ -170,7 +171,11 @@ export function InspectorDrawer() {
             </div>
 
             {/* Drawer Body Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div
+              data-lenis-prevent
+              onWheel={(e) => e.stopPropagation()}
+              className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6"
+            >
               {/* Specialized Section Form (Edit all text in section) */}
               {selectedField.type === "section" ? (
                 <SectionInspector
@@ -456,18 +461,9 @@ function ProjectInspector({
         <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
           Technologies (comma-separated)
         </label>
-        <input
-          type="text"
-          value={project.technologies.join(", ")}
-          onChange={(e) =>
-            updateField(
-              `${path}.technologies`,
-              e.target.value
-                .split(",")
-                .map((t) => t.trim())
-                .filter(Boolean),
-            )
-          }
+        <TagInput
+          value={project.technologies}
+          onChange={(tags) => updateField(`${path}.technologies`, tags)}
           className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none focus:ring-1 focus:ring-signal"
         />
       </div>
@@ -653,18 +649,9 @@ function JourneyInspector({
         <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
           Tags (comma-separated)
         </label>
-        <input
-          type="text"
-          value={item.tags?.join(", ") ?? ""}
-          onChange={(e) =>
-            updateField(
-              `${path}.tags`,
-              e.target.value
-                .split(",")
-                .map((t) => t.trim())
-                .filter(Boolean),
-            )
-          }
+        <TagInput
+          value={item.tags}
+          onChange={(tags) => updateField(`${path}.tags`, tags)}
           className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
         />
       </div>
@@ -894,29 +881,21 @@ function CertInspector({
         <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
           Tags (comma-separated)
         </label>
-        <input
-          type="text"
-          value={cert.tags?.join(", ") ?? ""}
-          onChange={(e) =>
-            updateField(
-              `${path}.tags`,
-              e.target.value
-                .split(",")
-                .map((t) => t.trim())
-                .filter(Boolean),
-            )
-          }
+        <TagInput
+          value={cert.tags}
+          onChange={(tags) => updateField(`${path}.tags`, tags)}
           className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
         />
       </div>
       <div className="space-y-2">
         <label className="block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-          Poster Thumbnail
+          Poster Thumbnail (Optional)
         </label>
         <div className="flex gap-2">
           <input
             type="text"
-            value={cert.poster}
+            placeholder="e.g. /certificates/name.webp (optional)"
+            value={cert.poster ?? ""}
             onChange={(e) => updateField(`${path}.poster`, e.target.value)}
             className="flex-1 rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
           />
@@ -941,11 +920,12 @@ function CertInspector({
       </div>
       <div>
         <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-          PDF File Path
+          PDF File Path (Optional)
         </label>
         <input
           type="text"
-          value={cert.file}
+          placeholder="e.g. /certificates/name.pdf (optional)"
+          value={cert.file ?? ""}
           onChange={(e) => updateField(`${path}.file`, e.target.value)}
           className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
         />

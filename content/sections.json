@@ -1,0 +1,110 @@
+[
+  {
+    "id": "hero",
+    "type": "hero",
+    "name": "Hero & Banner",
+    "enabled": true,
+    "settings": {
+      "word1": "SYSTEMS &",
+      "word2": "APPLICATIONS",
+      "tagline": "Computer & Information Technology student at ETTI Bucharest. I build web applications, experiment with machine learning, and craft software for whatever problem I find interesting."
+    }
+  },
+  {
+    "id": "about",
+    "type": "about",
+    "name": "About / Bio",
+    "enabled": true,
+    "settings": {
+      "eyebrow": "About",
+      "heading": "I engineer software across web, mobile, desktop, and machine learning.",
+      "paragraph1": "I'm Manu Catalin-Gabriel, a Computer and Information Technology (CTI) student at ETTI Bucharest (POLITEHNICA University). I design and ship multi-platform systems — from high-performance media streaming across Android, Android TV, and desktop, to full-stack web applications and machine learning experiments.",
+      "paragraph2": "I focus on clean architecture, local-first data pipelines, and responsive performance. Looking for software engineering roles and internships where I can contribute to high-impact production systems.",
+      "focusLabel": "I work with"
+    }
+  },
+  {
+    "id": "featured-projects",
+    "type": "featured-projects",
+    "name": "Flagship Work (Vortex)",
+    "enabled": true,
+    "settings": {
+      "eyebrow": "Featured Work",
+      "title": "Vortex — Multi-Platform Architecture",
+      "description": "Android, Android TV, and desktop media streaming platform powered by cloud storage."
+    }
+  },
+  {
+    "id": "projects",
+    "type": "projects",
+    "name": "All Projects Explorer",
+    "enabled": true,
+    "settings": {
+      "eyebrow": "All Projects",
+      "title": "Production Systems & Experiments"
+    }
+  },
+  {
+    "id": "stack",
+    "type": "stack",
+    "name": "Core Tech Stack",
+    "enabled": true,
+    "settings": {
+      "eyebrow": "Stack",
+      "title": "Technologies & Tools"
+    }
+  },
+  {
+    "id": "certifications",
+    "type": "certifications",
+    "name": "Accredited Certifications",
+    "enabled": true,
+    "settings": {
+      "eyebrow": "Certifications",
+      "title": "Certifications & Credentials"
+    }
+  },
+  {
+    "id": "ml",
+    "type": "ml",
+    "name": "ML / Lab Notebook",
+    "enabled": true,
+    "settings": {
+      "eyebrow": "ML / Notebook",
+      "title": "Machine Learning Lab"
+    }
+  },
+  {
+    "id": "journey",
+    "type": "journey",
+    "name": "Timeline & Milestones",
+    "enabled": true,
+    "settings": {
+      "eyebrow": "Engineering Trajectory",
+      "title": "Circuit Timeline & Milestones",
+      "description": "A dual-sided neural circuit charting core software platforms, hackathon victories, FIRST Tech Challenge robotics, and open-source infrastructure from 2023 to 2026.",
+      "status": "Active Branch Trajectory"
+    }
+  },
+  {
+    "id": "activities",
+    "type": "activities",
+    "name": "Hackathons & Activities",
+    "enabled": true,
+    "settings": {
+      "eyebrow": "Activities",
+      "title": "Hackathons & Community"
+    }
+  },
+  {
+    "id": "contact",
+    "type": "contact",
+    "name": "Contact & Channels",
+    "enabled": true,
+    "settings": {
+      "eyebrow": "Contact",
+      "heading": "Let's build something worthwhile.",
+      "description": "I'm always open to discussing software roles, interesting projects, or technical collaboration. Drop a message or reach out directly."
+    }
+  }
+]

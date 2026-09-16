@@ -21,6 +21,7 @@ import {
 
 import { useEditor } from "./editor-context";
 import { Button } from "@/components/ui/button";
+import { TagInput } from "@/components/ui/tag-input";
 import type { Project, ProjectCategory, ProjectStatus } from "@/data/projects";
 import type { Activity } from "@/data/activities";
 import type { Certification } from "@/data/certifications";
@@ -399,15 +400,9 @@ function WorkSectionForm({
 
       <div className="space-y-1.5">
         <label className="font-mono text-[11px] text-muted-foreground">Technologies (comma separated)</label>
-        <input
-          type="text"
-          value={vortex.technologies?.join(", ") || ""}
-          onChange={(e) =>
-            updateField(
-              `${targetPath}.technologies`,
-              e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-            )
-          }
+        <TagInput
+          value={vortex.technologies}
+          onChange={(tags) => updateField(`${targetPath}.technologies`, tags)}
           className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
         />
       </div>
@@ -449,7 +444,11 @@ function ProjectsSectionForm({
         </button>
       </div>
 
-      <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+      <div
+        data-lenis-prevent
+        onWheel={(e) => e.stopPropagation()}
+        className="space-y-2.5 max-h-[500px] overflow-y-auto overscroll-contain pr-1 scrollbar-thin scrollbar-thumb-border"
+      >
         {content.projects?.map((proj, idx) => {
           const isExpanded = expandedId === proj.id;
           return (
@@ -499,15 +498,9 @@ function ProjectsSectionForm({
                   </div>
                   <div className="space-y-1">
                     <label className="font-mono text-[10.5px] text-muted-foreground">Technologies (comma separated)</label>
-                    <input
-                      type="text"
-                      value={proj.technologies?.join(", ") || ""}
-                      onChange={(e) =>
-                        updateField(
-                          `projects.${idx}.technologies`,
-                          e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                        )
-                      }
+                    <TagInput
+                      value={proj.technologies}
+                      onChange={(tags) => updateField(`projects.${idx}.technologies`, tags)}
                       className="w-full rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 font-mono text-[11px] text-foreground"
                     />
                   </div>
@@ -581,15 +574,9 @@ function StackSectionForm({
             />
             <div className="space-y-1">
               <label className="font-mono text-[10px] text-muted-foreground">Items (comma separated)</label>
-              <input
-                type="text"
-                value={grp.items?.join(", ") || ""}
-                onChange={(e) =>
-                  updateField(
-                    `skills.skillGroups.${gIdx}.items`,
-                    e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                  )
-                }
+              <TagInput
+                value={grp.items}
+                onChange={(items) => updateField(`skills.skillGroups.${gIdx}.items`, items)}
                 className="w-full rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 font-sans text-xs text-foreground"
               />
             </div>
@@ -629,7 +616,11 @@ function CertificationsSectionForm({
         </button>
       </div>
 
-      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+      <div
+        data-lenis-prevent
+        onWheel={(e) => e.stopPropagation()}
+        className="space-y-3 max-h-[500px] overflow-y-auto overscroll-contain pr-1 scrollbar-thin scrollbar-thumb-border"
+      >
         {content.certifications?.map((cert, cIdx) => (
           <div key={cert.id || cIdx} className="rounded-xl border border-border/60 bg-neutral-950/70 p-3.5 space-y-2.5">
             <div className="flex items-center justify-between">
@@ -654,12 +645,50 @@ function CertificationsSectionForm({
               />
               <input
                 type="text"
+                placeholder="Subtitle"
+                value={cert.subtitle || ""}
+                onChange={(e) => updateField(`certifications.${cIdx}.subtitle`, e.target.value)}
+                className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <input
+                type="text"
                 placeholder="Issuer"
                 value={cert.issuer || ""}
                 onChange={(e) => updateField(`certifications.${cIdx}.issuer`, e.target.value)}
                 className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
               />
+              <input
+                type="text"
+                placeholder="Year"
+                value={cert.year || ""}
+                onChange={(e) => updateField(`certifications.${cIdx}.year`, e.target.value)}
+                className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+              />
             </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <input
+                type="text"
+                placeholder="Poster (/certificates/ccna.webp)"
+                value={cert.poster || ""}
+                onChange={(e) => updateField(`certifications.${cIdx}.poster`, e.target.value || undefined)}
+                className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground font-mono text-[11px]"
+              />
+              <input
+                type="text"
+                placeholder="PDF File (/certificates/ccna.pdf)"
+                value={cert.file || ""}
+                onChange={(e) => updateField(`certifications.${cIdx}.file`, e.target.value || undefined)}
+                className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground font-mono text-[11px]"
+              />
+            </div>
+            <TagInput
+              placeholder="Tags (comma-separated)"
+              value={cert.tags}
+              onChange={(tags) => updateField(`certifications.${cIdx}.tags`, tags)}
+              className="w-full rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-xs text-foreground"
+            />
           </div>
         ))}
       </div>
@@ -782,7 +811,131 @@ function JourneySectionForm({
   deleteJourneyItem: (idx: number) => void;
 }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* Section Header & Telemetry Configuration */}
+      <div className="rounded-xl border border-border/60 bg-neutral-950/70 p-3.5 space-y-3">
+        <h5 className="font-mono text-xs font-bold uppercase tracking-wider text-signal">
+          Header Copy &amp; Telemetry
+        </h5>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <input
+            type="text"
+            placeholder="Eyebrow"
+            value={content.copy?.journey?.eyebrow || ""}
+            onChange={(e) => updateField("copy.journey.eyebrow", e.target.value)}
+            className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+          />
+          <input
+            type="text"
+            placeholder="Status Badge"
+            value={content.copy?.journey?.status || ""}
+            onChange={(e) => updateField("copy.journey.status", e.target.value)}
+            className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+          />
+        </div>
+        <input
+          type="text"
+          placeholder="Section Title"
+          value={content.copy?.journey?.title || ""}
+          onChange={(e) => updateField("copy.journey.title", e.target.value)}
+          className="w-full rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-xs text-foreground"
+        />
+        <textarea
+          rows={2}
+          placeholder="Section Description"
+          value={content.copy?.journey?.description || ""}
+          onChange={(e) => updateField("copy.journey.description", e.target.value)}
+          className="w-full rounded-lg border border-border/60 bg-neutral-900 p-2 text-xs text-muted-foreground"
+        />
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <input
+            type="text"
+            placeholder="Filter Prefix (Stream:)"
+            value={content.copy?.journey?.streamLabel || ""}
+            onChange={(e) => updateField("copy.journey.streamLabel", e.target.value)}
+            className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+          />
+          <input
+            type="text"
+            placeholder="All Label (All Branches)"
+            value={content.copy?.journey?.allBranchesLabel || ""}
+            onChange={(e) => updateField("copy.journey.allBranchesLabel", e.target.value)}
+            className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+          />
+        </div>
+
+        {/* Telemetry Metric inputs */}
+        <div className="pt-2 border-t border-border/40 space-y-2">
+          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">
+            Telemetry Cards (Span, Hackathons, Robotics, Open Source)
+          </span>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <input
+              type="text"
+              placeholder="Span Value (2023 – 2026)"
+              value={content.copy?.journey?.statSpanValue || ""}
+              onChange={(e) => updateField("copy.journey.statSpanValue", e.target.value)}
+              className="rounded border border-border/60 bg-neutral-900 px-2 py-1 text-foreground"
+            />
+            <input
+              type="text"
+              placeholder="Span Sub (4 Years)"
+              value={content.copy?.journey?.statSpanSub || ""}
+              onChange={(e) => updateField("copy.journey.statSpanSub", e.target.value)}
+              className="rounded border border-border/60 bg-neutral-900 px-2 py-1 text-foreground"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <input
+              type="text"
+              placeholder="Hackathons Value (1st Place)"
+              value={content.copy?.journey?.statHackathonsValue || ""}
+              onChange={(e) => updateField("copy.journey.statHackathonsValue", e.target.value)}
+              className="rounded border border-border/60 bg-neutral-900 px-2 py-1 text-foreground"
+            />
+            <input
+              type="text"
+              placeholder="Hackathons Sub (UniHack Winner)"
+              value={content.copy?.journey?.statHackathonsSub || ""}
+              onChange={(e) => updateField("copy.journey.statHackathonsSub", e.target.value)}
+              className="rounded border border-border/60 bg-neutral-900 px-2 py-1 text-foreground"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <input
+              type="text"
+              placeholder="Robotics Value (FTC)"
+              value={content.copy?.journey?.statRoboticsValue || ""}
+              onChange={(e) => updateField("copy.journey.statRoboticsValue", e.target.value)}
+              className="rounded border border-border/60 bg-neutral-900 px-2 py-1 text-foreground"
+            />
+            <input
+              type="text"
+              placeholder="Robotics Sub (Nationals & Mentor)"
+              value={content.copy?.journey?.statRoboticsSub || ""}
+              onChange={(e) => updateField("copy.journey.statRoboticsSub", e.target.value)}
+              className="rounded border border-border/60 bg-neutral-900 px-2 py-1 text-foreground"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <input
+              type="text"
+              placeholder="Open Source Value (40+)"
+              value={content.copy?.journey?.statOpenSourceValue || ""}
+              onChange={(e) => updateField("copy.journey.statOpenSourceValue", e.target.value)}
+              className="rounded border border-border/60 bg-neutral-900 px-2 py-1 text-foreground"
+            />
+            <input
+              type="text"
+              placeholder="Open Source Sub (Repositories)"
+              value={content.copy?.journey?.statOpenSourceSub || ""}
+              onChange={(e) => updateField("copy.journey.statOpenSourceSub", e.target.value)}
+              className="rounded border border-border/60 bg-neutral-900 px-2 py-1 text-foreground"
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-saffron">
           Timeline Milestones ({content.journey?.length || 0})
@@ -796,7 +949,11 @@ function JourneySectionForm({
         </button>
       </div>
 
-      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+      <div
+        data-lenis-prevent
+        onWheel={(e) => e.stopPropagation()}
+        className="space-y-3 max-h-[400px] overflow-y-auto overscroll-contain pr-1 scrollbar-thin scrollbar-thumb-border"
+      >
         {content.journey?.map((item, jIdx) => (
           <div key={jIdx} className="rounded-xl border border-border/60 bg-neutral-950/70 p-3.5 space-y-2.5">
             <div className="flex items-center justify-between">
@@ -898,7 +1055,11 @@ function ActivitiesSectionForm({
         </button>
       </div>
 
-      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+      <div
+        data-lenis-prevent
+        onWheel={(e) => e.stopPropagation()}
+        className="space-y-3 max-h-[500px] overflow-y-auto overscroll-contain pr-1 scrollbar-thin scrollbar-thumb-border"
+      >
         {content.activities?.map((act, aIdx) => (
           <div key={act.id || aIdx} className="rounded-xl border border-border/60 bg-neutral-950/70 p-3.5 space-y-2.5">
             <div className="flex items-center justify-between">
@@ -927,6 +1088,38 @@ function ActivitiesSectionForm({
                 value={act.type || ""}
                 onChange={(e) => updateField(`activities.${aIdx}.type`, e.target.value)}
                 className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <input
+                type="text"
+                placeholder="Year (e.g. 2025)"
+                value={act.year || ""}
+                onChange={(e) => updateField(`activities.${aIdx}.year`, e.target.value)}
+                className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+              />
+              <input
+                type="text"
+                placeholder="Location (e.g. Romania, Pitesti)"
+                value={act.location || ""}
+                onChange={(e) => updateField(`activities.${aIdx}.location`, e.target.value)}
+                className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <input
+                type="text"
+                placeholder="Link (https://...)"
+                value={act.link || ""}
+                onChange={(e) => updateField(`activities.${aIdx}.link`, e.target.value || undefined)}
+                className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground"
+              />
+              <input
+                type="text"
+                placeholder="Image (/activities/photo.webp)"
+                value={act.image || ""}
+                onChange={(e) => updateField(`activities.${aIdx}.image`, e.target.value || undefined)}
+                className="rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 text-foreground font-mono text-[11px]"
               />
             </div>
             <textarea

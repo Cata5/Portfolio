@@ -38,10 +38,13 @@ import { SourceView } from "@/components/rag/source-view";
 import { EvalView } from "@/components/rag/eval-view";
 import { KBView } from "@/components/rag/kb-view";
 import { SettingsView } from "@/components/rag/settings-view";
+import { SectionsManager } from "@/components/admin/sections-manager";
+import { TagInput } from "@/components/ui/tag-input";
 import type { ProjectCategory, ProjectStatus } from "@/data/projects";
 
 type MainTab =
   | "overview"
+  | "sections"
   | "profile"
   | "projects"
   | "skills"
@@ -222,6 +225,7 @@ export function MainAdminDashboard() {
   const mlCount = content.ml?.runs?.length || 0;
   const activityCount = content.activities?.length || 0;
   const certCount = content.certifications?.length || 0;
+  const sectionCount = content.sections?.length || 0;
 
   return (
     <div className="min-h-screen text-foreground pb-20 pt-4 sm:pt-6 px-3 sm:px-6 max-w-7xl mx-auto space-y-6">
@@ -298,144 +302,222 @@ export function MainAdminDashboard() {
         </div>
       </header>
 
-      {/* Main Tabs Navigation Bar in Frosted Glass */}
+      {/* Redesigned Modern Categorized Navigation Bar */}
       <nav
-        onWheel={(e) => {
-          if (e.deltaY !== 0) {
-            e.currentTarget.scrollLeft += e.deltaY;
-          }
-        }}
-        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden rounded-xl border border-border/40 bg-card/30 p-1.5 backdrop-blur-xl ring-1 ring-white/5"
+        className="rounded-2xl border border-border/40 bg-card/30 p-2 sm:p-2.5 backdrop-blur-xl ring-1 ring-white/5 shadow-xl"
+        aria-label="Admin Navigation"
       >
-        <button
-          type="button"
-          onClick={() => setActiveTab("overview")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-medium transition-all cursor-pointer shrink-0 ${
-            activeTab === "overview"
-              ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20"
-              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          }`}
-        >
-          <LayoutDashboard className="size-3.5" />
-          <span>Overview</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Group 1: Structure & Overview */}
+          <div className="flex flex-wrap items-center gap-1 rounded-xl bg-neutral-950/40 p-1 border border-border/30">
+            <span className="hidden xl:inline-flex items-center px-2 font-mono text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wider">
+              Structure
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveTab("overview")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "overview"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <LayoutDashboard className="size-3.5" />
+              <span>Overview</span>
+            </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("profile")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-medium transition-all cursor-pointer shrink-0 ${
-            activeTab === "profile"
-              ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20"
-              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          }`}
-        >
-          <User className="size-3.5" />
-          <span>Site Profile</span>
-        </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("sections")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "sections"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <Layers className="size-3.5" />
+              <span>Page Builder</span>
+              <span
+                className={`ml-1 rounded px-1.5 py-0.2 text-[10px] font-mono ${
+                  activeTab === "sections"
+                    ? "bg-black/25 text-signal-ink font-bold"
+                    : "bg-signal/15 text-signal font-semibold"
+                }`}
+              >
+                {sectionCount}
+              </span>
+            </button>
+          </div>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("projects")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-medium transition-all cursor-pointer shrink-0 ${
-            activeTab === "projects"
-              ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20"
-              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          }`}
-        >
-          <FolderGit2 className="size-3.5" />
-          <span>Projects ({projectCount})</span>
-        </button>
+          <div className="h-6 w-px bg-border/40 hidden lg:block" />
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("skills")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-medium transition-all cursor-pointer shrink-0 ${
-            activeTab === "skills"
-              ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20"
-              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          }`}
-        >
-          <Cpu className="size-3.5" />
-          <span>Tech Stack</span>
-        </button>
+          {/* Group 2: Content Stores */}
+          <div className="flex flex-wrap items-center gap-1 rounded-xl bg-neutral-950/40 p-1 border border-border/30">
+            <span className="hidden xl:inline-flex items-center px-2 font-mono text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wider">
+              Content
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveTab("profile")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "profile"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <User className="size-3.5" />
+              <span>Profile</span>
+            </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("ml")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-medium transition-all cursor-pointer shrink-0 ${
-            activeTab === "ml"
-              ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20"
-              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          }`}
-        >
-          <Brain className="size-3.5" />
-          <span>ML Runs ({mlCount})</span>
-        </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("projects")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "projects"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <FolderGit2 className="size-3.5" />
+              <span>Projects</span>
+              <span
+                className={`ml-1 rounded px-1.5 py-0.2 text-[10px] font-mono ${
+                  activeTab === "projects"
+                    ? "bg-black/25 text-signal-ink font-bold"
+                    : "bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                {projectCount}
+              </span>
+            </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("journey")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-medium transition-all cursor-pointer shrink-0 ${
-            activeTab === "journey"
-              ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20"
-              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          }`}
-        >
-          <Milestone className="size-3.5" />
-          <span>Journey ({journeyCount})</span>
-        </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("skills")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "skills"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <Cpu className="size-3.5" />
+              <span>Stack</span>
+            </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("activities")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-medium transition-all cursor-pointer shrink-0 ${
-            activeTab === "activities"
-              ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20"
-              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          }`}
-        >
-          <Award className="size-3.5" />
-          <span>Activities ({activityCount}) & Certs ({certCount})</span>
-        </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("ml")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "ml"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <Brain className="size-3.5" />
+              <span>ML Runs</span>
+              <span
+                className={`ml-1 rounded px-1.5 py-0.2 text-[10px] font-mono ${
+                  activeTab === "ml"
+                    ? "bg-black/25 text-signal-ink font-bold"
+                    : "bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                {mlCount}
+              </span>
+            </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("rag")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-medium transition-all cursor-pointer shrink-0 ${
-            activeTab === "rag"
-              ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20"
-              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          }`}
-        >
-          <Cpu className="size-3.5" />
-          <span>RAG AI & Telemetry</span>
-        </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("journey")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "journey"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <Milestone className="size-3.5" />
+              <span>Journey</span>
+              <span
+                className={`ml-1 rounded px-1.5 py-0.2 text-[10px] font-mono ${
+                  activeTab === "journey"
+                    ? "bg-black/25 text-signal-ink font-bold"
+                    : "bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                {journeyCount}
+              </span>
+            </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("tests")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-medium transition-all cursor-pointer shrink-0 ${
-            activeTab === "tests"
-              ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20"
-              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          }`}
-        >
-          <FlaskConical className="size-3.5" />
-          <span>Tests & Deploy</span>
-        </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("activities")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "activities"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <Award className="size-3.5" />
+              <span>Activities &amp; Certs</span>
+              <span
+                className={`ml-1 rounded px-1.5 py-0.2 text-[10px] font-mono ${
+                  activeTab === "activities"
+                    ? "bg-black/25 text-signal-ink font-bold"
+                    : "bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                {activityCount + certCount}
+              </span>
+            </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("copy")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-xs font-medium transition-all cursor-pointer shrink-0 ${
-            activeTab === "copy"
-              ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20"
-              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          }`}
-        >
-          <Type className="size-3.5" />
-          <span>Copy & Headers</span>
-        </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("copy")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "copy"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <Type className="size-3.5" />
+              <span>Copy &amp; Headers</span>
+            </button>
+          </div>
+
+          <div className="h-6 w-px bg-border/40 hidden lg:block" />
+
+          {/* Group 3: System, AI & Ops */}
+          <div className="flex flex-wrap items-center gap-1 rounded-xl bg-neutral-950/40 p-1 border border-border/30">
+            <span className="hidden xl:inline-flex items-center px-2 font-mono text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wider">
+              System
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveTab("rag")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "rag"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <Radio className="size-3.5" />
+              <span>RAG AI &amp; Telemetry</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("tests")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "tests"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <FlaskConical className="size-3.5" />
+              <span>Tests &amp; Deploy</span>
+            </button>
+          </div>
+        </div>
       </nav>
 
       {/* Main Tab Content Panel */}
@@ -573,7 +655,12 @@ export function MainAdminDashboard() {
           </div>
         )}
 
-        {/* ======================= TAB 2: PROFILE ======================= */}
+        {/* ======================= TAB 2: SECTIONS & PAGE BUILDER ======================= */}
+        {activeTab === "sections" && (
+          <SectionsManager onNavigateTab={(tab) => setActiveTab(tab as MainTab)} />
+        )}
+
+        {/* ======================= TAB 3: PROFILE ======================= */}
         {activeTab === "profile" && (
           <div className="space-y-6">
             <div>
@@ -726,7 +813,11 @@ export function MainAdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Project Selection List */}
-              <div className="rounded-xl border border-border/50 bg-card/30 p-2 space-y-1.5 max-h-[500px] overflow-y-auto overscroll-contain">
+              <div
+                data-lenis-prevent
+                onWheel={(e) => e.stopPropagation()}
+                className="rounded-xl border border-border/50 bg-card/30 p-2 space-y-1.5 max-h-[520px] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-border hover:scrollbar-thumb-muted-foreground/40"
+              >
                 {content.projects?.map((proj) => {
                   const isSel = (selectedProject?.id === proj.id);
                   return (
@@ -817,6 +908,19 @@ export function MainAdminDashboard() {
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
+                    </div>
+
+                    <div className="sm:col-span-2 space-y-1">
+                      <label className="font-mono text-[11px] text-muted-foreground">Technologies &amp; Tags</label>
+                      <TagInput
+                        placeholder="e.g. Next.js, TypeScript, Tailwind, Python"
+                        value={selectedProject.technologies}
+                        onChange={(tags) => {
+                          const idx = content.projects.findIndex((p) => p.id === selectedProject.id);
+                          if (idx !== -1) updateField(`projects.${idx}.technologies`, tags);
+                        }}
+                        className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                      />
                     </div>
 
                     <div className="sm:col-span-2 space-y-1">
@@ -1068,10 +1172,10 @@ export function MainAdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold tracking-tight text-foreground">
-                  Journey & Milestone Timeline
+                  Journey &amp; Milestone Timeline
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Chronological career, education, and development milestones stored in content/journey.json.
+                  Circuit timeline header, telemetry metrics, and career milestones stored in content/copy.json and content/journey.json.
                 </p>
               </div>
               <button
@@ -1084,7 +1188,212 @@ export function MainAdminDashboard() {
               </button>
             </div>
 
+            {/* Timeline Header & Telemetry Card */}
+            <div className="rounded-2xl border border-border/60 bg-card/40 p-5 backdrop-blur-md space-y-4">
+              <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-signal flex items-center gap-2">
+                <Milestone className="size-4" />
+                <span>Circuit Timeline Header &amp; Telemetry Metrics</span>
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="font-mono text-[10.5px] text-muted-foreground">Section Eyebrow</label>
+                  <input
+                    type="text"
+                    value={content.copy?.journey?.eyebrow || ""}
+                    onChange={(e) => updateField("copy.journey.eyebrow", e.target.value)}
+                    className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-mono text-[10.5px] text-muted-foreground">Section Title</label>
+                  <input
+                    type="text"
+                    value={content.copy?.journey?.title || ""}
+                    onChange={(e) => updateField("copy.journey.title", e.target.value)}
+                    className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-mono text-[10.5px] text-muted-foreground">Status Badge</label>
+                  <input
+                    type="text"
+                    value={content.copy?.journey?.status || ""}
+                    onChange={(e) => updateField("copy.journey.status", e.target.value)}
+                    className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-mono text-[10.5px] text-muted-foreground">Section Description</label>
+                <textarea
+                  rows={2}
+                  value={content.copy?.journey?.description || ""}
+                  onChange={(e) => updateField("copy.journey.description", e.target.value)}
+                  className="w-full rounded-lg border border-border/60 bg-neutral-950/60 p-2.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-mono text-[10.5px] text-muted-foreground">Stream Prefix Label</label>
+                  <input
+                    type="text"
+                    value={content.copy?.journey?.streamLabel || ""}
+                    onChange={(e) => updateField("copy.journey.streamLabel", e.target.value)}
+                    className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-mono text-[10.5px] text-muted-foreground">All Filter Label</label>
+                  <input
+                    type="text"
+                    value={content.copy?.journey?.allBranchesLabel || ""}
+                    onChange={(e) => updateField("copy.journey.allBranchesLabel", e.target.value)}
+                    className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* 5 Telemetry Metrics Grid */}
+              <div className="border-t border-border/40 pt-3 space-y-2">
+                <label className="font-mono text-[11px] font-semibold text-foreground uppercase tracking-wider block">
+                  Header Telemetry Cards (5 Metrics)
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {/* Span */}
+                  <div className="rounded-xl border border-border/50 bg-neutral-950/40 p-3 space-y-1.5">
+                    <span className="font-mono text-[10px] text-signal uppercase font-bold">1. Span Metric</span>
+                    <input
+                      type="text"
+                      placeholder="Label (e.g. Span)"
+                      value={content.copy?.journey?.statSpanLabel || ""}
+                      onChange={(e) => updateField("copy.journey.statSpanLabel", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Value (e.g. 2023 – 2026)"
+                      value={content.copy?.journey?.statSpanValue || ""}
+                      onChange={(e) => updateField("copy.journey.statSpanValue", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Subtitle (e.g. 4 Years)"
+                      value={content.copy?.journey?.statSpanSub || ""}
+                      onChange={(e) => updateField("copy.journey.statSpanSub", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                  </div>
+
+                  {/* Milestones */}
+                  <div className="rounded-xl border border-border/50 bg-neutral-950/40 p-3 space-y-1.5">
+                    <span className="font-mono text-[10px] text-signal uppercase font-bold">2. Milestones (Dynamic)</span>
+                    <input
+                      type="text"
+                      placeholder="Label (e.g. Milestones)"
+                      value={content.copy?.journey?.statMilestonesLabel || ""}
+                      onChange={(e) => updateField("copy.journey.statMilestonesLabel", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                    <p className="font-mono text-[10.5px] text-muted-foreground italic py-1">
+                      Count: {journeyCount} Records (Calculated)
+                    </p>
+                    <input
+                      type="text"
+                      placeholder="Subtitle (e.g. Records)"
+                      value={content.copy?.journey?.statMilestonesSub || ""}
+                      onChange={(e) => updateField("copy.journey.statMilestonesSub", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                  </div>
+
+                  {/* Hackathons */}
+                  <div className="rounded-xl border border-border/50 bg-neutral-950/40 p-3 space-y-1.5">
+                    <span className="font-mono text-[10px] text-signal uppercase font-bold">3. Hackathons</span>
+                    <input
+                      type="text"
+                      placeholder="Label (e.g. Hackathons)"
+                      value={content.copy?.journey?.statHackathonsLabel || ""}
+                      onChange={(e) => updateField("copy.journey.statHackathonsLabel", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Value (e.g. 1st Place)"
+                      value={content.copy?.journey?.statHackathonsValue || ""}
+                      onChange={(e) => updateField("copy.journey.statHackathonsValue", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Subtitle (e.g. UniHack Winner)"
+                      value={content.copy?.journey?.statHackathonsSub || ""}
+                      onChange={(e) => updateField("copy.journey.statHackathonsSub", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                  </div>
+
+                  {/* Robotics */}
+                  <div className="rounded-xl border border-border/50 bg-neutral-950/40 p-3 space-y-1.5">
+                    <span className="font-mono text-[10px] text-signal uppercase font-bold">4. Robotics</span>
+                    <input
+                      type="text"
+                      placeholder="Label (e.g. Robotics)"
+                      value={content.copy?.journey?.statRoboticsLabel || ""}
+                      onChange={(e) => updateField("copy.journey.statRoboticsLabel", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Value (e.g. FTC)"
+                      value={content.copy?.journey?.statRoboticsValue || ""}
+                      onChange={(e) => updateField("copy.journey.statRoboticsValue", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Subtitle (e.g. Nationals & Mentor)"
+                      value={content.copy?.journey?.statRoboticsSub || ""}
+                      onChange={(e) => updateField("copy.journey.statRoboticsSub", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                  </div>
+
+                  {/* Open Source */}
+                  <div className="rounded-xl border border-border/50 bg-neutral-950/40 p-3 space-y-1.5">
+                    <span className="font-mono text-[10px] text-signal uppercase font-bold">5. Open Source</span>
+                    <input
+                      type="text"
+                      placeholder="Label (e.g. Open Source)"
+                      value={content.copy?.journey?.statOpenSourceLabel || ""}
+                      onChange={(e) => updateField("copy.journey.statOpenSourceLabel", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Value (e.g. 40+)"
+                      value={content.copy?.journey?.statOpenSourceValue || ""}
+                      onChange={(e) => updateField("copy.journey.statOpenSourceValue", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Subtitle (e.g. Repositories)"
+                      value={content.copy?.journey?.statOpenSourceSub || ""}
+                      onChange={(e) => updateField("copy.journey.statOpenSourceSub", e.target.value)}
+                      className="w-full rounded border border-border/60 bg-neutral-900 px-2 py-1 font-mono text-xs text-foreground"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-3">
+              <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40 pb-1.5">
+                Milestone Items ({journeyCount})
+              </h3>
               {content.journey?.map((item, jIdx) => (
                 <div
                   key={jIdx}
@@ -1152,11 +1461,11 @@ export function MainAdminDashboard() {
 
         {/* ======================= TAB 7: ACTIVITIES & CERTS ======================= */}
         {activeTab === "activities" && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold tracking-tight text-foreground">
-                  Activities, Competitions & Certifications
+                  Activities, Competitions &amp; Certifications
                 </h2>
                 <p className="text-xs text-muted-foreground">
                   Extracurricular competitions, hackathons, and accredited licenses in content/activities.json and content/certifications.json.
@@ -1182,15 +1491,147 @@ export function MainAdminDashboard() {
               </div>
             </div>
 
+            {/* Extracurricular Activities Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-border/40 pb-2">
+                <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-signal flex items-center gap-2">
+                  <Award className="size-4" />
+                  <span>Extracurricular Activities &amp; Competitions ({activityCount})</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={addNewActivity}
+                  className="text-signal hover:underline text-[11px] font-mono cursor-pointer flex items-center gap-1"
+                >
+                  <Plus className="size-3" /> Add Activity
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {content.activities?.map((act, aIdx) => (
+                  <div key={act.id || aIdx} className="rounded-xl border border-border/50 bg-card/40 p-4 space-y-3">
+                    <div className="flex justify-between items-center border-b border-border/40 pb-2">
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="font-mono text-xs font-semibold text-foreground truncate max-w-[180px]">
+                          {act.title || "Activity Title"}
+                        </span>
+                        <span className="rounded bg-signal/15 px-1.5 py-0.5 font-mono text-[10px] text-signal uppercase tracking-wider shrink-0">
+                          {act.type || "Event"}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => deleteActivity(act.id)}
+                        className="text-xs text-destructive hover:underline font-mono cursor-pointer"
+                      >
+                        × Delete
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Title</label>
+                        <input
+                          type="text"
+                          placeholder="Title"
+                          value={act.title || ""}
+                          onChange={(e) => updateField(`activities.${aIdx}.title`, e.target.value)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Type (e.g. Hackathon)</label>
+                        <input
+                          type="text"
+                          placeholder="Type"
+                          value={act.type || ""}
+                          onChange={(e) => updateField(`activities.${aIdx}.type`, e.target.value)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Year</label>
+                        <input
+                          type="text"
+                          placeholder="Year (e.g. 2025)"
+                          value={act.year || ""}
+                          onChange={(e) => updateField(`activities.${aIdx}.year`, e.target.value)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Location</label>
+                        <input
+                          type="text"
+                          placeholder="Location (e.g. Romania, Timisoara)"
+                          value={act.location || ""}
+                          onChange={(e) => updateField(`activities.${aIdx}.location`, e.target.value)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Link / URL (Optional)</label>
+                        <input
+                          type="text"
+                          placeholder="https://..."
+                          value={act.link || ""}
+                          onChange={(e) => updateField(`activities.${aIdx}.link`, e.target.value || undefined)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Image Path (Optional)</label>
+                        <input
+                          type="text"
+                          placeholder="/activities/photo.webp"
+                          value={act.image || ""}
+                          onChange={(e) => updateField(`activities.${aIdx}.image`, e.target.value || undefined)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-mono text-[10px] text-muted-foreground">Description</label>
+                      <textarea
+                        rows={2}
+                        placeholder="Description"
+                        value={act.description || ""}
+                        onChange={(e) => updateField(`activities.${aIdx}.description`, e.target.value)}
+                        className="w-full rounded border border-border/60 bg-neutral-950/60 p-2 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Certifications Section */}
-            <div className="space-y-3">
-              <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40 pb-1.5">
-                Accredited Certifications ({certCount})
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-4 pt-4 border-t border-border/40">
+              <div className="flex items-center justify-between border-b border-border/40 pb-2">
+                <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-saffron flex items-center gap-2">
+                  <Award className="size-4" />
+                  <span>Accredited Certifications ({certCount})</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={addNewCert}
+                  className="text-saffron hover:underline text-[11px] font-mono cursor-pointer flex items-center gap-1"
+                >
+                  <Plus className="size-3" /> Add Certificate
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {content.certifications?.map((cert, cIdx) => (
-                  <div key={cIdx} className="rounded-xl border border-border/50 bg-card/40 p-3.5 space-y-2.5">
-                    <div className="flex justify-between items-center">
+                  <div key={cert.id || cIdx} className="rounded-xl border border-border/50 bg-card/40 p-4 space-y-3">
+                    <div className="flex justify-between items-center border-b border-border/40 pb-2">
                       <span className="font-mono text-xs font-semibold text-foreground truncate max-w-[200px]">
                         {cert.title || "Certification"}
                       </span>
@@ -1203,33 +1644,80 @@ export function MainAdminDashboard() {
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <input
-                        type="text"
-                        placeholder="Title"
-                        value={cert.title || ""}
-                        onChange={(e) => updateField(`certifications.${cIdx}.title`, e.target.value)}
-                        className="rounded border border-border/60 bg-neutral-950/60 px-2 py-1 font-mono text-[11px] text-foreground"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Subtitle"
-                        value={cert.subtitle || ""}
-                        onChange={(e) => updateField(`certifications.${cIdx}.subtitle`, e.target.value)}
-                        className="rounded border border-border/60 bg-neutral-950/60 px-2 py-1 font-mono text-[11px] text-foreground"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Issuer"
-                        value={cert.issuer || ""}
-                        onChange={(e) => updateField(`certifications.${cIdx}.issuer`, e.target.value)}
-                        className="rounded border border-border/60 bg-neutral-950/60 px-2 py-1 font-mono text-[11px] text-foreground"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Year"
-                        value={cert.year || ""}
-                        onChange={(e) => updateField(`certifications.${cIdx}.year`, e.target.value)}
-                        className="rounded border border-border/60 bg-neutral-950/60 px-2 py-1 font-mono text-[11px] text-foreground"
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Title</label>
+                        <input
+                          type="text"
+                          placeholder="Title"
+                          value={cert.title || ""}
+                          onChange={(e) => updateField(`certifications.${cIdx}.title`, e.target.value)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Subtitle</label>
+                        <input
+                          type="text"
+                          placeholder="Subtitle"
+                          value={cert.subtitle || ""}
+                          onChange={(e) => updateField(`certifications.${cIdx}.subtitle`, e.target.value)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Issuer</label>
+                        <input
+                          type="text"
+                          placeholder="Issuer"
+                          value={cert.issuer || ""}
+                          onChange={(e) => updateField(`certifications.${cIdx}.issuer`, e.target.value)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Year</label>
+                        <input
+                          type="text"
+                          placeholder="Year"
+                          value={cert.year || ""}
+                          onChange={(e) => updateField(`certifications.${cIdx}.year`, e.target.value)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Poster Thumbnail (Optional)</label>
+                        <input
+                          type="text"
+                          placeholder="/certificates/ccna.webp"
+                          value={cert.poster || ""}
+                          onChange={(e) => updateField(`certifications.${cIdx}.poster`, e.target.value || undefined)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">PDF File (Optional)</label>
+                        <input
+                          type="text"
+                          placeholder="/certificates/ccna.pdf"
+                          value={cert.file || ""}
+                          onChange={(e) => updateField(`certifications.${cIdx}.file`, e.target.value || undefined)}
+                          className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-mono text-[10px] text-muted-foreground">Tags (comma-separated)</label>
+                      <TagInput
+                        placeholder="Networking, TCP/IP, Routing"
+                        value={cert.tags}
+                        onChange={(tags) =>
+                          updateField(`certifications.${cIdx}.tags`, tags)
+                        }
+                        className="w-full rounded border border-border/60 bg-neutral-950/60 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
                       />
                     </div>
                   </div>

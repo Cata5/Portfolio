@@ -814,37 +814,5 @@
       "GPU recommended for speed (CPU works)",
       "Recognition quality varies with handwriting and the chosen model"
     ]
-  },
-  {
-    "id": "webstudio",
-    "title": "Webstudio · working copy",
-    "category": "Experiments",
-    "platform": "Web",
-    "year": null,
-    "status": "Experimental",
-    "summary": "A local working copy of Webstudio, the open-source visual website builder monorepo. No git history is present in this copy, so personal changes could not be verified.",
-    "description": "A local copy of the Webstudio monorepo (apps/builder plus the sdk, css-engine, design-system and prisma packages). It's kept for studying and experimenting with a production visual-builder codebase. Because this folder has no .git history, I could not verify which parts (if any) were authored or changed locally — treat it as a working copy until that's confirmed.",
-    "technologies": [
-      "pnpm monorepo",
-      "React",
-      "TypeScript",
-      "Prisma",
-      "PostgREST",
-      "CSS engine",
-      "SDK packages"
-    ],
-    "image": null,
-    "featured": false,
-    "excludeFromRelated": true,
-    "features": [
-      "Webstudio Builder application (apps/builder)",
-      "Extensive package ecosystem: sdk, react-sdk, css-engine, design-system, prisma-client, cli",
-      "SDK component libraries for React, Radix, Remix and React Router"
-    ],
-    "architecture": "A pnpm-workspace monorepo: apps/builder is the visual editor; packages/ contains the sdk, css-engine, design-system, prisma-client and component libraries consumed by generated sites.",
-    "limitations": [
-      "No git history in the copy — personal contributions could not be verified",
-      "Large third-party codebase; not authored from scratch"
-    ]
   }
 ]

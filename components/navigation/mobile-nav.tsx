@@ -18,26 +18,47 @@ import { site } from "@/data/site";
 import { withBasePath } from "@/lib/base-path";
 import { cn } from "@/lib/utils";
 
-const links = [
-  { label: "About", href: "#about", desc: "Background & focus" },
-  { label: "Featured Work", href: "#work", desc: "Vortex multi-platform system" },
-  { label: "Stack", href: "#stack", desc: "Technologies & tools" },
-  { label: "ML", href: "#ml", desc: "Experiments & models" },
-  { label: "Journey", href: "#journey", desc: "Timeline & milestones" },
-  { label: "Contact", href: "#contact", desc: "Get in touch" },
-] as const;
+import { useEditor } from "@/components/editor/editor-context";
+import { sections as defaultSections, SECTION_TYPE_META } from "@/data/sections";
+
+const SECTION_DESCRIPTIONS: Record<string, string> = {
+  about: "Background & focus",
+  work: "Vortex multi-platform system",
+  "featured-projects": "Vortex multi-platform system",
+  projects: "Archive & code repository",
+  stack: "Technologies & tools",
+  certifications: "Verified credentials",
+  ml: "Experiments & models",
+  journey: "Timeline & milestones",
+  activities: "Extracurriculars & initiatives",
+  contact: "Get in touch",
+};
 
 interface MobileNavProps {
   activeSection?: string | null;
 }
 
 export function MobileNav({ activeSection }: MobileNavProps) {
+  const { content } = useEditor();
   const pathname = usePathname();
   const isHome =
     pathname === "/" ||
     pathname === "" ||
     pathname.endsWith("/Portofolio-V2/");
   const { setIsOpen: setIsRAGOpen } = useRAG();
+
+  const pageSections = content?.sections || defaultSections;
+  const links = pageSections
+    .filter((s) => s.enabled && s.navLabel && s.type !== "hero")
+    .map((s) => ({
+      label: s.navLabel!,
+      href: s.type === "featured-projects" ? "#work" : `#${s.id}`,
+      desc:
+        SECTION_DESCRIPTIONS[s.type] ||
+        SECTION_DESCRIPTIONS[s.id] ||
+        SECTION_TYPE_META[s.type]?.description ||
+        "Section",
+    }));
 
   return (
     <Sheet>
