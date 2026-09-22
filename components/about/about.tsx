@@ -76,12 +76,12 @@ export function About() {
             </h2>
             <div className="mt-10 max-w-xl space-y-6">
               <Editable path="copy.about.paragraph1" label="Bio Paragraph 1" type="textarea">
-                <p className="about-para text-lg font-extralight leading-relaxed text-muted-foreground">
+                <p className="about-para text-lg font-light leading-relaxed text-muted-foreground">
                   {copy.about?.paragraph1}
                 </p>
               </Editable>
               <Editable path="copy.about.paragraph2" label="Bio Paragraph 2" type="textarea">
-                <p className="about-para text-lg font-extralight leading-relaxed text-muted-foreground">
+                <p className="about-para text-lg font-light leading-relaxed text-muted-foreground">
                   {copy.about?.paragraph2}
                 </p>
               </Editable>

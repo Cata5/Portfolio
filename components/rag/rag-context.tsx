@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { isGhPages } from "@/lib/base-path";
 import type { ValidatedCitation } from "@/lib/rag/citations/validator";
 import type { GroundedEvidence, RetrievalDiagnostics } from "@/lib/rag/types/retrieval";
 import type { PipelineTimings, RAGPipelineStage } from "@/lib/rag/types/events";
@@ -166,10 +167,11 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Keyboard shortcut listener: ⌘J / Ctrl+J
+  // Keyboard shortcut listener: ⌘Shift+J / Ctrl+Shift+J (plain Ctrl+J is the
+  // browser's "open downloads" shortcut — don't hijack it)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key?.toLowerCase() === "j") {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key?.toLowerCase() === "j") {
         e.preventDefault();
         setIsOpen((prev) => !prev);
       }
@@ -183,6 +185,10 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
     fetchStatus();
     fetchConfig();
     refreshDocuments();
+
+    // On static deploys (GitHub Pages) there is no server and the status stub
+    // never changes — polling it every 12s only burns visitor battery.
+    if (isGhPages) return;
 
     // Heartbeat health check every 12 seconds
     const interval = setInterval(() => {

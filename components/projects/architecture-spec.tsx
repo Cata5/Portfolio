@@ -488,7 +488,7 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                         Android TV
                       </span>
                     </th>
-                    <th className="pb-3 font-semibold uppercase tracking-wider text-purple-500 dark:text-purple-400 w-[26%]">
+                    <th className="pb-3 font-semibold uppercase tracking-wider text-foreground/80 w-[26%]">
                       <span className="inline-flex items-center gap-1.5">
                         <Monitor className="size-3.5" />
                         PC Desktop
@@ -555,7 +555,7 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                         <span className="text-signal font-medium text-right">{row.tv}</span>
                       </div>
                       <div className="flex justify-between items-start gap-2">
-                        <span className="flex items-center gap-1.5 text-purple-500 dark:text-purple-400 shrink-0">
+                        <span className="flex items-center gap-1.5 text-foreground/80 shrink-0">
                           <Monitor className="size-3" />
                           PC:
                         </span>
@@ -600,7 +600,7 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                         <p className="mt-1.5 font-mono text-[11px] font-semibold text-foreground">
                           {item.tech}
                         </p>
-                        <p className="mt-1.5 text-xs font-extralight leading-relaxed text-muted-foreground">
+                        <p className="mt-1.5 text-xs font-light leading-relaxed text-muted-foreground">
                           {item.desc}
                         </p>
                         <div className="mt-3 flex items-center gap-1.5 font-mono text-[9px] text-emerald-600 dark:text-emerald-400">
@@ -618,7 +618,7 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                               p === "TV"
                                 ? "border-signal/40 bg-signal/10 text-signal"
                                 : p === "PC"
-                                  ? "border-purple-500/40 bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                                  ? "border-signal/40 bg-signal/10 text-signal"
                                   : "border-border/60 bg-muted/60 text-foreground/80",
                             )}
                           >
@@ -678,7 +678,7 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                   className={cn(
                     "flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-mono text-[11px] font-medium transition-all cursor-pointer shrink-0",
                     moduleFilter === "android"
-                      ? "bg-emerald-500 text-black font-semibold shadow-sm"
+                      ? "bg-signal text-signal-ink font-semibold shadow-sm"
                       : "text-muted-foreground hover:bg-muted/60 dark:hover:bg-neutral-900 hover:text-foreground",
                   )}
                 >
@@ -714,7 +714,7 @@ export function ArchitectureSpec({ project }: { project: Project }) {
             </div>
 
             {/* Shared Core Highlights Strip */}
-            <div className="rounded-xl border border-signal/30 bg-gradient-to-r from-signal/10 via-purple-500/5 to-signal/10 p-4 space-y-3 min-w-0">
+            <div className="rounded-xl border border-signal/30 bg-signal/[0.06] p-4 space-y-3 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-signal/20 pb-2.5">
                 <div className="flex items-center gap-2">
                   <Workflow className="size-4 text-signal shrink-0" />
@@ -761,12 +761,12 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                 <div className="rounded-xl border border-border/60 bg-card/80 dark:bg-neutral-950/80 p-4 min-w-0 overflow-hidden flex flex-col">
                   <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2.5 mb-3">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Smartphone className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                      <Smartphone className="size-4 shrink-0 text-foreground/70" />
                       <span className="truncate font-mono text-xs font-bold uppercase tracking-wider text-foreground">
                         app/ · Android Runtime
                       </span>
                     </div>
-                    <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 shrink-0 font-semibold">
+                    <span className="font-mono text-[9px] uppercase tracking-wider text-foreground/70 shrink-0 font-semibold">
                       139 files
                     </span>
                   </div>
@@ -841,7 +841,7 @@ export function ArchitectureSpec({ project }: { project: Project }) {
         {/* Footer */}
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-3 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground min-w-0">
           <span className="flex items-center gap-1.5">
-            <span className="size-1 rounded-full bg-emerald-500" />
+            <span className="size-1 rounded-full bg-signal" />
             all metrics verified against source · app/ + VortexDesktop/
           </span>
           <span>vortex :: architecture-spec</span>

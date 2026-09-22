@@ -236,6 +236,19 @@ html.lenis body {
   cursor: none !important;
 }
 
+/* Text fields keep the native I-beam: precision text editing needs it and
+   the custom dot obscures where the caret will land. */
+.has-custom-cursor input,
+.has-custom-cursor textarea,
+.has-custom-cursor select,
+.has-custom-cursor [contenteditable="true"],
+.has-custom-cursor input *,
+.has-custom-cursor textarea *,
+.has-custom-cursor select *,
+.has-custom-cursor [contenteditable="true"] * {
+  cursor: auto !important;
+}
+
 @media (pointer: coarse) {
   .has-custom-cursor,
   .has-custom-cursor * {

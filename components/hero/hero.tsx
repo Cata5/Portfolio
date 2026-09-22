@@ -214,7 +214,7 @@ export function Hero() {
           <GlassCard className="hero-glass w-fit max-w-full md:max-w-[520px] lg:max-w-[640px] xl:max-w-[720px] p-5 sm:p-7 lg:p-9">
             <HeroTypography />
             <Editable path="site.tagline" label="Tagline" type="textarea">
-              <p className="hero-tagline mt-6 sm:mt-8 lg:mt-10 max-w-md text-base sm:text-lg md:text-lg lg:text-xl font-extralight leading-relaxed text-muted-foreground">
+              <p className="hero-tagline mt-6 sm:mt-8 lg:mt-10 max-w-md text-base sm:text-lg md:text-lg lg:text-xl font-light leading-relaxed text-muted-foreground">
                 {site.tagline}
               </p>
             </Editable>

@@ -114,7 +114,7 @@ export function MLNotebook() {
                   </p>
                 </Editable>
                 <MLFlowDiagram className="mt-10" />
-                <p className="mt-10 max-w-sm text-lg font-extralight leading-relaxed text-muted-foreground">
+                <p className="mt-10 max-w-sm text-lg font-light leading-relaxed text-muted-foreground">
                   Model training pipelines, hyperparameter logs, and benchmark metrics for computer vision and generative architectures.
                 </p>
               </div>

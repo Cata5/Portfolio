@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 import { gsap } from "@/components/motion/gsap";
 import { holeState } from "@/components/triangle-world/black-hole";
+import { prefersReducedMotion } from "@/lib/motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -61,27 +62,52 @@ export function ContactForm({
     setStatus("submitting");
     setErrorMessage("");
 
-    // 1. Dispatch background POST request
-    const postPromise = fetch(scriptUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8",
-      },
-      body: payload,
-      mode: "no-cors",
-    }).catch((err) => {
-      console.warn("Background transmission warning:", err);
-    });
+    // POST with a readable response (text/plain avoids a CORS preflight but
+    // still lets us read the result). The form previously used mode:"no-cors",
+    // which made the response opaque — and success was shown unconditionally,
+    // so visitors could see "Message Sent" after a failed delivery.
+    let delivered = false;
+    try {
+      const res = await fetch(scriptUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: payload,
+      });
+      delivered = res.ok;
+    } catch {
+      delivered = false;
+    }
 
-    // 2. Animate the 3D Black Hole over the text, suck the message around its ring, and return
+    if (!delivered) {
+      setStatus("error");
+      setErrorMessage(
+        "The message could not be sent right now — please try again or email me directly.",
+      );
+      return;
+    }
+
     const formEl = formWrapperRef.current;
-    if (formEl) {
+    // Reduced motion: skip the theatrical hand-off entirely.
+    if (!formEl || prefersReducedMotion()) {
+      setStatus("success");
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+        _botField: "",
+      });
+      return;
+    }
+
+    // Shortened signature moment: the hole glides over the form while the
+    // message settles into it — one quick beat instead of a 3-second takeover.
+    {
       const rect = formEl.getBoundingClientRect();
       const formCenterX = (rect.left + rect.width / 2) / window.innerWidth;
       const formCenterY = (rect.top + rect.height / 2) / window.innerHeight;
       const initialCx = window.innerWidth < 640 ? 0.5 : 0.84;
       const initialOy = 0.50;
-
       // Elevate canvas above the text & content
       holeState.suctionActive = true;
       holeState.canvasZIndex = 50;
@@ -90,9 +116,7 @@ export function ContactForm({
       holeState.scaleMul = 1.0;
 
       const tl = gsap.timeline({
-        onComplete: async () => {
-          await postPromise;
-
+        onComplete: () => {
           // Reset canvas z-index and state
           holeState.canvasZIndex = 0;
           holeState.suctionActive = false;
@@ -116,7 +140,7 @@ export function ContactForm({
         },
       });
 
-      // Phase 1: Black Hole glides directly over the form text (0.0s -> 0.85s)
+      // Phase 1: Black Hole glides directly over the form text (0.0s -> 0.7s)
       tl.to(
         holeState,
         {
@@ -125,40 +149,27 @@ export function ContactForm({
           scaleMul: 1.5,
           finalSpin: 3.5,
           finalPower: 1,
-          duration: 0.85,
+          duration: 0.7,
           ease: "power2.inOut",
         },
         0,
       );
 
-      // Phase 2: Form text swirls around the spinning accretion ring & shrinks into singularity (0.75s -> 1.95s)
-      tl.to(
-        holeState,
-        {
-          finalSpin: 6.5,
-          duration: 1.2,
-          ease: "power1.in",
-        },
-        0.75,
-      );
-
+      // Phase 2: the form recedes into the hole, no whirl (0.35s -> 0.95s)
       tl.to(
         formEl,
         {
-          scale: 0.02,
-          rotation: 720,
-          skewX: 30,
-          skewY: -15,
-          filter: "blur(8px)",
+          scale: 0.6,
           opacity: 0,
+          filter: "blur(6px)",
           transformOrigin: "50% 50%",
-          duration: 1.2,
-          ease: "power3.in",
+          duration: 0.6,
+          ease: "power2.in",
         },
-        0.75,
+        0.35,
       );
 
-      // Phase 3: Black Hole glides back to resting position (1.95s -> 3.05s)
+      // Phase 3: the hole returns to rest while the success panel mounts (0.9s -> 1.4s)
       tl.to(
         holeState,
         {
@@ -167,14 +178,11 @@ export function ContactForm({
           scaleMul: 1.0,
           finalSpin: 1.0,
           finalPower: 0,
-          duration: 1.1,
+          duration: 0.5,
           ease: "power2.out",
         },
-        1.95,
+        0.9,
       );
-    } else {
-      await postPromise;
-      setStatus("success");
     }
   };
 
@@ -202,8 +210,7 @@ export function ContactForm({
               Message Sent
             </h3>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground leading-relaxed">
-              Thank you for reaching out! Your note has been sucked through the event horizon
-              and delivered directly to my inbox. I will reply shortly.
+              Thank you for reaching out — your message is in my inbox and I will reply shortly.
             </p>
             <Button
               type="button"
@@ -338,7 +345,7 @@ export function ContactForm({
                   {status === "submitting" ? (
                     <>
                       <Loader2 className="mr-2 size-4 animate-spin" />
-                      Sucking into Black Hole...
+                      Sending...
                     </>
                   ) : (
                     <>

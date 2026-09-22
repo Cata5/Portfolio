@@ -31,7 +31,7 @@ function CustomSectionCard({ section }: { section: PageSection }) {
         >
           {title}
         </TextReveal>
-        <p className="max-w-2xl font-extralight text-base sm:text-lg leading-relaxed text-muted-foreground whitespace-pre-wrap">
+        <p className="max-w-2xl font-light text-base sm:text-lg leading-relaxed text-muted-foreground whitespace-pre-wrap">
           {body}
         </p>
       </GlassCard>

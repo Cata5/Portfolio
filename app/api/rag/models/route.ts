@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getRAGConfig } from "@/lib/rag/config";
+import { stubbedRagResponse } from "@/lib/rag/gh-pages-stubs";
 
 export const dynamic = "force-static";
 
@@ -13,6 +14,9 @@ interface ModelInfo {
 }
 
 export async function GET() {
+  // Static export: never touch the LLM server or bake its config into the deploy.
+  const stubbed = stubbedRagResponse();
+  if (stubbed) return stubbed;
   try {
     const config = getRAGConfig();
     const baseUrl = (config.models.generationBaseUrl || "http://127.0.0.1:8888/v1").replace(/\/+$/, "");
@@ -78,6 +82,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const stubbed = stubbedRagResponse();
+  if (stubbed) return stubbed;
   try {
     const body = await request.json().catch(() => ({}));
     const config = getRAGConfig();

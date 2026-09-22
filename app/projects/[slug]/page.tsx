@@ -11,6 +11,7 @@ import { ScrollScale } from "@/components/motion/scroll-scale";
 import { TextReveal } from "@/components/motion/text-reveal";
 import { ProjectVisual } from "@/components/project-visual";
 import { ScreenshotGallery } from "@/components/projects/screenshot-gallery";
+import { limitationsWithSource, sourceAvailability } from "@/data/project-extras";
 import { site } from "@/data/site";
 import {
   getProject,
@@ -155,7 +156,7 @@ export default async function ProjectPage({
           >
             {project.title}
           </TextReveal>
-          <p className="mt-8 text-lg font-extralight leading-relaxed text-muted-foreground md:text-xl">
+          <p className="mt-8 text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
             {project.summary}
           </p>
           {(project.github || project.demo) && (
@@ -322,7 +323,12 @@ export default async function ProjectPage({
 
         {project.limitations && project.limitations.length > 0 && (
           <DetailSection label="Known limitations">
-            <FeatureList items={project.limitations} marker="half" />
+            <FeatureList items={limitationsWithSource(project)} marker="half" />
+          </DetailSection>
+        )}
+        {!project.limitations && sourceAvailability[project.id] && (
+          <DetailSection label="Known limitations">
+            <FeatureList items={[sourceAvailability[project.id]!]} marker="half" />
           </DetailSection>
         )}
 
@@ -356,7 +362,7 @@ export default async function ProjectPage({
                       {p.title}
                     </p>
                   </div>
-                  <p className="text-[14px] font-extralight leading-relaxed text-muted-foreground">
+                  <p className="text-[14px] font-light leading-relaxed text-muted-foreground">
                     {p.summary}
                   </p>
                 </Link>

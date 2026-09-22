@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { rag } from "@/lib/rag/rag-facade";
+import { stubbedRagResponse } from "@/lib/rag/gh-pages-stubs";
 
 export const dynamic = "force-static";
 
 export async function GET() {
+  const stubbed = stubbedRagResponse();
+  if (stubbed) return stubbed;
   try {
     const comparison = await rag.runEvaluation();
     return NextResponse.json({ success: true, comparison });
@@ -14,6 +17,8 @@ export async function GET() {
 }
 
 export async function POST() {
+  const stubbed = stubbedRagResponse();
+  if (stubbed) return stubbed;
   try {
     const comparison = await rag.runEvaluation();
     return NextResponse.json({ success: true, comparison });

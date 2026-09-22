@@ -32,7 +32,7 @@ export function Contact() {
               </Editable>
               <Reveal delay={0.15}>
                 <Editable path="copy.contact.description" label="Contact Description" type="textarea">
-                  <p className="mt-6 max-w-md text-base font-extralight leading-relaxed text-muted-foreground">
+                  <p className="mt-6 max-w-md text-base font-light leading-relaxed text-muted-foreground">
                     {copy.contact?.description ??
                       "I read everything. Write to me about work, experiments, or an idea that doesn't fit anywhere else."}
                   </p>

@@ -6,11 +6,11 @@ import { CLogo } from "./c-logo";
 
 export function RAGFloatingTrigger() {
   const { isOpen, setIsOpen } = useRAG();
-  const [shortcut, setShortcut] = useState("Ctrl J");
+  const [shortcut, setShortcut] = useState("Ctrl ⇧ J");
 
   useEffect(() => {
     if (typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)) {
-      setShortcut("⌘J");
+      setShortcut("⌘⇧J");
     }
   }, []);
 

@@ -46,13 +46,13 @@ export function CommandMenu() {
 
   const [shortcut, setShortcut] = useState("Ctrl K");
   const [editShortcut, setEditShortcut] = useState("Ctrl E");
-  const [ragShortcut, setRagShortcut] = useState("Ctrl J");
+  const [ragShortcut, setRagShortcut] = useState("Ctrl ⇧ J");
 
   useEffect(() => {
     if (typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)) {
       setShortcut("⌘K");
       setEditShortcut("⌘E");
-      setRagShortcut("⌘J");
+      setRagShortcut("⌘⇧J");
     }
   }, []);
 

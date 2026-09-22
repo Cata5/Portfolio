@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useCallback, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowUpRight,
   ChevronLeft,
@@ -23,7 +23,6 @@ import { scrollToId } from "@/components/motion/lenis";
 import { projects } from "@/data/projects";
 import { cn } from "@/lib/utils";
 import { RuntimeFrame } from "./device-frames";
-import { ArchitectureSpec } from "./architecture-spec";
 
 const vortex = projects.find((p) => p.id === "vortex") ?? null;
 
@@ -34,8 +33,6 @@ const vortex = projects.find((p) => p.id === "vortex") ?? null;
 export function FeaturedProjects() {
   const { isEditing, selectedField, setSelectedField } = useEditor();
   const [index, setIndex] = useState(1); // Default to TV (index 1)
-  const [direction, setDirection] = useState(1);
-  const reduce = !!useReducedMotion();
 
   const isSectionSelected =
     isEditing &&
@@ -63,38 +60,23 @@ export function FeaturedProjects() {
     (next: number) => {
       const count = runtimes.length;
       if (count === 0) return;
-      setDirection((next - index + count) % count === 1 ? 1 : -1);
       setIndex(((next % count) + count) % count);
     },
-    [index, runtimes.length],
+    [runtimes.length],
   );
 
-  // Auto advance every 8s, paused on hover
-  const pausedRef = useRef(false);
-  useEffect(() => {
-    if (reduce) return;
-    const interval = setInterval(() => {
-      if (!pausedRef.current) {
-        setIndex((prev) => (prev + 1) % runtimes.length);
-      }
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [reduce, runtimes.length]);
+  // No auto-advance: motion that swaps content while the visitor is reading
+  // it fights comprehension. The runtime stage changes only on user intent.
 
   if (!vortex || runtimes.length === 0) return null;
   const active = runtimes[index];
 
-  const slideVariants = reduce
-    ? {
-      initial: { opacity: 0 },
-      animate: { opacity: 1 },
-      exit: { opacity: 0 },
-    }
-    : {
-      initial: { opacity: 0, x: direction > 0 ? 32 : -32 },
-      animate: { opacity: 1, x: 0 },
-      exit: { opacity: 0, x: direction > 0 ? -32 : 32 },
-    };
+  // Manual stage: a quiet crossfade is all the motion the swap needs.
+  const slideVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+  };
 
   return (
     <section
@@ -126,7 +108,7 @@ export function FeaturedProjects() {
             {vortex.title}
           </TextReveal>
           <Reveal delay={0.1}>
-            <p className="mt-3 text-sm font-extralight leading-relaxed text-muted-foreground sm:text-base">
+            <p className="mt-3 text-sm font-light leading-relaxed text-muted-foreground sm:text-base">
               One unified architecture across three runtimes — Android, Android TV and PC.
               Self-hosted direct media streaming from Google Drive, SMB, SFTP, FTP, WebDAV, NFS and UPnP sources.
             </p>
@@ -136,14 +118,7 @@ export function FeaturedProjects() {
 
       {/* Part 1: Clean Device Showcase Stage */}
       <Container className="mt-8 md:mt-12">
-        <div
-          onMouseEnter={() => {
-            pausedRef.current = true;
-          }}
-          onMouseLeave={() => {
-            pausedRef.current = false;
-          }}
-        >
+        <div>
           <GlassCard className="p-5 sm:p-7 lg:p-8 md:bg-card/70">
             <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
               {/* Left column — runtime selector + details + CTA */}
@@ -167,10 +142,9 @@ export function FeaturedProjects() {
                         aria-selected={selected}
                         onClick={() => go(i)}
                         className={cn(
-                          "group relative rounded-xl border p-3.5 text-left transition-all duration-300",
-                          selected
-                            ? "border-signal/70 bg-signal/15 shadow-[0_0_18px_rgba(56,189,248,0.18)]"
-                            : "border-border/50 bg-muted/10 hover:border-border hover:bg-muted/20",
+                          "group relative rounded-xl border p-3.5 text-left transition-all duration-300",                            selected
+                              ? "border-signal/70 bg-signal/15"
+                              : "border-border/50 bg-muted/10 hover:border-border hover:bg-muted/20",
                         )}
                       >
                         <div className="flex items-center justify-between">
@@ -191,7 +165,7 @@ export function FeaturedProjects() {
                                 selected ? "text-foreground font-semibold" : "text-muted-foreground group-hover:text-foreground",
                               )}
                             >
-                              {vortex.title} · {r.label}
+                              {r.label}
                             </span>
                           </div>
 
@@ -208,7 +182,7 @@ export function FeaturedProjects() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             transition={{ duration: 0.2 }}
-                            className="mt-2.5 text-[13px] font-extralight leading-relaxed text-muted-foreground border-t border-signal/20 pt-2"
+                            className="mt-2.5 text-[13px] font-light leading-relaxed text-muted-foreground border-t border-signal/20 pt-2"
                           >
                             {r.description}
                           </motion.p>
@@ -230,21 +204,16 @@ export function FeaturedProjects() {
 
               {/* Right column — Single Focused Device Frame Stage */}
               <div className="relative flex min-h-[22rem] sm:min-h-[28rem] lg:min-h-[32rem] lg:col-span-8 items-center justify-center overflow-hidden">
-                <AnimatePresence
-                  mode="popLayout"
-                  initial={false}
-                  custom={direction}
-                >
+                <AnimatePresence mode="popLayout" initial={false}>
                   <motion.div
                     key={active.id}
-                    custom={direction}
                     variants={slideVariants}
                     initial="initial"
                     animate="animate"
                     exit="exit"
                     transition={{
-                      duration: 0.35,
-                      ease: [0.22, 1, 0.36, 1],
+                      duration: 0.3,
+                      ease: "easeOut",
                     }}
                     className="flex justify-center items-center w-full px-2"
                   >
@@ -296,8 +265,20 @@ export function FeaturedProjects() {
         </div>
       </Container>
 
-      {/* Part 2: Modularized Engineering Architecture Spec */}
-      <ArchitectureSpec project={vortex} />
+      {/* The full engineering breakdown (platform matrix, architecture layers,
+          module map, capabilities) lives on the project page — the homepage
+          keeps the flagship story short and routes readers there. */}
+      <Container className="mt-6">
+        <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+          Platform matrix · architecture · module map · capabilities — all on{" "}
+          <ProjectLink
+            href={`/projects/${vortex.id}`}
+            className="text-signal transition-colors hover:text-foreground"
+          >
+            the Vortex page →
+          </ProjectLink>
+        </p>
+      </Container>
     </section>
   );
 }

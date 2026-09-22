@@ -53,7 +53,7 @@ export function Stack() {
                         className="size-1 shrink-0 bg-signal/40 transition-colors group-hover:bg-signal"
                         aria-hidden="true"
                       />
-                      <span className="text-[15px] font-extralight text-foreground/85 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-foreground">
+                      <span className="text-[15px] font-light text-foreground/85 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-foreground">
                         {item}
                       </span>
                     </li>

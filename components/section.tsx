@@ -69,7 +69,7 @@ export function Section({
         "relative scroll-mt-16 transition-all duration-200",
         isEditing && id && "cursor-pointer group/section",
         isEditing && id && !isSectionSelected && "hover:ring-1 hover:ring-signal/40 hover:ring-offset-4 hover:ring-offset-background rounded-3xl",
-        isSectionSelected && "ring-2 ring-signal ring-offset-6 ring-offset-background rounded-3xl bg-signal/[0.015] shadow-[0_0_50px_rgba(56,189,248,0.12)]",
+        isSectionSelected && "ring-2 ring-signal ring-offset-6 ring-offset-background rounded-3xl bg-signal/[0.015] shadow-[0_0_50px_rgba(128,82,255,0.12)]",
         className,
       )}
       {...props}

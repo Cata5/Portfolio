@@ -43,7 +43,7 @@ interface CategoryMeta {
 const CATEGORY_META: Record<JourneyCategory, CategoryMeta> = {
   main: {
     label: "Core & AI Systems",
-    shortLabel: "Core Systems",
+    shortLabel: "Projects",
     description: "Autonomous agents, neural pipelines & platform architecture",
     icon: Cpu,
     badgeClass: "text-signal bg-signal/10 border-signal/30",
@@ -82,11 +82,11 @@ const CATEGORY_META: Record<JourneyCategory, CategoryMeta> = {
     shortLabel: "Open Source",
     description: "Desktop utilities, developer tools & ecosystem contributions",
     icon: Terminal,
-    badgeClass: "text-sky-400 bg-sky-500/10 border-sky-500/30",
-    dotClass: "bg-sky-400",
-    glowClass: "shadow-[0_0_16px_rgba(56,189,248,0.7)]",
-    borderHoverClass: "group-hover:border-sky-500/60 group-hover:shadow-[0_0_25px_rgba(56,189,248,0.2)]",
-    bgGlowClass: "group-hover:bg-sky-500/[0.04]",
+    badgeClass: "text-signal bg-signal/10 border-signal/30",
+    dotClass: "bg-signal",
+    glowClass: "shadow-[0_0_16px_var(--color-signal)]",
+    borderHoverClass: "group-hover:border-signal/60 group-hover:shadow-[0_0_25px_rgba(128,82,255,0.2)]",
+    bgGlowClass: "group-hover:bg-signal/[0.04]",
     accentHex: "#38bdf8",
   },
 };
@@ -248,7 +248,7 @@ export function Journey() {
                   </TextReveal>
                 </Editable>
                 <Editable path="copy.journey.description" label="Timeline Description" type="textarea">
-                  <p className="text-base font-extralight text-muted-foreground leading-relaxed">
+                  <p className="text-base font-light text-muted-foreground leading-relaxed">
                     {description}
                   </p>
                 </Editable>
@@ -319,7 +319,7 @@ export function Journey() {
                     {statOpenSourceLabel}
                   </span>
                   <div className="flex items-baseline gap-1.5 mt-1.5">
-                    <span className="font-mono text-xl font-bold text-sky-400">{statOpenSourceValue}</span>
+                    <span className="font-mono text-xl font-bold text-signal">{statOpenSourceValue}</span>
                     <span className="text-xs text-muted-foreground">{statOpenSourceSub}</span>
                   </div>
                 </div>
@@ -410,7 +410,7 @@ export function Journey() {
                       </span>
                     </div>
                     <span className="font-mono text-[11px] font-semibold text-signal bg-signal/15 px-2 py-0.5 rounded-md border border-signal/30">
-                      {group.items.length} Node{group.items.length > 1 ? "s" : ""}
+                      {group.items.length} {group.items.length === 1 ? "Node" : "Nodes"}
                     </span>
                   </div>
                 </div>
@@ -579,7 +579,7 @@ export function Journey() {
                                   )}
                                 </div>
 
-                                <p className="mt-2.5 text-sm sm:text-base font-extralight leading-relaxed text-muted-foreground">
+                                <p className="mt-2.5 text-sm sm:text-base font-light leading-relaxed text-muted-foreground">
                                   {entry.note}
                                 </p>
 

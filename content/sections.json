@@ -15,6 +15,7 @@
     "type": "about",
     "name": "About / Bio",
     "enabled": true,
+    "navLabel": "About",
     "settings": {
       "eyebrow": "About",
       "heading": "I engineer software across web, mobile, desktop, and machine learning.",
@@ -28,6 +29,7 @@
     "type": "featured-projects",
     "name": "Flagship Work (Vortex)",
     "enabled": true,
+    "navLabel": "Work",
     "settings": {
       "eyebrow": "Featured Work",
       "title": "Vortex — Multi-Platform Architecture",
@@ -39,6 +41,7 @@
     "type": "projects",
     "name": "All Projects Explorer",
     "enabled": true,
+    "navLabel": "Projects",
     "settings": {
       "eyebrow": "All Projects",
       "title": "Production Systems & Experiments"
@@ -49,6 +52,7 @@
     "type": "stack",
     "name": "Core Tech Stack",
     "enabled": true,
+    "navLabel": "Stack",
     "settings": {
       "eyebrow": "Stack",
       "title": "Technologies & Tools"
@@ -59,6 +63,7 @@
     "type": "certifications",
     "name": "Accredited Certifications",
     "enabled": true,
+    "navLabel": "Certs",
     "settings": {
       "eyebrow": "Certifications",
       "title": "Certifications & Credentials"
@@ -69,6 +74,7 @@
     "type": "ml",
     "name": "ML / Lab Notebook",
     "enabled": true,
+    "navLabel": "ML",
     "settings": {
       "eyebrow": "ML / Notebook",
       "title": "Machine Learning Lab"
@@ -79,6 +85,7 @@
     "type": "journey",
     "name": "Timeline & Milestones",
     "enabled": true,
+    "navLabel": "Journey",
     "settings": {
       "eyebrow": "Engineering Trajectory",
       "title": "Circuit Timeline & Milestones",
@@ -90,7 +97,8 @@
     "id": "activities",
     "type": "activities",
     "name": "Hackathons & Activities",
-    "enabled": true,
+    "enabled": false,
+    "navLabel": "Activities",
     "settings": {
       "eyebrow": "Activities",
       "title": "Hackathons & Community"
@@ -101,6 +109,7 @@
     "type": "contact",
     "name": "Contact & Channels",
     "enabled": true,
+    "navLabel": "Contact",
     "settings": {
       "eyebrow": "Contact",
       "heading": "Let's build something worthwhile.",

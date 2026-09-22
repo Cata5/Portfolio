@@ -125,8 +125,6 @@
     ],
     "image": "/projects/cheltuieli/01-phone.webp",
     "featured": false,
-    "deviceFrame": "phone",
-    "deviceShot": "/projects/cheltuieli/01-phone.webp",
     "screenshots": [
       "/projects/cheltuieli/01-phone.webp"
     ],
@@ -168,7 +166,6 @@
     "image": "/projects/aplicatie-teka/03-home.webp",
     "screenshots": [
       "/projects/aplicatie-teka/03-home.webp",
-      "/projects/aplicatie-teka/01-home.webp",
       "/projects/aplicatie-teka/02-tablet.webp"
     ],
     "github": "https://github.com/Cata5/Aplicatie-Teka",

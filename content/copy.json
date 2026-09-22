@@ -14,13 +14,14 @@
   },
   "activities": {
     "eyebrow": "Activities",
-    "title": "Hackathons & Community"
+    "title": "Hackathons & Community",
+    "_note": "Section disabled — its events live in the Timeline section. Re-enable in content/sections.json if needed."
   },
   "journey": {
     "eyebrow": "Engineering Trajectory",
-    "title": "Personal Circuit Timeline & Milestones",
-    "description": "A dual-sided neural circuit charting core software platforms, hackathon victories, FIRST Tech Challenge robotics, and open-source infrastructure from 2023 to 2026.",
-    "status": "Active Branch Trajectory",
+    "title": "Timeline & Milestones",
+    "description": "Core software platforms, hackathon wins, FIRST Tech Challenge robotics, and open-source work — 2023 to 2026.",
+    "status": "Always building",
     "streamLabel": "Stream:",
     "allBranchesLabel": "All Branches",
     "statSpanLabel": "Span",

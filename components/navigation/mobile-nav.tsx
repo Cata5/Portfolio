@@ -19,7 +19,7 @@ import { withBasePath } from "@/lib/base-path";
 import { cn } from "@/lib/utils";
 
 import { useEditor } from "@/components/editor/editor-context";
-import { sections as defaultSections, SECTION_TYPE_META } from "@/data/sections";
+import { buildNavLinks } from "@/lib/nav-links";
 
 const SECTION_DESCRIPTIONS: Record<string, string> = {
   about: "Background & focus",
@@ -47,18 +47,15 @@ export function MobileNav({ activeSection }: MobileNavProps) {
     pathname.endsWith("/Portofolio-V2/");
   const { setIsOpen: setIsRAGOpen } = useRAG();
 
-  const pageSections = content?.sections || defaultSections;
-  const links = pageSections
-    .filter((s) => s.enabled && s.navLabel && s.type !== "hero")
-    .map((s) => ({
-      label: s.navLabel!,
-      href: s.type === "featured-projects" ? "#work" : `#${s.id}`,
-      desc:
-        SECTION_DESCRIPTIONS[s.type] ||
-        SECTION_DESCRIPTIONS[s.id] ||
-        SECTION_TYPE_META[s.type]?.description ||
-        "Section",
-    }));
+  // buildNavLinks falls back to hardcoded defaults — the mobile drawer must
+  // never go empty (a CMS save once stripped navLabel and broke the live nav).
+  const links = buildNavLinks(content?.sections).map((l) => ({
+    ...l,
+    desc:
+      SECTION_DESCRIPTIONS[l.target] ||
+      SECTION_DESCRIPTIONS[l.href.slice(1)] ||
+      "Section",
+  }));
 
   return (
     <Sheet>

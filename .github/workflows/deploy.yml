@@ -120,7 +120,23 @@ jobs:
             echo "::error::unprefixed internal URLs found (see above)"
             exit 1
           fi
-          echo "export verified: basePath + trailingSlash + image loader all applied"
+          # The production nav must never ship empty again — a CMS save once
+          # stripped navLabel from content/sections.json and the deployed site
+          # had zero nav links (desktop nav + mobile drawer both derive from it).
+          NAV_LINKS=$(grep -oE 'aria-label="Main navigation"[^>]*>' out/index.html >/dev/null && grep -c 'href="#about"' out/index.html || true)
+          if [ "${NAV_LINKS:-0}" -lt 1 ]; then
+            echo "::error::homepage nav is empty — no href=\"#about\" link found in the exported header"
+            dump
+            exit 1
+          fi
+          # The RAG status export must not leak build-machine config/keys.
+          if [ -f out/api/rag/status ]; then
+            if grep -q 'apiKey' out/api/rag/status; then
+              echo "::error::out/api/rag/status contains an apiKey — the RAG status stub failed"
+              exit 1
+            fi
+          fi
+          echo "export verified: basePath + trailingSlash + image loader + nav + api stubs all applied"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -34,7 +34,7 @@ const CommandMenu = dynamic(
 );
 
 import { useEditor } from "@/components/editor/editor-context";
-import { sections as defaultSections } from "@/data/sections";
+import { buildNavLinks } from "@/lib/nav-links";
 
 export function SiteHeader() {
   const { content } = useEditor();
@@ -44,13 +44,9 @@ export function SiteHeader() {
   const isHome = pathname === "/" || pathname === "" || pathname.endsWith("/Portofolio-V2/");
   const currentActive = isHome ? active : null;
 
-  const pageSections = content?.sections || defaultSections;
-  const links = pageSections
-    .filter((s) => s.enabled && s.navLabel && s.type !== "hero")
-    .map((s) => ({
-      label: s.navLabel!,
-      href: s.type === "featured-projects" ? "#work" : `#${s.id}`,
-    }));
+  // buildNavLinks falls back to hardcoded defaults, so the nav can never go
+  // empty even if a CMS save strips navLabel from content/sections.json.
+  const links = buildNavLinks(content?.sections);
 
   // Section highlighting (only on homepage)
   useEffect(() => {

@@ -65,7 +65,7 @@ function ActivityCard({
         <h3 className="mt-2 text-xl font-normal tracking-[-0.02em] transition-colors duration-200 group-hover:text-signal">
           {activity.title}
         </h3>
-        <p className="mt-3 text-[15px] font-extralight leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-[15px] font-light leading-relaxed text-muted-foreground">
           {activity.description}
         </p>
         {activity.link && (
