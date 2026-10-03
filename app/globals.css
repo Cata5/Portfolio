@@ -1,8 +1,35 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Base UI / Base UI-derived components expose open+closed+selected state as
+   either a `data-state` attribute or a boolean `data-*` attribute. These three
+   variants let a class target both spellings: `data-open:animate-in` matches
+   `[data-state="open"]` and `[data-open]` that is not `="false"`.
+   Previously imported from `shadcn/tailwind.css`, which shipped the whole
+   shadcn preset (scroll-fade*, shimmer*, accordion keyframes — all unused
+   here). Declared locally so the stylesheet no longer depends on the exports
+   map of a CLI package. Used by components/ui/{dialog,tooltip,command}.tsx. */
+@custom-variant data-open {
+  &:where([data-state="open"]),
+  &:where([data-open]:not([data-open="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-closed {
+  &:where([data-state="closed"]),
+  &:where([data-closed]:not([data-closed="false"])) {
+    @slot;
+  }
+}
+
+@custom-variant data-selected {
+  &:where([data-selected="true"]) {
+    @slot;
+  }
+}
 
 @theme inline {
   --color-background: var(--background);
