@@ -134,7 +134,7 @@ export function GlitchedChatView() {
       timestamp: time,
       actions: [
         { label: "Explore All Projects", target: "projects", type: "scroll" },
-        { label: "View GitHub Repository", target: "https://github.com/Cata5/Portofolio-V2", type: "external" },
+        { label: "View GitHub Repository", target: "https://github.com/Cata5/Portfolio", type: "external" },
         { label: "Contact Catalin", target: "contact", type: "scroll" },
       ],
     };

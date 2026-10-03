@@ -41,7 +41,7 @@ export function SiteHeader() {
   const [active, setActive] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
-  const isHome = pathname === "/" || pathname === "" || pathname.endsWith("/Portofolio-V2/");
+  const isHome = pathname === "/" || pathname === "" || pathname.endsWith("/Portfolio/");
   const currentActive = isHome ? active : null;
 
   // buildNavLinks falls back to hardcoded defaults, so the nav can never go

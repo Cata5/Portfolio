@@ -17,7 +17,7 @@ env:
   # the verify step can echo it back as a check.
   NEXT_DEPLOY_TARGET: gh-pages
   NEXT_PUBLIC_DEPLOY_TARGET: gh-pages
-  NEXT_PUBLIC_BASE_PATH: /Portofolio-V2
+  NEXT_PUBLIC_BASE_PATH: /Portfolio
   NEXT_PUBLIC_GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxVQP7DtOk4uj0j13DR-_UzKSSQJksNFslVDo__TYsE5mp2hUQPeab-dM22i1wEFCEXZQ/exec"
 
 concurrency:
@@ -100,8 +100,8 @@ jobs:
             find out -mindepth 2 -name '*.html' -not -name 'index.html' 2>/dev/null | head -10 || true
           }
           # basePath must prefix assets
-          grep -q '/Portofolio-V2/_next' out/index.html \
-            || { echo "::error::basePath not applied (no /Portofolio-V2/_next in out/index.html)"; dump; exit 1; }
+          grep -q '/Portfolio/_next' out/index.html \
+            || { echo "::error::basePath not applied (no /Portfolio/_next in out/index.html)"; dump; exit 1; }
           # trailingSlash: export must never emit flat <route>.html files
           FLAT=$(find out -mindepth 2 -name '*.html' -not -name 'index.html' | head -1)
           if [ -n "$FLAT" ]; then
@@ -112,9 +112,9 @@ jobs:
           test -f out/projects/vortex/index.html \
             || { echo "::error::missing out/projects/vortex/index.html"; dump; exit 1; }
           # custom image loader must prefix project images on both pages
-          grep -q '/Portofolio-V2/projects/' out/index.html \
+          grep -q '/Portfolio/projects/' out/index.html \
             || { echo "::error::image loader not applied (no prefixed project image in out/index.html)"; dump; exit 1; }
-          grep -q '/Portofolio-V2/projects/' out/projects/vortex/index.html \
+          grep -q '/Portfolio/projects/' out/projects/vortex/index.html \
             || { echo "::error::image loader not applied on project page"; dump; exit 1; }
           if grep -oE '(href|src)="/projects/' out/index.html; then
             echo "::error::unprefixed internal URLs found (see above)"

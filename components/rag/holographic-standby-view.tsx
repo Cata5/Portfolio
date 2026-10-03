@@ -78,7 +78,7 @@ export function HolographicStandbyView() {
       errorLog: themes?.glitchedAssistant?.handshakeLog || [
         "POST http://127.0.0.1:8000/v1/chat/completions (Local Workstation)",
         "STATUS 503 SERVICE UNAVAILABLE (ERR_CONNECTION_REFUSED)",
-        "HOST SANDBOX: cata5.github.io/Portofolio-V2 (Static Cloud Target)",
+        "HOST SANDBOX: cata5.github.io/Portfolio (Static Cloud Target)",
         "PROTOCOL: Auto-switched to Pre-Compiled Verified Knowledge Archive",
       ],
       content:

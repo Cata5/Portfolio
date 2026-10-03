@@ -65,7 +65,7 @@ export function ScreenshotGallery({ project }: { project: Project }) {
               className="absolute bottom-2 right-2 bg-background/85 px-1.5 py-0.5 font-mono text-[10px] text-foreground/80 backdrop-blur-sm"
               aria-hidden="true"
             >
-              0{i + 1}
+              {String(i + 1).padStart(2, "0")}
             </span>
           </DialogTrigger>
         ))}

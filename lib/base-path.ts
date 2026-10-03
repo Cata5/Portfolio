@@ -1,5 +1,5 @@
 /**
- * GitHub Pages serves this repo as a *project site* at /Portofolio/, so
+ * GitHub Pages serves this repo as a *project site* at /Portfolio/, so
  * every absolute URL must carry that prefix in the deployed build.
  *
  * This file is the single source of truth for the deploy base path — the
@@ -16,7 +16,7 @@ export const isGhPages =
 
 /** Base path prefix for the GitHub Pages build (empty elsewhere). */
 export const BASE_PATH = isGhPages
-  ? process.env.NEXT_PUBLIC_BASE_PATH || "/Portofolio-V2"
+  ? process.env.NEXT_PUBLIC_BASE_PATH || "/Portfolio"
   : "";
 
 /**

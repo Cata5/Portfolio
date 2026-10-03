@@ -44,7 +44,7 @@ export function MobileNav({ activeSection }: MobileNavProps) {
   const isHome =
     pathname === "/" ||
     pathname === "" ||
-    pathname.endsWith("/Portofolio-V2/");
+    pathname.endsWith("/Portfolio/");
   const { setIsOpen: setIsRAGOpen } = useRAG();
 
   // buildNavLinks falls back to hardcoded defaults — the mobile drawer must

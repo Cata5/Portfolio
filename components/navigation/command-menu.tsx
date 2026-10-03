@@ -42,7 +42,7 @@ export function CommandMenu() {
   const { setIsOpen: setIsRAGOpen } = useRAG();
   const pathname = usePathname();
   const router = useRouter();
-  const isHome = pathname === "/" || pathname === "" || pathname.endsWith("/Portofolio-V2/");
+  const isHome = pathname === "/" || pathname === "" || pathname.endsWith("/Portfolio/");
 
   const [shortcut, setShortcut] = useState("Ctrl K");
   const [editShortcut, setEditShortcut] = useState("Ctrl E");

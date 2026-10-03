@@ -13,7 +13,7 @@
     "handshakeLog": [
       "POST http://127.0.0.1:8000/v1/chat/completions (Local Workstation)",
       "STATUS 503 SERVICE UNAVAILABLE (ERR_CONNECTION_REFUSED)",
-      "HOST SANDBOX: cata5.github.io/Portofolio-V2 (Static Cloud Target)",
+      "HOST SANDBOX: cata5.github.io/Portfolio (Static Cloud Target)",
       "PROTOCOL: Auto-switched to Pre-Compiled Verified Knowledge Archive"
     ],
     "vortexSummary": "Vortex is Catalin's flagship and most technically challenging project: a client-side media player across Android (phones & tablets), Android TV, and Windows desktop built with a unified Kotlin Multiplatform codebase.",

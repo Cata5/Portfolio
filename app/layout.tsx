@@ -71,7 +71,7 @@ export const metadata: Metadata = {
   creator: site.name,
   // Static og.png (public/) — a real .png URL so GitHub Pages serves it
   // with image/png and Twitter/Facebook validators accept it. Next joins
-  // the relative path onto metadataBase (which carries /Portofolio-V2), so
+  // the relative path onto metadataBase (which carries /Portfolio), so
   // no withBasePath here — that would double-prefix. Regenerate og.png by
   // re-adding app/opengraph-image.tsx, building, copying out/opengraph-image
   // over public/og.png, and removing the route again.

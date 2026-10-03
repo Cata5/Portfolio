@@ -1,6 +1,6 @@
-# Portfolio Audit — Portofolio-V2 (2026-09)
+# Portfolio Audit — Portfolio (2026-09)
 
-Evidence base: live site (`https://cata5.github.io/Portofolio-V2/` — HTML fetched, headers, `/api/rag/status` response), local static export in `out/`, full component/content/infra source review, `PROJECT_ANALYSIS.md`, `PRODUCT.md`.
+Evidence base: live site (`https://cata5.github.io/Portfolio/` — HTML fetched, headers, `/api/rag/status` response), local static export in `out/`, full component/content/infra source review, `PROJECT_ANALYSIS.md`, `PRODUCT.md`.
 
 Target visitor: recruiters / technical evaluators for internships & junior roles (per PRODUCT.md). Positioning: breadth across web / mobile / desktop / embedded / AI-ML, evidence-first, no fabrication. **The evidence discipline is the site's moat — keep it.**
 
