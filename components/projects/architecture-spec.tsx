@@ -84,7 +84,7 @@ export const ARCH_LAYERS = [
     layer: "Presentation Tier",
     icon: LayoutGridIcon,
     tech: "Jetpack Compose · Compose TV · Compose Multiplatform",
-    desc: "One Kotlin UI framework across three runtimes — touch UI on phones, a 10-foot D-pad UI on Android TV, and a Netflix-style desktop app on Windows.",
+    desc: "One Kotlin UI framework across two apps: touch UI on phones and tablets, a 10-foot D-pad UI on Android TV, plus a Compose Multiplatform desktop client built on a shared module.",
     flow: "view models · navigation · profile state",
   },
   {
@@ -97,7 +97,7 @@ export const ARCH_LAYERS = [
   {
     layer: "Storage & Provider Protocols",
     icon: HardDrive,
-    tech: "Drive · SMB · SFTP · FTP · WebDAV · NFS · UPnP",
+    tech: "Drive - SMB - SFTP - FTP - WebDAV",
     desc: "Pluggable client-side provider abstraction with LAN discovery (NSD/mDNS). Streams directly from personal cloud & LAN shares — zero central server.",
     flow: "authenticated stream URLs · range requests",
   },
@@ -142,8 +142,8 @@ export const ANDROID_TREE: ModuleNode[] = [
             children: [
               {
                 name: "storage",
-                note: "Drive · SMB · SFTP · FTP · WebDAV · NFS · UPnP + LAN discovery",
-                badge: "7 protocols",
+                note: "Drive - SMB - SFTP - FTP - WebDAV + LAN discovery",
+                badge: "5 protocols",
               },
               { name: "tmdb", note: "TmdbService + metadata cache", badge: "api" },
               { name: "youtube", note: "NewPipeSource · downloader", badge: "stream" },

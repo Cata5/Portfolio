@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { isGhPages } from "@/lib/base-path";
+import { isGhPages, withBasePath } from "@/lib/base-path";
 import type { ValidatedCitation } from "@/lib/rag/citations/validator";
 import type { GroundedEvidence, RetrievalDiagnostics } from "@/lib/rag/types/retrieval";
 import type { PipelineTimings, RAGPipelineStage } from "@/lib/rag/types/events";
@@ -90,7 +90,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/rag/status/");
+      const res = await fetch(withBasePath("/api/rag/status"));
       if (res.ok) {
         const data = await res.json();
         setStatus(data);
@@ -102,7 +102,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
 
   const fetchConfig = useCallback(async () => {
     try {
-      const res = await fetch("/api/rag/config/");
+      const res = await fetch(withBasePath("/api/rag/config"));
       if (res.ok) {
         const data = await res.json();
         setConfig(data.config);
@@ -114,7 +114,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
 
   const refreshDocuments = useCallback(async () => {
     try {
-      const res = await fetch("/api/rag/documents/");
+      const res = await fetch(withBasePath("/api/rag/documents"));
       if (res.ok) {
         const data = await res.json();
         setDocuments(data.documents || []);
@@ -126,7 +126,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
 
   const triggerReindex = useCallback(async () => {
     try {
-      const res = await fetch("/api/rag/reindex/", { method: "POST" });
+      const res = await fetch(withBasePath("/api/rag/reindex"), { method: "POST" });
       if (res.ok) {
         await refreshDocuments();
         await fetchStatus();
@@ -138,7 +138,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
 
   const updateConfig = useCallback(async (patch: DeepPartial<RAGConfig>) => {
     try {
-      const res = await fetch("/api/rag/config/", {
+      const res = await fetch(withBasePath("/api/rag/config"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patch),
@@ -155,7 +155,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
   const runEvaluation = useCallback(async () => {
     setIsEvaluating(true);
     try {
-      const res = await fetch("/api/rag/eval/", { method: "POST" });
+      const res = await fetch(withBasePath("/api/rag/eval"), { method: "POST" });
       if (res.ok) {
         const data = await res.json();
         setEvalComparison(data.comparison);
@@ -231,7 +231,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
       setIsStreaming(true);
 
       try {
-        const res = await fetch("/api/rag/query/", {
+        const res = await fetch(withBasePath("/api/rag/query"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

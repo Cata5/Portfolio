@@ -18,7 +18,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 
 import Link from "next/link";
-import { withBasePath } from "@/lib/base-path";
+
 import { useEditor } from "./editor-context";
 import { cn } from "@/lib/utils";
 
@@ -220,7 +220,7 @@ export function EditorBar() {
 
         {/* Main Admin Console Link */}
         <Link
-          href={withBasePath("/admin")}
+          href="/admin"
           title="Open Portfolio Control Center"
           className="flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-neutral-900 hover:text-signal"
         >

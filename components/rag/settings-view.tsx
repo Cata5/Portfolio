@@ -1,6 +1,7 @@
 "use client";
 
 import { useRAG } from "./rag-context";
+import { withBasePath } from "@/lib/base-path";
 import {
   Save,
   CheckCircle2,
@@ -61,7 +62,7 @@ export function SettingsView() {
   const fetchModels = async (targetUrl = baseUrl, targetKey = apiKey) => {
     setIsLoadingModels(true);
     try {
-      const res = await fetch("/api/rag/models/", {
+      const res = await fetch(withBasePath("/api/rag/models"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ baseUrl: targetUrl, apiKey: targetKey }),
@@ -149,7 +150,7 @@ export function SettingsView() {
       });
 
       // Explicitly trigger model reload / re-prime in Unsloth / LM Studio
-      const reloadRes = await fetch("/api/rag/models/", {
+      const reloadRes = await fetch(withBasePath("/api/rag/models"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

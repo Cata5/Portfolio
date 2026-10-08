@@ -30,7 +30,7 @@ const sections = [
 ] as const;
 
 import { usePathname, useRouter } from "next/navigation";
-import { withBasePath } from "@/lib/base-path";
+
 
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -141,7 +141,8 @@ export function CommandMenu() {
                 value="admin-control-center"
                 onSelect={() => {
                   setOpen(false);
-                  router.push(withBasePath("/admin"));
+                  // next/navigation's router.push applies `basePath` itself.
+                  router.push("/admin");
                 }}
               >
                 <span>Portfolio Control Center (Admin)</span>

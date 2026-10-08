@@ -27,6 +27,7 @@ import type { JourneyEntry } from "@/data/journey";
 import type { MlRun } from "@/data/ml";
 import type { PageSection, SectionType } from "@/data/sections";
 import { ScrollTrigger } from "@/components/motion/gsap";
+import { withBasePath } from "@/lib/base-path";
 
 export type ContentState = {
   site: typeof siteData;
@@ -223,7 +224,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
   const unlockWithPassword = useCallback(async (password: string) => {
     try {
-      const res = await fetch("/api/auth/verify/", {
+      const res = await fetch(withBasePath("/api/auth/verify"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
@@ -276,7 +277,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
     try {
       const token = authSecret || (typeof window !== "undefined" ? sessionStorage.getItem("portfolio_admin_token") : "");
-      const res = await fetch("/api/content/save/", {
+      const res = await fetch(withBasePath("/api/content/save"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

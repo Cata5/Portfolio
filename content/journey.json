@@ -12,7 +12,7 @@
     ]
   },
   {
-    "date": "Apr 2026",
+    "date": "May 2026",
     "category": "main",
     "title": "Vortex",
     "note": "Android app for cloud media streaming with Google Drive as a cloud supplier.",
@@ -52,7 +52,7 @@
     "date": "Jan 2025",
     "category": "community",
     "title": "FTC Robotics — Regionals (Mentor)",
-    "note": "Mentored the next generation of FIRST Tech Challenge robotics competitors (Coral Tech #28260), sharing technical knowledge in autonomous Java coding and mechanical design.",
+    "note": "Mentored junior members of the FIRST Tech Challenge team Coral Tech #28260, sharing technical knowledge in web development, code organisation and Git workflows.",
     "image": "/projects/coraltech/01-home.webp",
     "link": "https://github.com/Cata5/CoralTechFTC",
     "location": "Romania, Pitesti",
@@ -159,7 +159,7 @@
     "date": "2023",
     "category": "main",
     "title": "Started Open Source Journey",
-    "note": "Published first repositories on GitHub, beginning a growing collection of 40+ projects.",
+    "note": "Published first repositories on GitHub, now building a collection of personal projects across Android, web and machine learning.",
     "tags": [
       "GitHub",
       "Open Source",

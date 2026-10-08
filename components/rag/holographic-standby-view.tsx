@@ -128,9 +128,9 @@ export function HolographicStandbyView() {
         errorLog: rawError,
         content:
           themes?.glitchedAssistant?.vortexSummary ||
-          "Vortex is Catalin's flagship and most technically challenging project: a client-side media player across Android (phones & tablets), Android TV, and Windows desktop built with a unified Kotlin Multiplatform codebase.",
+          "Vortex is my flagship and most technically challenging project: a client-side media player for Android phones and tablets and Android TV, plus a Compose Multiplatform desktop client built on a shared module.",
         bullets: [
-          "Streams directly from 7 storage protocols: Google Drive OAuth, SMB, SFTP, FTPS, WebDAV, NFS, and UPnP",
+          "Streams directly from 5 storage protocols: Google Drive OAuth, SMB, SFTP, FTPS and WebDAV",
           "Dual playback engines: Media3/ExoPlayer (Android/TV) and in-app mpv integration (Windows desktop)",
           "WorkManager background download queue with quotas, pauses, and auto-cleanup",
           "YouTube music streaming engine with background playback and real offline downloads",

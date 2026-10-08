@@ -109,8 +109,8 @@ export function FeaturedProjects() {
           </TextReveal>
           <Reveal delay={0.1}>
             <p className="mt-3 text-sm font-light leading-relaxed text-muted-foreground sm:text-base">
-              One unified architecture across three runtimes — Android, Android TV and PC.
-              Self-hosted direct media streaming from Google Drive, SMB, SFTP, FTP, WebDAV, NFS and UPnP sources.
+              One Kotlin UI framework across two apps: Android phones and tablets, Android TV, plus a Compose Multiplatform desktop client on a shared module.
+              Self-hosted direct media streaming from five storage protocols: Google Drive, SMB, SFTP, FTP/FTPS and WebDAV.
             </p>
           </Reveal>
         </GlassCard>

@@ -18,7 +18,7 @@ import { GlitchedChatView } from "./glitched-chat-view";
 import { HolographicStandbyView } from "./holographic-standby-view";
 import { CyberdeckCliView } from "./cyberdeck-cli-view";
 import { ChatView } from "./chat-view";
-import { withBasePath } from "@/lib/base-path";
+
 
 export function RAGChatModal() {
   const { isOpen, setIsOpen, clearMessages } = useRAG();

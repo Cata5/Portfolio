@@ -35,9 +35,9 @@
     "statRoboticsLabel": "Robotics",
     "statRoboticsValue": "FTC",
     "statRoboticsSub": "Nationals & Mentor",
-    "statOpenSourceLabel": "Open Source",
-    "statOpenSourceValue": "40+",
-    "statOpenSourceSub": "Repositories"
+    "statOpenSourceLabel": "GitHub",
+    "statOpenSourceValue": "6",
+    "statOpenSourceSub": "Public Repositories"
   },
   "contact": {
     "heading": "Let's build something worthwhile.",

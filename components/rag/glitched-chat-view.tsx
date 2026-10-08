@@ -83,7 +83,7 @@ export function GlitchedChatView() {
         title: "STATIC CACHED EVIDENCE // VORTEX",
         errorLog: rawError,
         content:
-          "Vortex is Catalin's flagship and most technically challenging project. It is a client-side media player across Android phones, Android TV, and Windows desktop built with Kotlin Multiplatform, ExoPlayer, in-app mpv, and direct integration with 7 storage providers (Google Drive, SMB, SFTP, FTPS, WebDAV, NFS, UPnP).",
+          "Vortex is my flagship and most technically challenging project. It is a client-side media player for Android phones and tablets and Android TV, plus a Compose Multiplatform desktop client, built with ExoPlayer, in-app mpv, and direct integration with 5 working storage providers (Google Drive, SMB, SFTP, FTPS, WebDAV).",
         timestamp: time,
         actions: [
           { label: "Open Vortex Case Study", target: "/projects/vortex", type: "route" },

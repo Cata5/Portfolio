@@ -15,7 +15,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { site } from "@/data/site";
-import { withBasePath } from "@/lib/base-path";
+
 import { cn } from "@/lib/utils";
 
 import { useEditor } from "@/components/editor/editor-context";
@@ -93,9 +93,8 @@ export function MobileNav({ activeSection }: MobileNavProps) {
             {links.map((link) => {
               const sectionId = link.href.slice(1);
               const isActive = isHome && activeSection === sectionId;
-              const targetHref = isHome
-                ? link.href
-                : withBasePath(`/${link.href}`);
+              // next/link prefixes `basePath` itself — see site-header.tsx.
+              const targetHref = isHome ? link.href : `/${link.href}`;
 
               return (
                 <SheetClose

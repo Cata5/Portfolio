@@ -14,7 +14,7 @@ import { RAGTrigger } from "@/components/rag/rag-trigger";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { scrollToId } from "@/components/motion/lenis";
-import { withBasePath } from "@/lib/base-path";
+
 
 // cmdk + the dialog primitives stay out of the initial bundle — the palette
 // is a power-user shortcut, not first paint. Width-matched placeholder avoids
@@ -136,7 +136,10 @@ export function SiteHeader() {
         >
           {links.map((link) => {
             const isActive = isHome && currentActive === link.href.slice(1);
-            const targetHref = isHome ? link.href : withBasePath(`/${link.href}`);
+            // No withBasePath here: next/link already prefixes `basePath`, so
+            // adding it by hand produced `/Portfolio/Portfolio/#about` on every
+            // non-home page (all 8 nav links 404'd on the 17 project pages).
+            const targetHref = isHome ? link.href : `/${link.href}`;
 
             return (
               <Link

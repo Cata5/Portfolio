@@ -24,7 +24,7 @@ import { EvalView } from "@/components/rag/eval-view";
 import { KBView } from "@/components/rag/kb-view";
 import { SettingsView } from "@/components/rag/settings-view";
 import { CLogo } from "@/components/rag/c-logo";
-import { withBasePath } from "@/lib/base-path";
+
 
 type AdminTab = "pipeline" | "source" | "eval" | "kb" | "settings";
 
@@ -113,7 +113,7 @@ export function RAGAdminDashboard() {
 
           <div className="pt-2 border-t border-border/40">
             <Link
-              href={withBasePath("/")}
+              href="/"
               className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="size-3" /> Back to Portfolio
@@ -135,7 +135,7 @@ export function RAGAdminDashboard() {
       <div className="rounded-2xl border border-border/50 bg-card/40 p-4 sm:p-6 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] ring-1 ring-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
-            href={withBasePath("/")}
+            href="/"
             title="Back to Portfolio"
             className="flex size-9 items-center justify-center rounded-xl border border-border/60 bg-neutral-900/80 text-muted-foreground hover:border-signal/40 hover:text-foreground transition-all shrink-0"
           >

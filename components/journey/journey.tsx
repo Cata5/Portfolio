@@ -78,8 +78,8 @@ const CATEGORY_META: Record<JourneyCategory, CategoryMeta> = {
     accentHex: "#fb7185",
   },
   side: {
-    label: "Open Source & Tools",
-    shortLabel: "Open Source",
+    label: "Developer Tools & GitHub",
+    shortLabel: "Developer Tools",
     description: "Desktop utilities, developer tools & ecosystem contributions",
     icon: Terminal,
     badgeClass: "text-signal bg-signal/10 border-signal/30",
@@ -105,7 +105,7 @@ const YEAR_INFO: Record<string, { title: string; subtitle: string }> = {
     subtitle: "UniHack 1st Place Win, FIRST Tech Challenge & Neural Spree",
   },
   "2023": {
-    title: "Genesis & Open Source Roots",
+    title: "Genesis & First Projects",
     subtitle: "Hackathon Debut, InfoEducație & Desktop Utility Ecosystem",
   },
 };
@@ -145,7 +145,7 @@ export function Journey() {
   const statRoboticsSub = journeyCopy?.statRoboticsSub || "Nationals & Mentor";
 
   const statOpenSourceLabel = journeyCopy?.statOpenSourceLabel || "Open Source";
-  const statOpenSourceValue = journeyCopy?.statOpenSourceValue || "40+";
+  const statOpenSourceValue = journeyCopy?.statOpenSourceValue || "6";
   const statOpenSourceSub = journeyCopy?.statOpenSourceSub || "Repositories";
 
   // Retain original index bindings for CMS Visual Editor

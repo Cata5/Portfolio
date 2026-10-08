@@ -83,8 +83,8 @@ export function CyberdeckCliView() {
     } else if (lower.includes("vortex") || lower.includes("hardest") || lower.includes("flagship")) {
       outputLines = [
         "DOSSIER: VORTEX [FLAGSHIP CROSS-PLATFORM MEDIA STREAMER]",
-        "• Codebase: Single Kotlin codebase across 3 runtimes (Phone, TV, PC)",
-        "• Remote Storage: 7 protocols (Google Drive, SMB, SFTP, FTPS, WebDAV, NFS, UPnP)",
+        "-&gt; Codebase: Two apps sharing a Kotlin core (Phone/TV, Desktop)",
+        "-&gt; Remote Storage: 5 protocols (Google Drive, SMB, SFTP, FTPS, WebDAV)",
         "• Playback Engine: Media3/ExoPlayer (Android/TV) & in-app mpv player (Windows)",
         "• Music Engine: YouTube streaming + real offline audio downloads",
         "• Downloads: Background WorkManager queue with quota auto-cleanup",

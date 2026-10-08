@@ -15,6 +15,7 @@ import { SectionInspector } from "./section-inspector";
 import { Button } from "@/components/ui/button";
 import { TagInput } from "@/components/ui/tag-input";
 import { getLenis } from "@/components/motion/lenis";
+import { withBasePath } from "@/lib/base-path";
 import type { Project, ProjectCategory, ProjectStatus } from "@/data/projects";
 import type { Activity } from "@/data/activities";
 import type { Certification } from "@/data/certifications";
@@ -100,7 +101,7 @@ export function InspectorDrawer() {
 
     try {
       const token = typeof window !== "undefined" ? sessionStorage.getItem("portfolio_admin_token") : "";
-      const res = await fetch("/api/content/upload/", {
+      const res = await fetch(withBasePath("/api/content/upload"), {
         method: "POST",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

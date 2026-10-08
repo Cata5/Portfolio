@@ -140,7 +140,7 @@ export function MainAdminDashboard() {
     setIsRestartingModel(true);
     setRestartFeedback("Restarting local model instance & applying parameters...");
     try {
-      const res = await fetch("/api/rag/models/", {
+      const res = await fetch(withBasePath("/api/rag/models"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reload: true }),
@@ -208,7 +208,7 @@ export function MainAdminDashboard() {
 
           <div className="pt-2 border-t border-border/40">
             <Link
-              href={withBasePath("/")}
+              href="/"
               className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="size-3" /> Back to Portfolio
@@ -233,7 +233,7 @@ export function MainAdminDashboard() {
       <header className="rounded-2xl border border-border/50 bg-card/40 p-4 sm:p-5 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] ring-1 ring-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
-            href={withBasePath("/")}
+            href="/"
             title="Back to Portfolio"
             className="flex size-10 items-center justify-center rounded-xl border border-border/60 bg-card/60 text-muted-foreground hover:border-signal/40 hover:text-foreground transition-all shrink-0 shadow-sm"
           >
@@ -292,7 +292,7 @@ export function MainAdminDashboard() {
           </button>
 
           <Link
-            href={withBasePath("/")}
+            href="/"
             target="_blank"
             className="flex items-center gap-1.5 rounded-xl border border-border/50 bg-card/60 px-3.5 py-2 font-mono text-xs text-muted-foreground hover:border-signal/40 hover:text-foreground transition-all"
           >

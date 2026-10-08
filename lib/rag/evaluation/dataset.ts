@@ -43,7 +43,7 @@ export const PORTFOLIO_EVALUATION_DATASET: EvalQuery[] = [
     query: "Which remote storage protocols does Vortex support for streaming?",
     category: "vortex",
     expectedDocumentIds: ["content_projects", "PROJECT_ANALYSIS"],
-    expectedKeywords: ["Google Drive", "SMB", "SFTP", "WebDAV", "NFS", "UPnP"],
+      expectedKeywords: ["Google Drive", "SMB", "SFTP", "WebDAV", "FTP"],
     relevanceJudgments: {
       content_projects: 3,
       PROJECT_ANALYSIS: 3,
