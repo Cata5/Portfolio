@@ -469,7 +469,7 @@ export function ChatView() {
                       <div className="flex items-center gap-1.5">
                         <Layers className="size-3 text-signal" />
                         <span className="font-mono text-[10px] uppercase tracking-wider text-signal font-semibold">
-                          Embedded Action — View on Portfolio:
+                          Embedded Action - View on Portfolio:
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-2">

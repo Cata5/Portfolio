@@ -12,7 +12,7 @@ export function Footer() {
     <footer className="relative overflow-hidden border-t border-border/40">
       <Container className="relative z-10 flex flex-col gap-4 py-12 md:flex-row md:items-center md:justify-between">
         <p className="font-mono text-[11px] text-muted-foreground">
-          © <CurrentYear /> {site.name} — portfolio v2
+          © <CurrentYear /> {site.name} - Portfolio
         </p>
         <div className="flex flex-wrap items-center gap-6 font-mono text-[11px] text-muted-foreground">
           <a

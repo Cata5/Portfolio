@@ -123,7 +123,7 @@ export function ProjectExplorer() {
           })}
           {filtered.length === 0 && (
             <li className="border-b border-border/40 py-12 text-center font-mono text-[12px] text-muted-foreground">
-              No projects in this category yet — real work lands here.
+              No projects in this category yet - real work lands here.
             </li>
           )}
         </ul>
@@ -154,13 +154,13 @@ function ExplorerRow({
         </span>
         <span className="font-mono text-[11px] text-muted-foreground">
           {project.category}
-          {project.year ? ` — ${project.year}` : ""}
-          {project.placeholder ? " — placeholder" : ""}
+          {project.year ? ` - ${project.year}` : ""}
+          {project.placeholder ? " - placeholder" : ""}
           {project.featured ? " · featured" : ""}
         </span>
       </span>
       <span className="hidden truncate font-mono text-[12px] text-muted-foreground md:block">
-        {project.technologies.join(" · ") || "—"}
+        {project.technologies.join(" · ") || "-"}
       </span>
       <span className="justify-self-end text-muted-foreground transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-signal">
         <ArrowUpRight className="size-4" aria-hidden="true" />

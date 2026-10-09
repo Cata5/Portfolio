@@ -85,7 +85,7 @@ export function HolographicStandbyView() {
         themes?.common?.welcomeDescription ||
         "Local neural inference weights (Gemma 4 Q4_K_M via Unsloth) run on Catalin's workstation and are unreachable on this static GitHub Pages build. The assistant is reading from the pre-indexed portfolio knowledge archive with instant verified navigation.",
       bullets: [
-        "Vortex (Cross-Platform Media Player) — Flagship systems engineering project",
+        "Vortex (Cross-Platform Media Player) - Flagship systems engineering project",
         "Technical Stack: TypeScript, Python, Kotlin, Next.js 16, React 19, PyTorch",
         "Direct Contact: cata.manu06@gmail.com | github.com/Cata5 | linkedin.com/in/cata5",
       ],
@@ -124,7 +124,7 @@ export function HolographicStandbyView() {
         id: `msg_${Date.now()}`,
         role: "bot",
         badge: "VERIFIED ARCHIVE // VORTEX",
-        title: "Vortex — Cross-Platform Streaming Media Player",
+        title: "Vortex - Cross-Platform Streaming Media Player",
         errorLog: rawError,
         content:
           themes?.glitchedAssistant?.vortexSummary ||
@@ -148,7 +148,7 @@ export function HolographicStandbyView() {
         id: `msg_${Date.now()}`,
         role: "bot",
         badge: "VERIFIED ARCHIVE // DIRECT CHANNELS",
-        title: "Catalin Manu — Direct Contact Uplink",
+        title: "Catalin Manu - Direct Contact Uplink",
         errorLog: rawError,
         content:
           themes?.glitchedAssistant?.contactSummary ||

@@ -498,7 +498,7 @@ export function Journey() {
                                 <div className="relative h-48 sm:h-56 w-full overflow-hidden bg-neutral-950/60">
                                   <Image
                                     src={entry.image}
-                                    alt={`${entry.title} — visual`}
+                                    alt={`${entry.title} - visual`}
                                     fill
                                     sizes="(min-width: 768px) 45vw, 100vw"
                                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"

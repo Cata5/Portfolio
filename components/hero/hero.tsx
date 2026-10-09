@@ -253,7 +253,7 @@ export function Hero() {
 
       {/* Edge labels */}
       <div className="hero-label absolute right-5 top-20 z-30 hidden font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground md:block">
-        portfolio — v2 / <CurrentYear />
+        Portfolio / <CurrentYear />
       </div>
       <a
         href={site.github}
@@ -262,7 +262,7 @@ export function Hero() {
         className="hero-side-label absolute left-5 top-1/2 z-30 hidden -translate-y-1/2 items-center gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-foreground lg:flex"
         style={{ writingMode: "vertical-rl" }}
       >
-        github — cata5
+        github - cata5
       </a>
     </section>
   );

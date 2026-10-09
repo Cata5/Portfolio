@@ -36,7 +36,7 @@ export function ProjectVisual({
       >
         <Image
           src={imageSrc}
-          alt={`${project.title} — screenshot`}
+          alt={`${project.title} - screenshot`}
           fill
           sizes="(min-width: 1024px) 56vw, 100vw"
           className={cn(
@@ -49,7 +49,7 @@ export function ProjectVisual({
   }
 
   const label = project.placeholder
-    ? "placeholder — add to data/projects.ts"
+    ? "placeholder - add to data/projects.ts"
     : "screenshot pending";
 
   return (

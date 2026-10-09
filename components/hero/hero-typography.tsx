@@ -12,7 +12,7 @@ export function HeroTypography() {
       <p className="hero-eyebrow mb-4 sm:mb-6 lg:mb-8 overflow-hidden text-[12px] sm:text-[13px] font-semibold uppercase tracking-[0.03em] text-saffron">
         <span className="hero-eyebrow-inner block">
           <Editable path="site.role" label="Role / Title" inline>
-            {site.name} — {site.role}
+            {site.name} - {site.role}
           </Editable>
         </span>
       </p>

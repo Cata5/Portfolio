@@ -31,7 +31,7 @@ function ActivityCard({
         <div className="relative h-44 w-full overflow-hidden sm:h-52">
           <Image
             src={activity.image}
-            alt={`${activity.title} — photo`}
+            alt={`${activity.title} - photo`}
             fill
             sizes="(min-width: 640px) 44vw, 100vw"
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"

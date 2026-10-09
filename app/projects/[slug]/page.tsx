@@ -55,7 +55,7 @@ export async function generateMetadata({
           url: "/og.png",
           width: 1200,
           height: 630,
-          alt: `${site.name} — ${site.role}`,
+          alt: `${site.name} - ${site.role}`,
         },
       ],
     },
@@ -228,7 +228,7 @@ export default async function ProjectPage({
           <header className="mt-14 md:mt-20">
             <p className="text-[13px] font-semibold uppercase tracking-[0.03em] text-saffron">
               {project.category}
-              {project.year ? ` — ${project.year}` : ""}
+              {project.year ? ` - ${project.year}` : ""}
             </p>
             <TextReveal
               as="h1"
@@ -342,7 +342,7 @@ export default async function ProjectPage({
           {bands[0] && (
             <MediaBand
               src={bands[0]}
-              alt={`${project.title} — interface detail`}
+              alt={`${project.title} - interface detail`}
             />
           )}
 
@@ -390,7 +390,7 @@ export default async function ProjectPage({
           {bands[1] && (
             <MediaBand
               src={bands[1]}
-              alt={`${project.title} — another view`}
+              alt={`${project.title} - another view`}
             />
           )}
 

@@ -43,7 +43,7 @@ export function LightboxTrigger({ project }: { project: Project }) {
       >
         <Image
           src={shots[0]}
-          alt={`${project.title} — screenshot`}
+          alt={`${project.title} - screenshot`}
           fill
           sizes="(min-width: 1024px) 56vw, 100vw"
           className="object-contain transition-transform duration-500 ease-out group-hover:scale-[1.015]"

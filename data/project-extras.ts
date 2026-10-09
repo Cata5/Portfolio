@@ -7,11 +7,11 @@ import { projects, type Project } from "@/data/projects";
  * don't collide.
  */
 export const sourceAvailability: Partial<Record<Project["id"], string>> = {
-  cheltuieli: "Source is not public — walks through a real client project. Happy to show the code privately or discuss it in an interview.",
+  cheltuieli: "Source is not public - walks through a real client project. Happy to show the code privately or discuss it in an interview.",
   "apps-manager": "Source is not public. Happy to show the code privately or discuss it in an interview.",
   "dataset-generator": "Source is not public. Happy to show the code privately or discuss it in an interview.",
   detectie: "Source is not public. Happy to show the code privately or discuss it in an interview.",
-  coraltech: "Client project — source not public. Happy to walk through the code privately.",
+  coraltech: "Client project - source not public. Happy to walk through the code privately.",
   "yolo-trainer": "Source is not public. Happy to show the code privately or discuss it in an interview.",
   siteauto: "Source is not public. Happy to show the code privately or discuss it in an interview.",
   "llm-finetuner": "Source is not public. Happy to show the code privately or discuss it in an interview.",

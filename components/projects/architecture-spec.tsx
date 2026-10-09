@@ -91,21 +91,21 @@ export const ARCH_LAYERS = [
     layer: "State & Repository Engine",
     icon: Database,
     tech: "Room (KMP) · shared Kotlin core · TMDB cache",
-    desc: "A shared MediaRepository and library scanner feed a Room database — movies, TV, music, per-profile state, collections and resume positions — with TMDB metadata cached locally (24 h TTL).",
+    desc: "A shared MediaRepository and library scanner feed a Room database - movies, TV, music, per-profile state, collections and resume positions - with TMDB metadata cached locally (24 h TTL).",
     flow: "media queries · connection metadata",
   },
   {
     layer: "Storage & Provider Protocols",
     icon: HardDrive,
     tech: "Drive - SMB - SFTP - FTP - WebDAV",
-    desc: "Pluggable client-side provider abstraction with LAN discovery (NSD/mDNS). Streams directly from personal cloud & LAN shares — zero central server.",
+    desc: "Pluggable client-side provider abstraction with LAN discovery (NSD/mDNS). Streams directly from personal cloud & LAN shares - zero central server.",
     flow: "authenticated stream URLs · range requests",
   },
   {
     layer: "Playback & Security Pipeline",
     icon: Lock,
     tech: "Media3 / ExoPlayer · mpv (mediamp) · Android Keystore",
-    desc: "Hardware-accelerated playback — ExoPlayer on mobile and TV, an in-app mpv player with external fallback on desktop (via a loopback DriveStreamProxy). Secrets live in Keystore, never Room.",
+    desc: "Hardware-accelerated playback - ExoPlayer on mobile and TV, an in-app mpv player with external fallback on desktop (via a loopback DriveStreamProxy). Secrets live in Keystore, never Room.",
     flow: "audio tracks · subtitles · seek · resume",
   },
 ];
@@ -328,7 +328,7 @@ function InteractiveTreeNode({
 
         {node.note && (
           <span className="font-mono text-[10px] text-muted-foreground/80 break-words">
-            — {node.note}
+            - {node.note}
           </span>
         )}
       </div>

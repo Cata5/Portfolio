@@ -743,7 +743,7 @@ function MLSectionForm({
         {content.ml.runs?.map((run, rIdx) => (
           <div key={rIdx} className="rounded-xl border border-border/60 bg-neutral-950/70 p-3.5 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs font-bold text-signal">Run #{rIdx + 1} — {run.model}</span>
+              <span className="font-mono text-xs font-bold text-signal">Run #{rIdx + 1} - {run.model}</span>
               <button
                 type="button"
                 onClick={() => deleteMlRun(rIdx)}

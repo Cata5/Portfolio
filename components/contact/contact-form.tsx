@@ -81,7 +81,7 @@ export function ContactForm({
     if (!delivered) {
       setStatus("error");
       setErrorMessage(
-        "The message could not be sent right now — please try again or email me directly.",
+        "The message could not be sent right now - please try again or email me directly.",
       );
       return;
     }
@@ -210,7 +210,7 @@ export function ContactForm({
               Message Sent
             </h3>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground leading-relaxed">
-              Thank you for reaching out — your message is in my inbox and I will reply shortly.
+              Thank you for reaching out - your message is in my inbox and I will reply shortly.
             </p>
             <Button
               type="button"

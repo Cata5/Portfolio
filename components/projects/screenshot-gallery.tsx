@@ -53,7 +53,7 @@ export function ScreenshotGallery({ project }: { project: Project }) {
           >
             <Image
               src={src}
-              alt={`${project.title} — screenshot ${i + 1}`}
+              alt={`${project.title} - screenshot ${i + 1}`}
               fill
               sizes="(min-width: 640px) 40vw, 100vw"
               // The whole image fits inside the frame (no cropping) — tall

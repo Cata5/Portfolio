@@ -107,7 +107,7 @@ export function SiteHeader() {
               }
             }}
             className="group flex items-center gap-2 sm:gap-2.5"
-            aria-label={`${site.name} — back to top`}
+            aria-label={`${site.name} - back to top`}
           >
             <span
               className="size-2 rounded-full bg-signal shadow-[0_0_8px_var(--color-signal)] transition-transform duration-200 group-hover:scale-125"

@@ -6,7 +6,7 @@
     "platform": "Android · Android TV · Windows",
     "year": 2026,
     "status": "In Development",
-    "summary": "Self-hosted media streaming on Android, Android TV and Windows — five real remote providers (Drive, SMB, SFTP, FTP, WebDAV), TMDB enrichment, offline downloads, Google Cast and a YouTube-powered music library.",
+    "summary": "Self-hosted media streaming on Android, Android TV and Windows - five real remote providers (Drive, SMB, SFTP, FTP, WebDAV), TMDB enrichment, offline downloads, Google Cast and a YouTube-powered music library.",
     "description": "Vortex is a client-side, self-hosted media streaming app with no backend and no subscription: it streams from sources you already own. It aggregates personal libraries from Google Drive, SMB, SFTP, FTP/FTPS and WebDAV behind one provider interface, discovers LAN servers over NSD/mDNS to pre-fill connection forms, and enriches everything with TMDB metadata cached locally. Playback is Media3/ExoPlayer with an FFmpeg software-decoder fallback on phones and TV, and an in-app mpv player on Windows. It adds per-profile state (favourites, watchlist, resume, subtitle and audio memory, kids profiles), picture-in-picture, Google Cast with its own LAN proxy, OpenSubtitles search, intro skip, a WorkManager download queue with quota cleanup, and a YouTube-powered music library with real offline downloads. Secrets live in an Android Keystore-backed encrypted store, never in the database.",
     "technologies": [
       "Kotlin 2.2",
@@ -54,39 +54,39 @@
         "label": "Android",
         "device": "phone",
         "shot": "/projects/vortex/01-phone.webp",
-        "description": "Phones and tablets — touch UI with metadata, resume, downloads, profiles, music and offline support."
+        "description": "Phones and tablets - touch UI with metadata, resume, downloads, profiles, music and offline support."
       },
       {
         "id": "tv",
         "label": "TV",
         "device": "tv",
         "shot": "/projects/vortex/02-tv.webp",
-        "description": "Android TV — Leanback launcher, D-pad navigation, remote controls and an ambient poster-slideshow screensaver."
+        "description": "Android TV - Leanback launcher, D-pad navigation, remote controls and an ambient poster-slideshow screensaver."
       },
       {
         "id": "pc",
         "label": "PC",
         "device": "desktop",
         "shot": "/projects/vortex/03-desktop.png",
-        "description": "Windows desktop — Netflix-style library in Compose Multiplatform, in-app mpv player with external fallback, Drive sign-in via OAuth loopback and real 4K / HDR / Dolby Vision / Atmos quality badges."
+        "description": "Windows desktop - Netflix-style library in Compose Multiplatform, in-app mpv player with external fallback, Drive sign-in via OAuth loopback and real 4K / HDR / Dolby Vision / Atmos quality badges."
       }
     ],
     "features": [
       "Unified movie & TV library aggregated from Google Drive, SMB, SFTP, FTP/FTPS and WebDAV behind one provider interface",
       "LAN server discovery (NSD/mDNS) across 5 service types that pre-fills connection forms",
-      "TMDB metadata enrichment — posters, backdrops, cast, episode details — with a 24 h local cache and manual re-matching",
+      "TMDB metadata enrichment - posters, backdrops, cast, episode details - with a 24 h local cache and manual re-matching",
       "Google Cast with a dedicated LAN proxy server, per-cast random tokens, Range support and HLS/DASH MIME sniffing",
       "OpenSubtitles network search and download, with subtitle charset auto-detection to repair mojibake",
       "Picture-in-picture video with the diagnostics overlay suppressed while active",
-      "Per-profile state — favourites, watchlist, watched, resume, subtitle and audio memory, and a kids flag",
+      "Per-profile state - favourites, watchlist, watched, resume, subtitle and audio memory, and a kids flag",
       "Per-title and per-episode playback resume, plus episode moving between shows and seasons with optional re-enrichment",
-      "Intro skip — manual button, auto-skip setting and per-episode intro markers detected at scan time",
+      "Intro skip - manual button, auto-skip setting and per-episode intro markers detected at scan time",
       "Auto-play next episode plus an in-player queue overlay",
       "Subtitle track selection, styling, offset and per-show language memory; sidecar subtitle scanning for downloaded media",
       "Multi-track audio selection and playback speeds from 0.5× to 2.0×",
       "Offline downloads for every provider via a WorkManager queue with pause, resume, retry, progress and an existing-download re-adoption scanner",
-      "Download controls — storage location picker, Wi-Fi-only mode, free-space guard and quota-based auto cleanup",
-      "Google Drive OAuth — embedded WebView flow on TV with device-flow fallback, Google Sign-In on phone, browser loopback on desktop",
+      "Download controls - storage location picker, Wi-Fi-only mode, free-space guard and quota-based auto cleanup",
+      "Google Drive OAuth - embedded WebView flow on TV with device-flow fallback, Google Sign-In on phone, browser loopback on desktop",
       "Android TV: Leanback launcher, D-pad navigation and an ambient poster-slideshow screensaver",
       "User profiles with per-profile settings, backed by a versioned backup format",
       "Custom collections and watchlists with ordered membership",
@@ -94,27 +94,27 @@
       "Per-episode watched state (auto at 95%+) with season progress bars",
       "Actor & director pages, plus \"You May Also Like\" from TMDB similar titles",
       "Music: on-device YouTube search, streaming playback, real offline audio downloads, albums, artists, queue, play counts, per-profile likes and M3U import/export",
-      "Playback diagnostics overlay — codecs, resolution, dropped frames, bandwidth estimate",
+      "Playback diagnostics overlay - codecs, resolution, dropped frames, bandwidth estimate",
       "Backup & restore as versioned per-profile JSON (merge-only; connection credentials never exported)",
       "In-app Privacy & Account screen with real data deletion and Google token revocation",
       "Certificate pinning for TMDB and Google, and a low-end/TV adaptive buffer and decode budget",
       "Equalizer, audio routing and ambient display while playing",
-      "RAM-only stream buffering — no stream bytes ever written to disk",
+      "RAM-only stream buffering - no stream bytes ever written to disk",
       "Desktop (Windows): in-app mpv player with external fallback, real 4K / HDR / Dolby Vision / Atmos probing, yt-dlp trailers, native Aero Snap window hooks, mpv auto-install and JSON IPC over a named pipe"
     ],
     "partialFeatures": [
-      "Music screens are phone-only — TV music and equalizer is a documented follow-up",
+      "Music screens are phone-only - TV music and equalizer is a documented follow-up",
       "NFS and UPnP providers exist as source files but every method is unimplemented and neither is offered in the connection UI",
       "Kids profiles carry a flag that is displayed but not yet used to filter content",
       "Sidecar subtitles only resolve for local files, so they apply to downloaded media rather than streamed sources"
     ],
-    "architecture": "Two Gradle builds rather than one shared core: an Android single-module app (phones + TV) and an independent Compose Multiplatform desktop build, each with its own repository and TMDB-enrichment layer — a documented divergence risk. Within the Android app, a remote-storage provider interface abstracts Drive, SMB, SFTP, FTP and WebDAV, a resolver maps connection IDs to providers for the download queue, and a Room database (v24, 14 migrations) holds per-profile state. TMDB metadata is fetched and cached locally. Playback is Media3/ExoPlayer with an FFmpeg fallback, or mpv on desktop, where a loopback DriveStreamProxy injects OAuth credentials so mpv can stream authenticated Drive URLs; Android Cast uses a separate LAN-bound proxy with per-cast tokens. Secrets live in an Android Keystore-backed encrypted store, never in Room.",
+    "architecture": "Two Gradle builds rather than one shared core: an Android single-module app (phones + TV) and an independent Compose Multiplatform desktop build, each with its own repository and TMDB-enrichment layer - a documented divergence risk. Within the Android app, a remote-storage provider interface abstracts Drive, SMB, SFTP, FTP and WebDAV, a resolver maps connection IDs to providers for the download queue, and a Room database (v24, 14 migrations) holds per-profile state. TMDB metadata is fetched and cached locally. Playback is Media3/ExoPlayer with an FFmpeg fallback, or mpv on desktop, where a loopback DriveStreamProxy injects OAuth credentials so mpv can stream authenticated Drive URLs; Android Cast uses a separate LAN-bound proxy with per-cast tokens. Secrets live in an Android Keystore-backed encrypted store, never in Room.",
     "architectureDiagram": "Android app (:app)                Desktop (separate Gradle build)\n  Compose phone / Compose TV   ←→    Compose Multiplatform (Windows)\n        ↓                                  ↓\n  Room v24 (per-profile)              Room KMP v3\n        ↓\n  Provider interface: Drive · SMB · SFTP · FTP · WebDAV  (+ NSD discovery)\n        ↓\n  Media3/ExoPlayer + FFmpeg fallback · mpv (desktop)\n        ↓\n  Secrets: Android Keystore · desktop loopback DriveStreamProxy\n  Cast: LAN CastProxyServer with per-cast tokens",
     "limitations": [
-      "Requires TMDB and Google OAuth credentials in local.properties — the build succeeds without them but metadata and Drive silently stay disabled",
+      "Requires TMDB and Google OAuth credentials in local.properties - the build succeeds without them but metadata and Drive silently stay disabled",
       "The Android app and the desktop app are separate builds with duplicated domain logic, so features can diverge",
       "Google client secrets are compiled into BuildConfig and kept by R8 rules, so they are extractable from any release APK",
-      "No iOS build — Kotlin/Compose only; the desktop artifact is Windows-x64 only",
+      "No iOS build - Kotlin/Compose only; the desktop artifact is Windows-x64 only",
       "Backup & restore is gated off on Android TV, and there is no SAF picker for choosing a backup location",
       "Room falls back to a destructive migration, wiping all tables on an unknown-version upgrade",
       "The public demo is a static export, so the download queue and provider setup need a real device"
@@ -165,7 +165,7 @@
     "architectureDiagram": "PyQt6 UI (main_window)\n    ↓  QThread workers\nEmailScanner (IMAP)\n    ↓\nInvoiceExtractor (HTML · PDF · OCR)\n    ↓\nExcelHandler (openpyxl + backups)",
     "limitations": [
       "Requires a local Tesseract installation for image OCR",
-      "Matching depends on keyword configuration — accuracy varies by supplier"
+      "Matching depends on keyword configuration - accuracy varies by supplier"
     ]
   },
   {
@@ -175,7 +175,7 @@
     "platform": "Windows · Android (Capacitor)",
     "year": 2026,
     "status": "Completed",
-    "summary": "Offline offer generator for Teka: reads six Excel files (products, clients, promos), applies tiered discounts, and exports client offers — as a Windows app and an Android app.",
+    "summary": "Offline offer generator for Teka: reads six Excel files (products, clients, promos), applies tiered discounts, and exports client offers - as a Windows app and an Android app.",
     "description": "Auto Oferta is a local tool built for Teka that centralizes six Excel workbooks (sinks, kitchen taps, appliances, accessories, client commercial conditions, brochures/promos). It matches clients with products, applies commercial discounts, calculates final prices with configurable TVA and promo formulas, and exports the result to Excel. A local Python server serves an offline web interface, wrapped for Android via Capacitor, with a single-file Windows build via PyInstaller.",
     "technologies": [
       "Python",
@@ -199,7 +199,7 @@
     "features": [
       "Loads six Excel sources with sheet/header detection and column aliasing (incl. legacy .xls)",
       "Client-to-product matching across commercial conditions",
-      "Tiered discount engine — client discount then supplementary discount, applied cascaded (not summed)",
+      "Tiered discount engine - client discount then supplementary discount, applied cascaded (not summed)",
       "Promo modes: brochure 'ADAOS 20%' and percentage discounts",
       "Configurable TVA (default 21%) and promo formulas",
       "Excel export of calculated offers",
@@ -211,7 +211,7 @@
     "architecture": "excel_loader.py normalizes the six workbooks, service.py performs client/product/promo matching, pricing.py owns the tiered-discount formulas, exporter.py writes results, and app.py serves the offline web dashboard on localhost. The Capacitor project wraps the same web UI for Android.",
     "architectureDiagram": "6 Excel workbooks\n    ↓  excel_loader (aliases, normalization)\nservice.py (matching)\n    ↓\npricing.py (tiered discounts · TVA · promos)\n    ↓\nexporter.py → Excel offer  ·  app.py → local web UI → Capacitor (Android)",
     "limitations": [
-      "Pricing formulas are specific to Teka's commercial conditions — not generic",
+      "Pricing formulas are specific to Teka's commercial conditions - not generic",
       "Local-first: no multi-user or server deployment"
     ]
   },
@@ -222,7 +222,7 @@
     "platform": "Windows",
     "year": 2026,
     "status": "In Development",
-    "summary": "An Electron launcher that scans drives for games and apps, installs software through winget, and tracks playtime — all in one SQLite-backed dashboard.",
+    "summary": "An Electron launcher that scans drives for games and apps, installs software through winget, and tracks playtime - all in one SQLite-backed dashboard.",
     "description": "Apps Manager is an Electron desktop app that turns a machine into a tidy launcher. It scans configured paths to detect installed games, lets you add or rename entries and set custom covers, launches games while recording playtime, and installs applications through winget with a progress UI. Everything is stored locally in SQLite (better-sqlite3).",
     "technologies": [
       "Electron",
@@ -247,10 +247,10 @@
       "SQLite library (games + winget databases) with seed data",
       "Settings persisted in the Electron userData directory"
     ],
-    "architecture": "The Electron main process owns SQLite (better-sqlite3) and exposes a typed API over contextBridge via preload. The React renderer (Vite) consumes it through tabs — DetectGames, InstallApps, StartApp, Settings — with a floating overlay for background scans.",
+    "architecture": "The Electron main process owns SQLite (better-sqlite3) and exposes a typed API over contextBridge via preload. The React renderer (Vite) consumes it through tabs - DetectGames, InstallApps, StartApp, Settings - with a floating overlay for background scans.",
     "architectureDiagram": "React UI (Vite renderer)\n    ↑  contextBridge API\nElectron main process\n    ├─ better-sqlite3 (games, winget)\n    └─ winget CLI integration",
     "limitations": [
-      "Early-stage — README is still the create-vite template",
+      "Early-stage - README is still the create-vite template",
       "Windows-specific (winget, exe paths)"
     ]
   },
@@ -261,7 +261,7 @@
     "platform": "Windows · desktop",
     "year": 2026,
     "status": "Completed",
-    "summary": "A desktop tool for building image datasets from multiple sources — Bing, Google, iCrawler — and generating SAM-based masks and annotation files for training.",
+    "summary": "A desktop tool for building image datasets from multiple sources - Bing, Google, iCrawler - and generating SAM-based masks and annotation files for training.",
     "description": "Dataset Generator assembles image datasets from several scraping backends with user-agent spoofing and organized temp management, then supports mask generation with Segment Anything and annotation classes defined in JSON. Two CustomTkinter front-ends (app/ and new_ui/) drive the pipeline, and it ships with the CUDA-toolchain requirements for on-machine training.",
     "technologies": [
       "Python",
@@ -331,7 +331,7 @@
     "architecture": "server.py runs YOLO inference and EasyOCR over async WebSockets and returns PlateResult objects (index, confidence, bbox, recognized text, crop path). The ESP32 connects as a client and renders results; phone_camera_client.html captures and uploads images. Models are trained offline with the PySide6 Train_APP.",
     "architectureDiagram": "Phone camera / camera feed\n    ↓\nPython server (YOLO → EasyOCR) ── WebSocket API\n    ↓\nESP32 client (PlatformIO)  ·  web results\n\nPySide6 Train_APP trains the YOLO weights offline",
     "limitations": [
-      "Wi-Fi SSID, password and server IP are hardcoded in the ESP32 firmware — should move to build-time config",
+      "Wi-Fi SSID, password and server IP are hardcoded in the ESP32 firmware - should move to build-time config",
       "Tied to a local network (single server address)",
       "Detection quality depends on the trained plate model"
     ],
@@ -347,7 +347,7 @@
     "year": 2026,
     "status": "In Development",
     "demo": "https://cata5.github.io/Primarie/",
-    "summary": "A municipal e-services portal — declarations, tax certificates and fine payments in one account — with scrypt auth, role-based dashboards, audit logging and SQLite storage.",
+    "summary": "A municipal e-services portal - declarations, tax certificates and fine payments in one account - with scrypt auth, role-based dashboards, audit logging and SQLite storage.",
     "description": "Primarie is a Next.js portal for municipal e-services. It ships with a seeded demo user, scrypt password hashing with an optional pepper, brute-force throttling on login, a guided declaration wizard, role-based dashboard views (an OWASP A01 access-control pass is recorded in git history), audit logging, and a performance pass that lifted its audit score to 84/100. Data lives in SQLite (node:sqlite) with a JSON store for legacy content, and the whole thing deploys via a multi-stage Dockerfile. A fully interactive static demo (client-side state in localStorage) is published on GitHub Pages.",
     "technologies": [
       "Next.js 16",
@@ -385,7 +385,7 @@
     "architecture": "Server actions validate input (validate.ts), manage sessions and audit (audit.ts, auth.ts). Declarations flow through lib/declarations.ts and forms.ts against SQLite, with a JSON database for content that predates the migration. The Dockerfile builds a standalone Next.js output. In the Pages demo build, lib/auth.ts and lib/db.ts serve a seeded client-side store instead, so the whole dashboard stays interactive without a server.",
     "architectureDiagram": "Browser\n    ↓  Server Actions\nNext.js (App Router)\n    ├─ auth.ts (scrypt · pepper · throttle)\n    ├─ declarations.ts / forms.ts\n    ├─ SQLite (node:sqlite) + data/db.json\n    └─ audit.ts → data/logs\n\nGitHub Pages demo: seeded client store (localStorage)",
     "limitations": [
-      "Demo credentials are hardcoded in lib/auth.ts — fine for evaluation, must be replaced for production",
+      "Demo credentials are hardcoded in lib/auth.ts - fine for evaluation, must be replaced for production",
       "JSON store is being migrated to SQLite; both are read at runtime"
     ]
   },
@@ -397,8 +397,8 @@
     "year": 2026,
     "status": "In Development",
     "demo": "https://cata5.github.io/CoralTechWeb/",
-    "summary": "Bilingual (EN/RO) site for an FTC robotics team — seasons, activities, members and sponsors, plus a two-game arcade, a page-flip photo album and a 10-module admin CMS behind passkeys and TOTP.",
-    "description": "Coral Tech is the website of an FTC robotics team (#28260) — \"fusing nature with technology\". Twelve public routes cover seasons, activities, members, sponsors, outreach, recruitment and an interactive photo album; alongside them sit a two-game arcade (a procedural maze and an FTC logo-trivia game) and a 10-module admin CMS. Content is bilingual through hand-rolled locale files (275 keys in EN and RO, exact parity) with a per-entity field_en/field_ro convention. A local-LLM RAG assistant answers from the site's own content: chunks are embedded with Ollama or a local GGUF model and returned with citations plus allow-listed scroll actions. Admin auth is WebAuthn passkeys with TOTP 2FA and hashed single-use recovery codes.",
+    "summary": "Bilingual (EN/RO) site for an FTC robotics team - seasons, activities, members and sponsors, plus a two-game arcade, a page-flip photo album and a 10-module admin CMS behind passkeys and TOTP.",
+    "description": "Coral Tech is the website of an FTC robotics team (#28260) - \"fusing nature with technology\". Twelve public routes cover seasons, activities, members, sponsors, outreach, recruitment and an interactive photo album; alongside them sit a two-game arcade (a procedural maze and an FTC logo-trivia game) and a 10-module admin CMS. Content is bilingual through hand-rolled locale files (275 keys in EN and RO, exact parity) with a per-entity field_en/field_ro convention. A local-LLM RAG assistant answers from the site's own content: chunks are embedded with Ollama or a local GGUF model and returned with citations plus allow-listed scroll actions. Admin auth is WebAuthn passkeys with TOTP 2FA and hashed single-use recovery codes.",
     "technologies": [
       "Next.js 16",
       "React 19",
@@ -421,10 +421,10 @@
     ],
     "features": [
       "12 public routes: home, seasons, activities, members, sponsors, outreach, join, gallery, journal, games, maze, logo-trivia",
-      "Bilingual EN/RO throughout — 275 locale keys per language with exact parity, plus per-entity field_en/field_ro fields",
+      "Bilingual EN/RO throughout - 275 locale keys per language with exact parity, plus per-entity field_en/field_ro fields",
       "Local-LLM RAG assistant answering from site content, returning citations and allow-listed scroll-to-section actions",
       "Two playable games: a procedural maze generator (4 difficulties, custom grids to 70×70, guaranteed solution) and an FTC logo-trivia game with 174 teams",
-      "Page-flip photo album engine — 7 chapters × 17 spreads, 6 spread layouts, swipe navigation, lightbox and memory pins",
+      "Page-flip photo album engine - 7 chapters × 17 spreads, 6 spread layouts, swipe navigation, lightbox and memory pins",
       "10-module admin CMS with server actions, live EN/RO string editing and image upload/pickers",
       "Admin auth: WebAuthn passkeys, TOTP 2FA with QR enrolment, 8 hashed single-use recovery codes, 12 h hashed sessions",
       "Content sync + reindex endpoint with SHA-256 fingerprint caching and a debounced file-watcher",
@@ -434,7 +434,7 @@
       "Skip-to-content link, sitemap and robots rules"
     ],
     "partialFeatures": [
-      "The chat path retrieves from 6 in-memory content chunks, not the persisted vector store — the index pipeline is complete but data/rag/vectors.json is still empty on the committed tree",
+      "The chat path retrieves from 6 in-memory content chunks, not the persisted vector store - the index pipeline is complete but data/rag/vectors.json is still empty on the committed tree",
       "The assistant is English-only; the client's language field is ignored in favour of a server-side constant",
       "The public demo is a static export built with the chat assistant disabled, so the RAG feature is not visible at the demo link",
       "10 of 15 team members still use a placeholder portrait",
@@ -443,8 +443,8 @@
     "architecture": "Content lives as markdown with gray-matter frontmatter plus JSON entities under content/ and locales/. The RAG pipeline snapshots rendered pages, chunks them, embeds via Ollama or a local GGUF runtime (with automatic CPU fallback) and persists vectors to data/rag/vectors.json; the chat endpoint embeds candidate chunks on the fly, ranks by cosine similarity and generates with node-llama-cpp, returning an answer, an allow-listed action and its sources. Server actions in app/admin/* own every write and sit behind a passkey + TOTP session gate.",
     "architectureDiagram": "Content (content/*.md · locales/*.json)\n    ↓  sync + chunk + embed (Ollama | local GGUF)\nVector index (data/rag/vectors.json)\n    ↓  retrieve + generate\n/api/rag/chat (node-llama-cpp) → answer + sources + actions\n\nAdmin CMS (server actions)\n    ↓  passkey + TOTP session\nContent writes",
     "limitations": [
-      "The RAG pipeline needs Ollama or a local GGUF runtime at index time — there is no hosted fallback",
-      "Vector store is a file-based JSON document — fine at this site's scale, not for large corpora",
+      "The RAG pipeline needs Ollama or a local GGUF runtime at index time - there is no hosted fallback",
+      "Vector store is a file-based JSON document - fine at this site's scale, not for large corpora",
       "Localhost requests are auto-authenticated as admin outside production, so passkey enforcement only holds on a real host",
       "The chat endpoint has no API key or rate limit, so it should not be exposed publicly as-is",
       "No automated tests"
@@ -465,7 +465,7 @@
     "year": 2026,
     "status": "In Development",
     "demo": "https://cata5.github.io/LiceulTeoreticIonCantacuzino/",
-    "summary": "Full website for a Bucharest high school — 28 public routes over 16 SQLite tables, a 2,700-line timetable PDF parser, and an admin panel behind TOTP two-factor auth.",
+    "summary": "Full website for a Bucharest high school - 28 public routes over 16 SQLite tables, a 2,700-line timetable PDF parser, and an admin panel behind TOTP two-factor auth.",
     "description": "A complete school website built on Next.js and SQLite (better-sqlite3, WAL). It publishes news, classes, teachers, documents, results, gallery, a school magazine, case-study projects, FAQs, e-learning and timetables across 28 public routes. The distinguishing piece is a ~2,700-line timetable PDF parser that extracts a class schedule, associates teachers and resolves shift conflicts automatically, with class metadata (grade, profile, specialisation, head teacher, room) inferred from the parsed rows. Content is managed through an admin panel protected by JWT sessions, bcrypt hashing, TOTP two-factor authentication and CSRF double-submit tokens, with JSONL audit logging, progressive lockout and rate limiting. Uploaded files are validated by binary magic bytes. The public deployment is a static export; the admin panel, timetable parser, uploads and contact inbox require a Node server.",
     "technologies": [
       "Next.js 16",
@@ -498,7 +498,7 @@
     ],
     "features": [
       "28 public routes: news, classes, teachers, documents, results (3 routes), gallery, magazine, projects, FAQs, e-learning, timetables, educational offer and contact",
-      "Timetable PDF parser (~2,700 lines) — table extraction, class matching, teacher association and automatic shift-conflict resolution",
+      "Timetable PDF parser (~2,700 lines) - table extraction, class matching, teacher association and automatic shift-conflict resolution",
       "Automatic class metadata inference from parsed timetables: grade, profile, specialisation, head teacher and room, creating missing classes automatically",
       "Admin panel with JWT sessions, bcrypt password hashing and TOTP two-factor authentication with in-browser QR enrolment",
       "CSRF double-submit tokens with timing-safe comparison, progressive account lockout and per-IP/per-user rate limiting",
@@ -508,25 +508,25 @@
       "Contact form writing into a SQLite inbox, with an admin reader (search, read state, delete) and a confirmation page",
       "Client-side PDF magazine reader with page-flip navigation, zoom and deep-linkable pages",
       "SQLite storage across 16 tables and 13 indexes, with an idempotent one-time JSON → SQLite migration guarded by a metadata marker",
-      "SEO layer — dynamic sitemap, robots rules, canonicals, OpenGraph cards and NewsArticle / BreadcrumbList / FAQPage / EducationalOrganization structured data",
-      "Security headers — CSP, HSTS in production, X-Frame-Options DENY, nosniff, referrer and permissions policies",
+      "SEO layer - dynamic sitemap, robots rules, canonicals, OpenGraph cards and NewsArticle / BreadcrumbList / FAQPage / EducationalOrganization structured data",
+      "Security headers - CSP, HSTS in production, X-Frame-Options DENY, nosniff, referrer and permissions policies",
       "Image-optimizer SSRF allowlist in proxy.ts, and path-traversal-proof PDF resolution",
       "GDPR privacy policy, terms of use, FAQ with a non-empty fallback, opening hours and a sticky mobile contact bar",
       "No third-party analytics, an AI-crawler-readable llms.txt, and reduced-motion aware animated reveals"
     ],
-    "architecture": "proxy.ts (the renamed middleware) guards every /admin and /api/admin request with a verified JWT, enforcing CSRF on mutations and applying an image-optimizer SSRF allowlist. Requests pass through a security tier — session verification, CSRF comparison, rate limiting, lockout and audit logging — into app/api/admin/* route handlers, which read and write through a content-store over a SQLite mapping layer down to better-sqlite3 in WAL mode. The timetable PDF parser runs server-side against uploaded documents and returns rows, warnings and diagnostics. The production build is a static export to GitHub Pages with the admin and API trees stripped, so the write paths only exist under next dev or a self-hosted Node runtime.",
+    "architecture": "proxy.ts (the renamed middleware) guards every /admin and /api/admin request with a verified JWT, enforcing CSRF on mutations and applying an image-optimizer SSRF allowlist. Requests pass through a security tier - session verification, CSRF comparison, rate limiting, lockout and audit logging - into app/api/admin/* route handlers, which read and write through a content-store over a SQLite mapping layer down to better-sqlite3 in WAL mode. The timetable PDF parser runs server-side against uploaded documents and returns rows, warnings and diagnostics. The production build is a static export to GitHub Pages with the admin and API trees stripped, so the write paths only exist under next dev or a self-hosted Node runtime.",
     "architectureDiagram": "proxy.ts (JWT guard · CSRF · SSRF allowlist)\n    ↓\nlib/server/security/ (session · csrf · lockout · rate-limit · audit)\n    ↓\napp/api/admin/* route handlers  ──  orar-parser (PDF → timetable rows)\n    ↓\ncontent-store.ts → sqlite-content.ts (11 entities)\n    ↓\nbetter-sqlite3 (WAL) → data/db.sqlite\n\nStatic export to GitHub Pages ships the read path only.",
     "limitations": [
-      "The admin panel, timetable parser, uploads and contact inbox need a Node server — they are stripped from the GitHub Pages static demo, where the contact form cannot submit",
+      "The admin panel, timetable parser, uploads and contact inbox need a Node server - they are stripped from the GitHub Pages static demo, where the contact form cannot submit",
       "A single shared admin account, with no user table or roles beyond \"admin\"",
       "Session revocation is process-local, so logout does not invalidate tokens across multiple instances",
       "Rate limiting still trusts the first client-supplied X-Forwarded-For hop, so it is bypassable on a self-hosted deployment",
       "The timetable parser (~2,700 lines) and the content mapper (~1,700 lines) are large single modules and a maintenance risk",
-      "Automated test coverage is a single 2FA lifecycle script — no test framework is configured",
+      "Automated test coverage is a single 2FA lifecycle script - no test framework is configured",
       "School-specific content lives in the database and needs seeding for a fresh deploy"
     ],
     "partialFeatures": [
-      "The dark theme is unreachable — a class-based dark variant is defined and roughly 98 dark: utilities are used, but nothing ever sets the .dark class",
+      "The dark theme is unreachable - a class-based dark variant is defined and roughly 98 dark: utilities are used, but nothing ever sets the .dark class",
       "The magazine has one dead PDF link; issue content is not yet complete",
       "Teacher profiles render initials avatars rather than photographs",
       "e-learning is a pair of static external links, and the documents page has no category filter or search",
@@ -534,7 +534,7 @@
     ],
     "futureWork": [
       "Replace the third-party placeholder magazine PDF and the stock-photography gallery entries with real school material before publishing",
-      "Gitignore the data/ directory — it holds the admin TOTP secret and contact message PII",
+      "Gitignore the data/ directory - it holds the admin TOTP secret and contact message PII",
       "Either wire up the dark theme or remove the dead dark: utilities",
       "Add real teacher photography and finish the magazine issues",
       "Break up the timetable parser and the content mapper, and add a real test framework"
@@ -592,7 +592,7 @@
     "year": 2026,
     "status": "In Development",
     "summary": "A local-first AI operating assistant: a 9B planner, a 26M executor, 56 tools, and an offline keyword router so everything keeps working without a model server.",
-    "description": "Jarvis is a local-first, extensible AI assistant built on the @earendil-works/pi framework. It uses a three-layer architecture — Ornith (9B) plans but never calls tools, Needle (26M) picks tool + args but never chats, and the runtime validates, checks permissions, executes and logs. There are 56 tools across filesystem, shell, Windows, Excel, browser, memory, media, system, archive, document, image, AI, automation and dev groups. A correction layer routes intents offline — fixing typos, Unix aliases and known failure modes — so all tools stay reachable even when no model is running. The media manager syncs a Google Drive / local library and talks to qBittorrent and rclone.",
+    "description": "Jarvis is a local-first, extensible AI assistant built on the @earendil-works/pi framework. It uses a three-layer architecture - Ornith (9B) plans but never calls tools, Needle (26M) picks tool + args but never chats, and the runtime validates, checks permissions, executes and logs. There are 56 tools across filesystem, shell, Windows, Excel, browser, memory, media, system, archive, document, image, AI, automation and dev groups. A correction layer routes intents offline - fixing typos, Unix aliases and known failure modes - so all tools stay reachable even when no model is running. The media manager syncs a Google Drive / local library and talks to qBittorrent and rclone.",
     "technologies": [
       "TypeScript",
       "Node.js",
@@ -618,7 +618,7 @@
       "Documentation for installation, extensions, workflows and model optimization"
     ],
     "architecture": "Queries flow User → Ornith (planner) → Needle (executor) → Runtime → Tools. The runtime validates and gates tool calls by permission; when Needle is unavailable, correction.ts routes intents via a prioritized keyword scorer so the same tools stay reachable offline. Media tooling caches library state in media_index.db and integrates rclone + qBittorrent.",
-    "architectureDiagram": "User\n  ↓\nOrnith (planner, 9B) — plans, never calls tools\n  ↓\nNeedle (executor, 26M) — picks tool + args\n  ↓\nRuntime (validate · permissions · execute · log)\n  ↓\n56 tools — filesystem · shell · windows · excel · browser · media · AI …\n\ncorrection.ts routes intents offline when Needle is down",
+    "architectureDiagram": "User\n  ↓\nOrnith (planner, 9B) - plans, never calls tools\n  ↓\nNeedle (executor, 26M) - picks tool + args\n  ↓\nRuntime (validate · permissions · execute · log)\n  ↓\n56 tools - filesystem · shell · windows · excel · browser · media · AI …\n\ncorrection.ts routes intents offline when Needle is down",
     "limitations": [
       "Relies on the @earendil-works/pi framework as the host platform",
       "Requires bundled binaries (ffmpeg, rclone) and optional qBittorrent for media tools"
@@ -631,7 +631,7 @@
     "platform": "Web",
     "year": 2025,
     "status": "Completed",
-    "summary": "A car-parts shop with AI detection: upload a photo and a custom YOLOv8 model identifies the part and matches products — plus cart, checkout, appointments and a dashboard.",
+    "summary": "A car-parts shop with AI detection: upload a photo and a custom YOLOv8 model identifies the part and matches products - plus cart, checkout, appointments and a dashboard.",
     "description": "Siteauto is a Next.js storefront for car parts with a computer-vision twist: the detect page accepts a photo, runs a custom-trained YOLOv8 model (there are variants trained with and without side mirrors), draws the detected part on a canvas and filters matching products. The store itself has products, a cart (Redis-backed), checkout, JWT auth, service appointments, a dashboard for cars and messages, 3D product models and a floating chat widget. The detection runs through a Python helper spawned by the Next.js API route.",
     "technologies": [
       "Next.js 15",
@@ -664,7 +664,7 @@
     "architectureDiagram": "Browser (upload photo)\n    ↓\nNext.js /api/detect → python utils/detect.py (YOLOv8)\n    ↓  JSON detections\nproduct matching → shop / cart (Redis) / checkout (JWT)",
     "limitations": [
       "Requires Redis running locally for cart functionality",
-      "Detection runs a Python subprocess per request — fine for a demo, not for scale",
+      "Detection runs a Python subprocess per request - fine for a demo, not for scale",
       "Model files (.pt) are large binaries kept in the repo"
     ]
   },
@@ -676,7 +676,7 @@
     "year": 2024,
     "status": "Completed",
     "summary": "A small Flask app that classifies uploaded images with locally loaded TensorFlow models, plus a helper that indexes a folder into a dataset manifest.",
-    "description": "AI Interface is a compact experiment: a Flask web app that loads Keras models registered in models.json, accepts an image upload, runs inference with the selected model and returns the predicted class. A companion tkinter script walks a directory of images and writes top_level_folders.json — a small helper for assembling image datasets for training.",
+    "description": "AI Interface is a compact experiment: a Flask web app that loads Keras models registered in models.json, accepts an image upload, runs inference with the selected model and returns the predicted class. A companion tkinter script walks a directory of images and writes top_level_folders.json - a small helper for assembling image datasets for training.",
     "technologies": [
       "Python",
       "Flask",
@@ -698,7 +698,7 @@
     "architecture": "A single Flask process serves the HTML frontend from templates/, accepts uploads into uploads/, and runs tf.keras inference per request. Models are loaded from .h5 files on disk per the models.json registry.",
     "architectureDiagram": "Browser (index.html)\n    ↓\nFlask routes (page.py)\n    ↓\ntf.keras model (models.json → .h5)",
     "limitations": [
-      "One-shot inference only — no batching, no GPU path, no error fallback beyond the Flask defaults",
+      "One-shot inference only - no batching, no GPU path, no error fallback beyond the Flask defaults",
       "Models must be placed manually under models/"
     ]
   },
@@ -709,7 +709,7 @@
     "platform": "Web · local tool",
     "year": null,
     "status": "Completed",
-    "summary": "A Flask web interface for fine-tuning LLMs with Unsloth — LoRA parameters, live GPU monitoring, custom chat templates and training resume.",
+    "summary": "A Flask web interface for fine-tuning LLMs with Unsloth - LoRA parameters, live GPU monitoring, custom chat templates and training resume.",
     "description": "LLM Finetuner puts Unsloth-based LoRA fine-tuning behind a web UI. It ships with model presets (Llama 3.2 1B, Mistral 7B 4-bit), configurable LoRA/training parameters, GPU/CPU/system metrics streamed from the backend, custom chat templates, live training logs and a resume flow. Heavy imports (Unsloth, TRL, Transformers) load lazily so the UI stays responsive, and everything runs locally.",
     "technologies": [
       "Python",
@@ -735,14 +735,14 @@
       "Live training logs and status tracking",
       "Training resume from a saved state (resume.html)",
       "Lazy loading of heavy ML imports; uploads and cache directories managed by the app",
-      "Example training dataset included (data.json — car-diagnostics chat pairs)"
+      "Example training dataset included (data.json - car-diagnostics chat pairs)"
     ],
     "architecture": "Flask serves the web UI and defers to a lazily-imported finetunerLLM module that drives Unsloth's FastLanguageModel with TRL's SFTTrainer. Training runs on a background thread while a status object tracks progress and messages. Config lives in JSON files under config/ (models, default settings, templates).",
     "architectureDiagram": "Browser (index · resume)\n    ↓\nFlask app.py\n    ├─ finetunerLLM (Unsloth + SFTTrainer)\n    ├─ utils/system_monitor (GPU/CPU metrics)\n    └─ config/*.json (models · settings · templates)",
     "limitations": [
       "Requires a CUDA GPU with enough VRAM and the CUDA toolchain (tested on 12.4)",
       "Requires an Unsloth-compatible model",
-      "Training is local-only — no distributed or cloud training"
+      "Training is local-only - no distributed or cloud training"
     ]
   },
   {
@@ -788,7 +788,7 @@
       "PyInstaller-friendly entry point with pip-subprocess support"
     ],
     "architecture": "A prompt_toolkit REPL (ui/cli.py) drives a turn loop (core/loop.py) that routes intents through a tool router to sandboxed executors. Models are managed by models/manager.py across five providers, with a GPU device layer (gpu/device.py) mapping tensors to cuda:0 or cpu. State (config, registry, history) lives under ~/.neuroshell/, with caches isolated there too.",
-    "architectureDiagram": "Terminal REPL (prompt_toolkit)\n    ↓\ncore/loop (agent · planner · router)\n    ↓\ntools (terminal · filesystem · system · web) — sandboxed\n    ↑\nmodels/manager → ollama · GGUF · transformers · HF · OpenAI",
+    "architectureDiagram": "Terminal REPL (prompt_toolkit)\n    ↓\ncore/loop (agent · planner · router)\n    ↓\ntools (terminal · filesystem · system · web) - sandboxed\n    ↑\nmodels/manager → ollama · GGUF · transformers · HF · OpenAI",
     "limitations": [
       "Local model quality depends on the active backend/model",
       "Requires Python 3.10+ and (for GPU) an NVIDIA GPU with the CUDA wheels"

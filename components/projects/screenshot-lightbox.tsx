@@ -46,7 +46,7 @@ export function ScreenshotLightbox({
       }}
     >
       <DialogTitle className="sr-only">
-        {project.title} — screenshot {current + 1} of {count}
+        {project.title} - screenshot {current + 1} of {count}
       </DialogTitle>
       <DialogDescription className="sr-only">
         Full-size screenshot of {project.title}
@@ -64,7 +64,7 @@ export function ScreenshotLightbox({
         <Image
           key={src}
           src={src}
-          alt={`${project.title} — screenshot ${current + 1}`}
+          alt={`${project.title} - screenshot ${current + 1}`}
           fill
           sizes="90vw"
           className="object-contain"

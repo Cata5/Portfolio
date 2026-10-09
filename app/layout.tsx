@@ -50,7 +50,7 @@ const jsonLd = {
       "@type": "WebSite",
       "@id": `${site.url}/#website`,
       url: site.url,
-      name: `${site.name} — ${site.role}`,
+      name: `${site.name} - ${site.role}`,
       inLanguage: "en",
       publisher: { "@id": `${site.url}/#person` },
     },
@@ -60,8 +60,8 @@ const jsonLd = {
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} — ${site.role}`,
-    template: `%s — ${site.name}`,
+    default: `${site.name} - ${site.role}`,
+    template: `%s - ${site.name}`,
   },
   description: site.description,
   alternates: {
@@ -78,8 +78,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: site.url,
-    siteName: `${site.name} — ${site.role}`,
-    title: `${site.name} — ${site.role}`,
+    siteName: `${site.name} - ${site.role}`,
+    title: `${site.name} - ${site.role}`,
     description: site.description,
     locale: "en_US",
     images: [
@@ -87,13 +87,13 @@ export const metadata: Metadata = {
         url: "/og.png",
         width: 1200,
         height: 630,
-        alt: `${site.name} — ${site.role}`,
+        alt: `${site.name} - ${site.role}`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${site.name} — ${site.role}`,
+    title: `${site.name} - ${site.role}`,
     description: site.description,
     images: ["/og.png"],
   },

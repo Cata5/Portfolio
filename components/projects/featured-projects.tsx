@@ -266,11 +266,11 @@ export function FeaturedProjects() {
       </Container>
 
       {/* The full engineering breakdown (platform matrix, architecture layers,
-          module map, capabilities) lives on the project page — the homepage
+          module map, capabilities) lives on the project page - the homepage
           keeps the flagship story short and routes readers there. */}
       <Container className="mt-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-          Platform matrix · architecture · module map · capabilities — all on{" "}
+          Platform matrix · architecture · module map · capabilities - all on{" "}
           <ProjectLink
             href={`/projects/${vortex.id}`}
             className="text-signal transition-colors hover:text-foreground"

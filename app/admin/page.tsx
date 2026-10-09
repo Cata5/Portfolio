@@ -3,7 +3,7 @@ import { MainAdminDashboard } from "@/components/admin/admin-dashboard";
 import { TriangleWorld } from "@/components/triangle-world";
 
 export const metadata: Metadata = {
-  title: "Portfolio Control Center — Admin Console",
+  title: "Portfolio Control Center - Admin Console",
   description: "Unified admin dashboard to configure projects, skills, ML experiments, copy, and AI telemetry across the portfolio.",
   robots: {
     index: false,

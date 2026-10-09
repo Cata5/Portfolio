@@ -42,7 +42,7 @@ export function MLNotebook() {
                     model experiment
                   </span>
                   <span className="font-mono text-[11px] text-muted-foreground">
-                    log — {ml.runs.length} run{ml.runs.length === 1 ? "" : "s"}
+                    log - {ml.runs.length} run{ml.runs.length === 1 ? "" : "s"}
                   </span>
                 </div>
                 <Stagger as="dl" className="font-mono text-[12.5px]">
@@ -78,7 +78,7 @@ export function MLNotebook() {
                         ) : run ? (
                           run[field as keyof typeof run]
                         ) : (
-                          "—"
+                          "-"
                         )}
                       </dd>
                     </div>

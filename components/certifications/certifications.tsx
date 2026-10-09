@@ -103,7 +103,7 @@ export function Certifications() {
                           >
                             <Image
                               src={cert.poster!}
-                              alt={`${cert.title} — ${cert.subtitle} certificate`}
+                              alt={`${cert.title} - ${cert.subtitle} certificate`}
                               fill
                               sizes="(min-width: 768px) 40vw, 100vw"
                               className="object-contain transition-transform duration-700 ease-out group-hover:scale-[1.03]"
@@ -121,7 +121,7 @@ export function Certifications() {
                         ) : (
                           <Image
                             src={cert.poster!}
-                            alt={`${cert.title} — ${cert.subtitle} certificate`}
+                            alt={`${cert.title} - ${cert.subtitle} certificate`}
                             fill
                             sizes="(min-width: 768px) 40vw, 100vw"
                             className="object-contain transition-transform duration-700 ease-out group-hover:scale-[1.03]"

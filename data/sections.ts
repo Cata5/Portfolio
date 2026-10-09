@@ -53,7 +53,7 @@ export const SECTION_TYPE_META: Record<
     label: "Flagship Work (Vortex)",
     description: "Interactive multi-device stage showcasing Vortex media architecture",
     defaultEyebrow: "Featured Work",
-    defaultTitle: "Vortex — Multi-Platform Architecture",
+    defaultTitle: "Vortex - Multi-Platform Architecture",
     defaultNavLabel: "Featured Work",
   },
   projects: {

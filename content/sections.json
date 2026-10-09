@@ -19,7 +19,7 @@
     "settings": {
       "eyebrow": "About",
       "heading": "I engineer software across web, mobile, desktop, and machine learning.",
-      "paragraph1": "I'm Manu Catalin-Gabriel, a Computer and Information Technology (CTI) student at ETTI Bucharest (POLITEHNICA University). I design and ship multi-platform systems — from high-performance media streaming across Android, Android TV, and desktop, to full-stack web applications and machine learning experiments.",
+      "paragraph1": "I'm Manu Catalin-Gabriel, a Computer and Information Technology (CTI) student at ETTI Bucharest (POLITEHNICA University). I design and ship multi-platform systems - from high-performance media streaming across Android, Android TV, and desktop, to full-stack web applications and machine learning experiments.",
       "paragraph2": "I focus on clean architecture, local-first data pipelines, and responsive performance. Looking for software engineering roles and internships where I can contribute to high-impact production systems.",
       "focusLabel": "I work with"
     }
@@ -32,7 +32,7 @@
     "navLabel": "Work",
     "settings": {
       "eyebrow": "Featured Work",
-      "title": "Vortex — Multi-Platform Architecture",
+      "title": "Vortex - Multi-Platform Architecture",
       "description": "Android, Android TV, and desktop media streaming platform powered by cloud storage."
     }
   },
