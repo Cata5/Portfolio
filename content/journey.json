@@ -2,7 +2,7 @@
   {
     "date": "May 2026",
     "category": "main",
-    "title": "NeuroShell CLI",
+    "title": "Jarvis & Neuroshell CLI",
     "note": "Self-improving AI assistant - autonomous, model-swapping, tool-using CLI that runs locally.",
     "tags": [
       "Python",
@@ -142,17 +142,6 @@
       "Competition",
       "Learning",
       "Presentation"
-    ]
-  },
-  {
-    "date": "2023",
-    "category": "side",
-    "title": "Desktop Apps & Developer Tools",
-    "note": "Built SSH Electron, rclone Upload UI, Google Drive Player, and custom workflow utilities.",
-    "tags": [
-      "Electron",
-      "Node.js",
-      "Desktop"
     ]
   },
   {
