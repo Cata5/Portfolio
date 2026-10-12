@@ -6,7 +6,7 @@
     "hardware",
     "training"
   ],
-  "hardware": "R9 5900Hs · 40GB RAM · RTX 3060",
+  "hardware": "R9 5900Hs · 40GB RAM · RTX 3060 6GB",
   "runs": [
     {
       "model": "YOLOv8 - car parts (2 variants: with / without side mirrors)",
@@ -29,7 +29,7 @@
       "dataset": "License Plate Recognition - Roboflow Universe",
       "datasetUrl": "https://universe.roboflow.com/roboflow-universe-projects/license-plate-recognition-rxg4e",
       "framework": "Ultralytics · GLM-OCR",
-      "hardware": "Ryzen 9 5900HS · 40 GB RAM · RTX 3060 ",
+      "hardware": "Ryzen 9 5900HS · 40 GB RAM · RTX 3060 6GB",
       "training": "-",
       "notes": "License-plate detection pipeline in Detectie: YOLO finds the plate, GLM-OCR reads the text, results stream over WebSocket to an ESP32 client."
     }

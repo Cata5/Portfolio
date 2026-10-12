@@ -19,6 +19,7 @@ import { useEditor } from "@/components/editor/editor-context";
 import { useRAG } from "@/components/rag/rag-context";
 import { scrollToId } from "@/components/motion/lenis";
 import { site } from "@/data/site";
+import { projects as staticProjects } from "@/data/projects";
 
 const sections = [
   { label: "About", target: "about", hint: "background" },
@@ -38,7 +39,8 @@ import { Button } from "@/components/ui/button";
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { setTheme, resolvedTheme } = useTheme();
-  const { toggleEdit, isEditing } = useEditor();
+  const { toggleEdit, isEditing, content } = useEditor();
+  const allProjects = content?.projects?.length ? content.projects : staticProjects;
   const { setIsOpen: setIsRAGOpen } = useRAG();
   const pathname = usePathname();
   const router = useRouter();
@@ -122,6 +124,29 @@ export function CommandMenu() {
                 >
                   <span>{s.label}</span>
                   <CommandShortcut>{s.hint}</CommandShortcut>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+            <CommandGroup heading="Projects">
+              {allProjects.map((p) => (
+                <CommandItem
+                  key={p.id}
+                  value={`project ${p.title} ${p.summary ?? ""} ${p.category ?? ""} ${p.technologies?.join(" ") ?? ""}`}
+                  onSelect={() => {
+                    close(() => router.push(`/projects/${p.id}`));
+                  }}
+                  className="flex items-center justify-between gap-2"
+                >
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-medium truncate">{p.title}</span>
+                    {p.summary && (
+                      <span className="text-[11px] text-muted-foreground truncate font-light">
+                        {p.summary}
+                      </span>
+                    )}
+                  </div>
+                  <CommandShortcut className="shrink-0">{p.year || "Project"}</CommandShortcut>
                 </CommandItem>
               ))}
             </CommandGroup>

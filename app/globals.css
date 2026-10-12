@@ -329,10 +329,32 @@ html.lenis body {
   }
 }
 
-/* In visual edit mode, ensure text masks don't clip outlines or badges */
+/* In visual edit mode, ensure text masks don't clip outlines or badges, and ensure all typography is fully visible */
 html[data-cms-editing="true"] .hero-line-mask,
-html[data-cms-editing="true"] .about-heading-mask {
+html[data-cms-editing="true"] .hero-eyebrow,
+html[data-cms-editing="true"] .about-heading-mask,
+html[data-cms-editing="true"] .tr-mask--line,
+html[data-cms-editing="true"] .tr-mask--word,
+html[data-cms-editing="true"] .tr-mask {
   overflow: visible !important;
+}
+
+html[data-cms-editing="true"] .hero-glass,
+html[data-cms-editing="true"] .hero-line,
+html[data-cms-editing="true"] .hero-eyebrow-inner,
+html[data-cms-editing="true"] .hero-tagline,
+html[data-cms-editing="true"] .hero-proof-strip,
+html[data-cms-editing="true"] .hero-workspace,
+html[data-cms-editing="true"] .hero-grid,
+html[data-cms-editing="true"] .hero-ctas,
+html[data-cms-editing="true"] .about-heading,
+html[data-cms-editing="true"] .about-para,
+html[data-cms-editing="true"] .about-label,
+html[data-cms-editing="true"] .about-area,
+html[data-cms-editing="true"] .tr-line,
+html[data-cms-editing="true"] .tr-word {
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 /* ------------------------------------------------------------------ */

@@ -1,0 +1,118 @@
+{
+  "eyebrow": "In progress · 2026",
+  "intro": "A generative language model written from first principles: character-level tokenization and an auto-regressive data pipeline today, then scaled dot-product attention, a Transformer block and a full training stack using Pytorch.\n",
+  "statusLabel": "In development",
+  "roadmapLabel": "Build Roadmap",
+  "shippedLabel": "stages shipped",
+  "ctaLabel": "View full project page",
+  "railLabel": "shipped",
+  "buildingLabel": "building",
+  "plannedLabel": "planned",
+  "noteLead": "Tensor shapes · attention math · failure modes - all on",
+  "noteLink": "the LLM from Scratch page →",
+  "runtime": [
+    {
+      "label": "Language",
+      "value": "Python 3.14"
+    },
+    {
+      "label": "Framework",
+      "value": "PyTorch (Cuda Compatible)"
+    },
+    {
+      "label": "Compute",
+      "value": "CUDA 13.2 ready - wheel via setup_cuda.bat"
+    },
+    {
+      "label": "Corpus",
+      "value": "Any text input that is fairly long."
+    }
+  ],
+  "stages": [
+    {
+      "n": 1,
+      "id": "tokenizer",
+      "title": "Vocabulary & Tokenization",
+      "short": "tokenize",
+      "file": "tokenizer.py",
+      "status": "done",
+      "summary": "Character-level encoder over the raw corpus: unique token set, bijective maps, encode / decode with round-trip verification.",
+      "items": [
+        "stoi (char -> int) and itos (int -> char) built from the sorted unique token set",
+        "encode(text) -> list[int] and decode(tokens) -> str",
+        "Round-trip check: decode(encode(s)) == s",
+        "Small vocabulary (~65 symbols), zero out-of-vocabulary tokens, long sequences as the trade-off"
+      ]
+    },
+    {
+      "n": 2,
+      "id": "data-pipeline",
+      "title": "Data Pipeline & Batching",
+      "short": "dataset",
+      "file": "dataset.py",
+      "status": "done",
+      "summary": "Corpus to a torch.long tensor with a 90 / 10 split and a batch sampler over fixed context windows.",
+      "items": [
+        "Encoded corpus read once into a 1D torch.long tensor",
+        "Train / validation split (90% / 10%) to catch overfitting early",
+        "get_batch(split, batch_size, block_size) -> x, y with shape (B, T)",
+        "Autoregressive pairs: x = data[i : i+T], y = data[i+1 : i+T+1] - T predictions per window"
+      ]
+    },
+    {
+      "n": 3,
+      "id": "bigram",
+      "title": "Baseline Bigram Model",
+      "short": "bigram",
+      "file": "",
+      "status": "current",
+      "summary": "An attention-free lookup table that exercises the whole pipeline end to end and sets the loss baseline to beat.",
+      "items": [
+        "Embedding + linear head: logits (B, T, V) against targets (B, T)",
+        "Flatten for cross-entropy: (B * T, V) vs (B * T)",
+        "Training loop: forward -> loss -> zero_grad -> backward -> step",
+        "Autoregressive generation loop sampling from the last position"
+      ]
+    },
+    {
+      "n": 4,
+      "id": "attention",
+      "title": "Self-Attention from Scratch",
+      "short": "attention",
+      "file": "",
+      "status": "planned",
+      "summary": "Scaled dot-product attention with a causal mask, first as one head, then as parallel heads concatenated through an output projection.",
+      "items": []
+    },
+    {
+      "n": 5,
+      "id": "transformer",
+      "title": "The Transformer Block",
+      "short": "transformer",
+      "file": "",
+      "status": "planned",
+      "summary": "Pre-LayerNorm blocks with residual connections, learned position embeddings, stacked L layers and a linear projection back to the vocabulary.",
+      "items": []
+    },
+    {
+      "n": 6,
+      "id": "training",
+      "title": "Optimization & Training System",
+      "short": "training",
+      "file": "",
+      "status": "planned",
+      "summary": "AdamW with a cosine learning-rate schedule and warmup, a no-grad validation loop, and checkpoint save / reload for long runs.",
+      "items": []
+    },
+    {
+      "n": 7,
+      "id": "inference",
+      "title": "Inference & Text Sampling",
+      "short": "sampling",
+      "file": "",
+      "status": "planned",
+      "summary": "Greedy decoding, temperature scaling and top-k filtering, with a KV-cache so generation stays linear instead of quadratic.",
+      "items": []
+    }
+  ]
+}

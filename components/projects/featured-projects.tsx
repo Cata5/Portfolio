@@ -18,21 +18,37 @@ import { ProjectLink } from "@/components/motion/project-link";
 import { Reveal } from "@/components/motion/reveal";
 import { TextReveal } from "@/components/motion/text-reveal";
 import { SectionHeader } from "@/components/section";
+import { Editable } from "@/components/editor/editable";
 import { useEditor } from "@/components/editor/editor-context";
 import { scrollToId } from "@/components/motion/lenis";
 import { projects } from "@/data/projects";
 import { cn } from "@/lib/utils";
 import { RuntimeFrame } from "./device-frames";
+import { LlmShowcase } from "./llm-showcase";
 
-const vortex = projects.find((p) => p.id === "vortex") ?? null;
+type FlagshipId = "vortex" | "llm-from-scratch";
+
+/** The systems the section promotes - each one has its own stage below. */
+const FLAGSHIPS: { id: FlagshipId; label: string; live?: boolean }[] = [
+  { id: "vortex", label: "Vortex" },
+  { id: "llm-from-scratch", label: "LLM from Scratch", live: true },
+];
 
 /**
  * Flagship Work Section:
- * Single-device focus stage + Engineering Architecture Spec & Platform Comparison Matrix.
+ * Two systems, switched by the tab bar - Vortex keeps its single-device focus
+ * stage (runtimes, device frames), and LLM from Scratch gets the build
+ * roadmap board (see ./llm-showcase).
  */
 export function FeaturedProjects() {
-  const { isEditing, selectedField, setSelectedField } = useEditor();
+  const { content, isEditing, selectedField, setSelectedField } = useEditor();
   const [index, setIndex] = useState(1); // Default to TV (index 1)
+  const [flagship, setFlagship] = useState<FlagshipId>("vortex");
+
+  const vortexIndex = content.projects.findIndex((p) => p.id === "vortex");
+  const vortex = vortexIndex !== -1 ? content.projects[vortexIndex] : projects.find((p) => p.id === "vortex") ?? null;
+  const llmIndex = content.projects.findIndex((p) => p.id === "llm-from-scratch");
+  const llm = llmIndex !== -1 ? content.projects[llmIndex] : projects.find((p) => p.id === "llm-from-scratch") ?? null;
 
   const isSectionSelected =
     isEditing &&
@@ -47,7 +63,7 @@ export function FeaturedProjects() {
     }
     setSelectedField({
       path: "section.work",
-      label: "Section: Featured Work (Vortex)",
+      label: "Section: Flagship Work",
       type: "section",
       meta: { sectionId: "work" },
     });
@@ -68,8 +84,8 @@ export function FeaturedProjects() {
   // No auto-advance: motion that swaps content while the visitor is reading
   // it fights comprehension. The runtime stage changes only on user intent.
 
-  if (!vortex || runtimes.length === 0) return null;
-  const active = runtimes[index];
+  if (!vortex && !llm) return null;
+  const active = vortex?.runtimes?.[index] ?? null;
 
   // Manual stage: a quiet crossfade is all the motion the swap needs.
   const slideVariants = {
@@ -98,25 +114,108 @@ export function FeaturedProjects() {
       )}
 
       <Container className="pt-24 md:pt-36">
-        <SectionHeader eyebrow="Featured System" />
+        <SectionHeader eyebrow="Featured Work" />
 
-        <GlassCard className="mt-4 w-fit max-w-lg p-5 sm:p-6 md:bg-card/70">
-          <TextReveal
-            as="h2"
-            className="text-2xl font-normal tracking-[-0.02em] md:text-3xl"
-          >
-            {vortex.title}
-          </TextReveal>
-          <Reveal delay={0.1}>
-            <p className="mt-3 text-sm font-light leading-relaxed text-muted-foreground sm:text-base">
-              One Kotlin UI framework across two apps: Android phones and tablets, Android TV, plus a Compose Multiplatform desktop client on a shared module.
-              Self-hosted direct media streaming from five storage protocols: Google Drive, SMB, SFTP, FTP/FTPS and WebDAV.
-            </p>
-          </Reveal>
-        </GlassCard>
+        {/* Flagship switcher - which of the two systems gets the stage below */}
+        <div
+          role="tablist"
+          aria-label="Featured systems"
+          className="mb-2 -mt-2 inline-flex max-w-full flex-wrap items-center gap-1 rounded-2xl border border-border/50 bg-card/40 p-1 backdrop-blur-md"
+        >
+          {FLAGSHIPS.map((f, i) => {
+            const selected = f.id === flagship;
+            const project = f.id === "vortex" ? vortex : llm;
+            const projectIndex = f.id === "vortex" ? vortexIndex : llmIndex;
+            const tabName = project?.tabLabel || project?.title || f.label;
+            const tabPath = projectIndex !== -1 ? `projects.${projectIndex}.tabLabel` : (f.id === "vortex" ? "projects.0.tabLabel" : "projects.1.tabLabel");
+
+            return (
+              <button
+                key={f.id}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setFlagship(f.id)}
+                className={cn(
+                  "group flex cursor-pointer items-center gap-2.5 rounded-xl border px-3.5 py-2 transition-all duration-300 sm:px-4",
+                  selected
+                    ? "border-signal/60 bg-signal/15"
+                    : "border-transparent hover:bg-muted/30",
+                )}
+              >
+                <span
+                  className={cn(
+                    "font-mono text-[10px] font-semibold tracking-wider",
+                    selected ? "text-signal" : "text-muted-foreground",
+                  )}
+                >
+                  0{i + 1}
+                </span>
+                <Editable
+                  path={tabPath}
+                  label={`${f.label} Tab Name`}
+                  value={tabName}
+                  inline
+                >
+                  <span
+                    className={cn(
+                      "text-[13px] font-medium tracking-tight",
+                      selected
+                        ? "text-foreground"
+                        : "text-muted-foreground group-hover:text-foreground",
+                    )}
+                  >
+                    {tabName}
+                  </span>
+                </Editable>
+                {f.live && (
+                  <span className="hidden items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider text-saffron sm:inline-flex">
+                    <span
+                      aria-hidden="true"
+                      className="size-1.5 animate-pulse rounded-full bg-saffron"
+                    />
+                    building
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {flagship === "llm-from-scratch" && llm ? (
+          <LlmShowcase project={llm} />
+        ) : vortex && active ? (
+          <>
+            <GlassCard className="mt-4 w-fit max-w-lg p-5 sm:p-6 md:bg-card/70">
+              <Editable
+                path={vortexIndex !== -1 ? `projects.${vortexIndex}.title` : "projects.0.title"}
+                label="Vortex Title"
+              >
+                <TextReveal
+                  as="h2"
+                  className="text-2xl font-normal tracking-[-0.02em] md:text-3xl"
+                >
+                  {vortex.title}
+                </TextReveal>
+              </Editable>
+              <Reveal delay={0.1}>
+                <Editable
+                  path={vortexIndex !== -1 ? `projects.${vortexIndex}.summary` : "projects.0.summary"}
+                  label="Vortex Summary"
+                  type="textarea"
+                >
+                  <p className="mt-3 text-sm font-light leading-relaxed text-muted-foreground sm:text-base">
+                    {vortex.summary || "One Kotlin UI framework across two apps: Android phones and tablets, Android TV, plus a Compose Multiplatform desktop client on a shared module. Self-hosted direct media streaming from five storage protocols: Google Drive, SMB, SFTP, FTP/FTPS and WebDAV."}
+                  </p>
+                </Editable>
+              </Reveal>
+            </GlassCard>
+          </>
+        ) : null}
       </Container>
 
       {/* Part 1: Clean Device Showcase Stage */}
+      {flagship === "vortex" && vortex && active && (
       <Container className="mt-8 md:mt-12">
         <div>
           <GlassCard className="p-5 sm:p-7 lg:p-8 md:bg-card/70">
@@ -159,14 +258,21 @@ export function FeaturedProjects() {
                             >
                               <Icon className="size-3.5" />
                             </div>
-                            <span
-                              className={cn(
-                                "text-sm font-medium tracking-tight transition-colors",
-                                selected ? "text-foreground font-semibold" : "text-muted-foreground group-hover:text-foreground",
-                              )}
+                            <Editable
+                              path={vortexIndex !== -1 ? `projects.${vortexIndex}.runtimes.${i}.label` : `projects.0.runtimes.${i}.label`}
+                              label={`Runtime ${i + 1} Tab Name`}
+                              value={r.label}
+                              inline
                             >
-                              {r.label}
-                            </span>
+                              <span
+                                className={cn(
+                                  "text-sm font-medium tracking-tight transition-colors",
+                                  selected ? "text-foreground font-semibold" : "text-muted-foreground group-hover:text-foreground",
+                                )}
+                              >
+                                {r.label}
+                              </span>
+                            </Editable>
                           </div>
 
                           {selected && (
@@ -264,6 +370,7 @@ export function FeaturedProjects() {
           </div>
         </div>
       </Container>
+      )}
 
       {/* The full engineering breakdown (platform matrix, architecture layers,
           module map, capabilities) lives on the project page - the homepage
@@ -272,10 +379,10 @@ export function FeaturedProjects() {
         <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
           Platform matrix · architecture · module map · capabilities - all on{" "}
           <ProjectLink
-            href={`/projects/${vortex.id}`}
+            href={`/projects/${flagship === "vortex" ? vortex?.id ?? "vortex" : llm?.id ?? "llm-from-scratch"}`}
             className="text-signal transition-colors hover:text-foreground"
           >
-            the Vortex page →
+            {flagship === "vortex" ? "the Vortex page" : "the LLM from Scratch page"} →
           </ProjectLink>
         </p>
       </Container>

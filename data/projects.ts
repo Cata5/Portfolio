@@ -21,6 +21,7 @@ export type ProjectStatus =
 export type Project = {
   id: string;
   title: string;
+  tabLabel?: string;
   category: ProjectCategory;
   platform?: string;
   year: number | null;
@@ -72,6 +73,7 @@ export const realProjects = projects.filter((p) => !p.placeholder);
 
 const FEATURED_ORDER = [
   "vortex",
+  "llm-from-scratch",
   "aplicatie-teka",
   "coraltech",
   "liceul",

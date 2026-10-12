@@ -59,19 +59,16 @@ export function InspectorDrawer() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Prevent background page scrolling while inspector drawer is active
+  // Close on Escape key
   useEffect(() => {
-    if (typeof document === "undefined") return;
-    if (isEditing && selectedField) {
-      getLenis()?.stop();
-      const prevOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prevOverflow;
-        getLenis()?.start();
-      };
-    }
-  }, [isEditing, selectedField]);
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && selectedField) {
+        setSelectedField(null);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedField, setSelectedField]);
 
   // Resolve current value from deep path
   const getNestedValue = (path: string): unknown => {
@@ -125,14 +122,14 @@ export function InspectorDrawer() {
     <AnimatePresence>
       {isEditing && selectedField && (
         <>
-          {/* Dimmed Backdrop Lock - Prevents background interaction & scrolling */}
+          {/* Subtle Click-Outside Overlay - Keeps the entire website visible and crisp */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.15 }}
             onClick={() => setSelectedField(null)}
-            className="fixed inset-0 z-[65] bg-black/60 backdrop-blur-[2px] cursor-pointer"
+            className="fixed inset-0 z-[65] bg-black/15 cursor-pointer"
           />
 
           {/* Drawer Panel */}
@@ -145,7 +142,7 @@ export function InspectorDrawer() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0 }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="w-screen max-w-md border-l border-border/80 bg-neutral-950/95 shadow-2xl shadow-black/90 ring-1 ring-white/10 backdrop-blur-2xl"
+              className="dark w-screen max-w-md border-l border-border/80 bg-neutral-950/95 text-neutral-100 shadow-2xl shadow-black/90 ring-1 ring-white/10 backdrop-blur-2xl"
             >
               <div className="flex h-full flex-col">
                 {/* Drawer Header */}
@@ -297,12 +294,12 @@ export function InspectorDrawer() {
                   <label className="mb-2 block font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                     Value
                   </label>
-                  <input
-                    type="text"
-                    value={typeof currentValue === "string" ? currentValue : String(currentValue ?? "")}
-                    onChange={(e) => handleTextChange(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-neutral-900/90 px-3.5 py-2.5 font-sans text-sm text-foreground focus:border-signal focus:outline-none focus:ring-1 focus:ring-signal"
-                  />
+                    <input
+                      type="text"
+                      value={typeof currentValue === "string" ? currentValue : String(currentValue ?? selectedField.value ?? "")}
+                      onChange={(e) => handleTextChange(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-neutral-900/90 px-3.5 py-2.5 font-sans text-sm text-foreground focus:border-signal focus:outline-none focus:ring-1 focus:ring-signal"
+                    />
                 </div>
               )}
             </div>

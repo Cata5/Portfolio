@@ -13,7 +13,9 @@ import { BASE_PATH, isGhPages } from "./lib/base-path";
 // The shared deploy constants live in lib/base-path.ts.
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.101.11"],
+  ...(process.env.ALLOWED_DEV_ORIGINS
+    ? { allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS.split(",") }
+    : {}),
   // Kept unconditional: the export decides between `<route>/index.html` and
   // `<route>.html` from this flag at export time, and CI has produced flat
   // `.html` files when it was tucked inside the env-driven spread below.

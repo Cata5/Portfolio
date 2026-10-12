@@ -16,6 +16,7 @@ import {
   RefreshCw,
   ArrowLeft,
   Plus,
+  Route,
   Trash2,
   Lock,
   ShieldAlert,
@@ -51,6 +52,7 @@ type MainTab =
   | "ml"
   | "journey"
   | "activities"
+  | "roadmap"
   | "rag"
   | "tests"
   | "copy";
@@ -226,6 +228,7 @@ export function MainAdminDashboard() {
   const activityCount = content.activities?.length || 0;
   const certCount = content.certifications?.length || 0;
   const sectionCount = content.sections?.length || 0;
+  const roadmapStageCount = content.roadmap?.stages?.length || 0;
 
   return (
     <div className="min-h-screen text-foreground pb-20 pt-4 sm:pt-6 px-3 sm:px-6 max-w-7xl mx-auto space-y-6">
@@ -467,6 +470,28 @@ export function MainAdminDashboard() {
                 }`}
               >
                 {activityCount + certCount}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("roadmap")}
+              className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all cursor-pointer ${
+                activeTab === "roadmap"
+                  ? "bg-signal text-signal-ink font-semibold shadow-md shadow-signal/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+              }`}
+            >
+              <Route className="size-3.5" />
+              <span>Roadmap</span>
+              <span
+                className={`ml-1 rounded px-1.5 py-0.2 text-[10px] font-mono ${
+                  activeTab === "roadmap"
+                    ? "bg-black/25 text-signal-ink font-bold"
+                    : "bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                {roadmapStageCount}
               </span>
             </button>
 
@@ -1723,6 +1748,274 @@ export function MainAdminDashboard() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================= TAB: ROADMAP ======================= */}
+        {activeTab === "roadmap" && content.roadmap && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-base font-bold tracking-tight text-foreground">
+                Flagship Roadmap &mdash; LLM from Scratch
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Copy, labels, runtime facts and every build stage shown in the homepage
+                flagship block. Stored in content/roadmap.json.
+              </p>
+            </div>
+
+            {/* Section copy + labels */}
+            <div className="rounded-xl border border-border/50 bg-card/40 p-4 space-y-3">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-saffron">
+                Section Copy &amp; Labels
+              </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {(
+                  [
+                    ["intro", "Intro paragraph", true],
+                    ["eyebrow", "Eyebrow", false],
+                    ["statusLabel", "Status label", false],
+                    ["roadmapLabel", "Roadmap label", false],
+                    ["shippedLabel", "Shipped readout (after the number)", false],
+                    ["ctaLabel", "CTA label", false],
+                    ["railLabel", "Status: shipped", false],
+                    ["buildingLabel", "Status: building", false],
+                    ["plannedLabel", "Status: planned", false],
+                    ["noteLead", "Note line (before link)", true],
+                    ["noteLink", "Note link label", false],
+                  ] as const
+                ).map(([key, label, long]) => (
+                  <div key={key} className="space-y-1">
+                    <label className="font-mono text-[10.5px] text-muted-foreground">
+                      {label}
+                    </label>
+                    {long ? (
+                      <textarea
+                        rows={3}
+                        value={content.roadmap![key] || ""}
+                        onChange={(e) =>
+                          updateField(`roadmap.${key}`, e.target.value)
+                        }
+                        className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        value={content.roadmap![key] || ""}
+                        onChange={(e) =>
+                          updateField(`roadmap.${key}`, e.target.value)
+                        }
+                        className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Runtime facts */}
+            <div className="rounded-xl border border-border/50 bg-card/40 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-saffron">
+                  Runtime Facts
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateField("roadmap.runtime", [
+                      ...(content.roadmap!.runtime || []),
+                      { label: "New label", value: "New value" },
+                    ])
+                  }
+                  className="flex items-center gap-1 rounded-lg border border-border/60 px-2 py-1 font-mono text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <Plus className="size-3" /> Add
+                </button>
+              </div>
+              <div className="space-y-2">
+                {(content.roadmap!.runtime || []).map((r, rIdx) => (
+                  <div key={rIdx} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={r.label}
+                      onChange={(e) =>
+                        updateField(`roadmap.runtime.${rIdx}.label`, e.target.value)
+                      }
+                      className="w-40 rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={r.value}
+                      onChange={(e) =>
+                        updateField(`roadmap.runtime.${rIdx}.value`, e.target.value)
+                      }
+                      className="flex-1 rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateField(
+                          "roadmap.runtime",
+                          (content.roadmap!.runtime || []).filter((_, i) => i !== rIdx),
+                        )
+                      }
+                      className="text-muted-foreground hover:text-destructive cursor-pointer"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Stages */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-saffron">
+                  Build Stages
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateField("roadmap.stages", [
+                      ...(content.roadmap!.stages || []),
+                      {
+                        n: (content.roadmap!.stages?.length || 0) + 1,
+                        id: `stage-${Date.now().toString(36)}`,
+                        title: "New Stage",
+                        short: "stage",
+                        file: "",
+                        status: "planned",
+                        summary: "What this stage builds.",
+                        items: [],
+                      },
+                    ])
+                  }
+                  className="flex items-center gap-1.5 rounded-xl bg-signal px-3.5 py-2 font-mono text-xs font-semibold text-signal-ink hover:opacity-90 transition-all cursor-pointer shadow-md shadow-signal/20"
+                >
+                  <Plus className="size-3.5" />
+                  <span>Add Stage</span>
+                </button>
+              </div>
+
+              {(content.roadmap!.stages || []).map((stage, sIdx) => (
+                <div
+                  key={stage.id}
+                  className="rounded-xl border border-border/50 bg-card/40 p-4 space-y-3"
+                >
+                  <div className="flex items-center justify-between border-b border-border/40 pb-2">
+                    <span className="font-mono text-xs font-bold text-saffron">
+                      Stage {stage.n}: {stage.title || "Untitled"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateField(
+                          "roadmap.stages",
+                          (content.roadmap!.stages || []).filter((_, i) => i !== sIdx),
+                        )
+                      }
+                      className="text-xs text-destructive hover:underline font-mono cursor-pointer flex items-center gap-1"
+                    >
+                      <Trash2 className="size-3" /> Delete
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div className="space-y-1">
+                      <label className="font-mono text-[10.5px] text-muted-foreground">
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        value={stage.title}
+                        onChange={(e) =>
+                          updateField(`roadmap.stages.${sIdx}.title`, e.target.value)
+                        }
+                        className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-mono text-[10.5px] text-muted-foreground">
+                        Rail label
+                      </label>
+                      <input
+                        type="text"
+                        value={stage.short}
+                        onChange={(e) =>
+                          updateField(`roadmap.stages.${sIdx}.short`, e.target.value)
+                        }
+                        className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-mono text-[10.5px] text-muted-foreground">
+                        Source file
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="optional"
+                        value={stage.file || ""}
+                        onChange={(e) =>
+                          updateField(`roadmap.stages.${sIdx}.file`, e.target.value)
+                        }
+                        className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="font-mono text-[10.5px] text-muted-foreground">
+                        Status
+                      </label>
+                      <select
+                        value={stage.status}
+                        onChange={(e) =>
+                          updateField(
+                            `roadmap.stages.${sIdx}.status`,
+                            e.target.value,
+                          )
+                        }
+                        className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                      >
+                        <option value="done">done</option>
+                        <option value="current">current</option>
+                        <option value="planned">planned</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-mono text-[10.5px] text-muted-foreground">
+                      Summary
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={stage.summary}
+                      onChange={(e) =>
+                        updateField(`roadmap.stages.${sIdx}.summary`, e.target.value)
+                      }
+                      className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-mono text-[10.5px] text-muted-foreground">
+                      Work items (one per line, shown for done/current stages)
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={(stage.items || []).join("\n")}
+                      onChange={(e) =>
+                        updateField(
+                          `roadmap.stages.${sIdx}.items`,
+                          e.target.value.split("\n").filter((l) => l.trim() !== ""),
+                        )
+                      }
+                      className="w-full rounded-lg border border-border/60 bg-neutral-950/60 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/70 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

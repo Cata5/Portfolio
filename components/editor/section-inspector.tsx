@@ -22,6 +22,7 @@ import {
 import { useEditor } from "./editor-context";
 import { Button } from "@/components/ui/button";
 import { TagInput } from "@/components/ui/tag-input";
+import { cn } from "@/lib/utils";
 import type { Project, ProjectCategory, ProjectStatus } from "@/data/projects";
 import type { Activity } from "@/data/activities";
 import type { Certification } from "@/data/certifications";
@@ -53,7 +54,7 @@ export function SectionInspector({ sectionId, label }: SectionInspectorProps) {
   const id = sectionId.toLowerCase();
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-150">
+    <div className="dark text-neutral-100 space-y-6 animate-in fade-in duration-150">
       <div className="rounded-xl border border-signal/30 bg-signal/10 p-3.5 flex items-center justify-between">
         <div className="flex items-center gap-2 text-signal">
           <Layers className="size-4 shrink-0" />
@@ -337,7 +338,7 @@ function AboutSectionForm({
 }
 
 // ---------------------------------------------------------------------------
-// 3. FEATURED WORK (VORTEX) SECTION FORM
+// 3. FEATURED WORK (VORTEX & LLM FROM SCRATCH) SECTION FORM
 // ---------------------------------------------------------------------------
 function WorkSectionForm({
   content,
@@ -346,66 +347,347 @@ function WorkSectionForm({
   content: ReturnType<typeof useEditor>["content"];
   updateField: (path: string, val: unknown) => void;
 }) {
+  const [activeTab, setActiveTab] = useState<"vortex" | "llm">("vortex");
+
   const vortexIndex = content.projects.findIndex((p) => p.id === "vortex");
   const vortex = vortexIndex !== -1 ? content.projects[vortexIndex] : content.projects[0];
-  const targetPath = vortexIndex !== -1 ? `projects.${vortexIndex}` : "projects.0";
+  const vortexPath = vortexIndex !== -1 ? `projects.${vortexIndex}` : "projects.0";
 
-  if (!vortex) return null;
+  const llmIndex = content.projects.findIndex((p) => p.id === "llm-from-scratch");
+  const llm = llmIndex !== -1 ? content.projects[llmIndex] : content.projects.find((p) => p.id === "llm-from-scratch");
+  const llmPath = llmIndex !== -1 ? `projects.${llmIndex}` : "projects.1";
+
+  const roadmap = content.roadmap;
+  const stages = roadmap?.stages || [];
 
   return (
-    <div className="space-y-4">
-      <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-saffron">
-        Flagship Project ({vortex.title})
-      </h4>
-
-      <div className="space-y-1.5">
-        <label className="font-mono text-[11px] text-muted-foreground">Title</label>
-        <input
-          type="text"
-          value={vortex.title || ""}
-          onChange={(e) => updateField(`${targetPath}.title`, e.target.value)}
-          className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
-        />
+    <div className="space-y-5">
+      {/* Flagship Switcher Tabs */}
+      <div className="flex rounded-xl border border-border/60 bg-neutral-900/60 p-1">
+        <button
+          type="button"
+          onClick={() => setActiveTab("vortex")}
+          className={cn(
+            "flex-1 rounded-lg py-1.5 font-mono text-xs font-semibold transition-all cursor-pointer",
+            activeTab === "vortex"
+              ? "bg-signal text-white shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          01. {vortex?.tabLabel || vortex?.title || "Vortex"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("llm")}
+          className={cn(
+            "flex-1 rounded-lg py-1.5 font-mono text-xs font-semibold transition-all cursor-pointer",
+            activeTab === "llm"
+              ? "bg-signal text-white shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          02. {llm?.tabLabel || llm?.title || "LLM from Scratch"}
+        </button>
       </div>
 
-      <div className="space-y-1.5">
-        <label className="font-mono text-[11px] text-muted-foreground">Summary</label>
-        <textarea
-          rows={3}
-          value={vortex.summary || ""}
-          onChange={(e) => updateField(`${targetPath}.summary`, e.target.value)}
-          className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
-        />
-      </div>
+      {activeTab === "vortex" ? (
+        vortex ? (
+          <div className="space-y-4 animate-in fade-in duration-150">
+            <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-saffron">
+              Flagship 01: Vortex ({vortex.title})
+            </h4>
 
-      <div className="space-y-1.5">
-        <label className="font-mono text-[11px] text-muted-foreground">Detailed Description</label>
-        <textarea
-          rows={5}
-          value={vortex.description || ""}
-          onChange={(e) => updateField(`${targetPath}.description`, e.target.value)}
-          className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
-        />
-      </div>
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Tab Switcher Label</label>
+              <input
+                type="text"
+                placeholder="e.g. Vortex"
+                value={vortex.tabLabel ?? ""}
+                onChange={(e) => updateField(`${vortexPath}.tabLabel`, e.target.value)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
 
-      <div className="space-y-1.5">
-        <label className="font-mono text-[11px] text-muted-foreground">Architecture Narrative</label>
-        <textarea
-          rows={4}
-          value={vortex.architecture || ""}
-          onChange={(e) => updateField(`${targetPath}.architecture`, e.target.value)}
-          className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
-        />
-      </div>
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Title</label>
+              <input
+                type="text"
+                value={vortex.title || ""}
+                onChange={(e) => updateField(`${vortexPath}.title`, e.target.value)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
 
-      <div className="space-y-1.5">
-        <label className="font-mono text-[11px] text-muted-foreground">Technologies (comma separated)</label>
-        <TagInput
-          value={vortex.technologies}
-          onChange={(tags) => updateField(`${targetPath}.technologies`, tags)}
-          className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
-        />
-      </div>
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Summary</label>
+              <textarea
+                rows={3}
+                value={vortex.summary || ""}
+                onChange={(e) => updateField(`${vortexPath}.summary`, e.target.value)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Detailed Description</label>
+              <textarea
+                rows={5}
+                value={vortex.description || ""}
+                onChange={(e) => updateField(`${vortexPath}.description`, e.target.value)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Architecture Narrative</label>
+              <textarea
+                rows={4}
+                value={vortex.architecture || ""}
+                onChange={(e) => updateField(`${vortexPath}.architecture`, e.target.value)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Technologies (comma separated)</label>
+              <TagInput
+                value={vortex.technologies}
+                onChange={(tags) => updateField(`${vortexPath}.technologies`, tags)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-2 pt-2 border-t border-border/40">
+              <label className="font-mono text-[11px] font-semibold text-muted-foreground">
+                Runtime Tab Targets (Android, TV, Desktop)
+              </label>
+              {vortex.runtimes?.map((r, i) => (
+                <div key={r.id || i} className="rounded-xl border border-border/60 bg-neutral-900/60 p-2.5 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] text-signal font-semibold uppercase shrink-0">{r.device}</span>
+                    <input
+                      type="text"
+                      placeholder="Tab Name (e.g. Android TV)"
+                      value={r.label || ""}
+                      onChange={(e) => updateField(`${vortexPath}.runtimes.${i}.label`, e.target.value)}
+                      className="flex-1 rounded-lg border border-border bg-neutral-900 px-2.5 py-1.5 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Short description"
+                    value={r.description || ""}
+                    onChange={(e) => updateField(`${vortexPath}.runtimes.${i}.description`, e.target.value)}
+                    className="w-full rounded-lg border border-border bg-neutral-900 px-2.5 py-1 font-sans text-[11px] text-muted-foreground focus:border-signal focus:outline-none"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null
+      ) : (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-saffron">
+            Flagship 02: {llm?.tabLabel || llm?.title || "LLM from Scratch"}
+          </h4>
+
+          {llm && (
+            <>
+              <div className="space-y-1.5">
+                <label className="font-mono text-[11px] text-muted-foreground">Tab Switcher Label</label>
+                <input
+                  type="text"
+                  placeholder="e.g. CataAI or LLM from Scratch"
+                  value={llm.tabLabel ?? ""}
+                  onChange={(e) => updateField(`${llmPath}.tabLabel`, e.target.value)}
+                  className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-mono text-[11px] text-muted-foreground">Project Title</label>
+                <input
+                  type="text"
+                  value={llm.title || ""}
+                  onChange={(e) => updateField(`${llmPath}.title`, e.target.value)}
+                  className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="space-y-1.5">
+                  <label className="font-mono text-[11px] text-muted-foreground">Status Badge</label>
+                  <input
+                    type="text"
+                    value={llm.status || ""}
+                    onChange={(e) => updateField(`${llmPath}.status`, e.target.value)}
+                    className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="font-mono text-[11px] text-muted-foreground">Year</label>
+                  <input
+                    type="number"
+                    value={llm.year ?? 2026}
+                    onChange={(e) => updateField(`${llmPath}.year`, parseInt(e.target.value, 10))}
+                    className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-mono text-[11px] text-muted-foreground">Summary (One-liner)</label>
+                <textarea
+                  rows={2}
+                  value={llm.summary || ""}
+                  onChange={(e) => updateField(`${llmPath}.summary`, e.target.value)}
+                  className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-mono text-[11px] text-muted-foreground">Detailed Description</label>
+                <textarea
+                  rows={4}
+                  value={llm.description || ""}
+                  onChange={(e) => updateField(`${llmPath}.description`, e.target.value)}
+                  className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-mono text-[11px] text-muted-foreground">Technologies</label>
+                <TagInput
+                  value={llm.technologies}
+                  onChange={(tags) => updateField(`${llmPath}.technologies`, tags)}
+                  className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
+                />
+              </div>
+            </>
+          )}
+
+          {roadmap && (
+            <div className="pt-3 border-t border-border/40 space-y-3">
+              <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-saffron">
+                Roadmap Board Copy
+              </h4>
+
+              <div className="space-y-1.5">
+                <label className="font-mono text-[11px] text-muted-foreground">Roadmap Eyebrow</label>
+                <input
+                  type="text"
+                  value={roadmap.eyebrow || ""}
+                  onChange={(e) => updateField("roadmap.eyebrow", e.target.value)}
+                  className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-mono text-[11px] text-muted-foreground">Roadmap Intro</label>
+                <textarea
+                  rows={3}
+                  value={roadmap.intro || ""}
+                  onChange={(e) => updateField("roadmap.intro", e.target.value)}
+                  className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-mono text-[11px] text-muted-foreground">Status Chip Label</label>
+                <input
+                  type="text"
+                  value={roadmap.statusLabel || ""}
+                  onChange={(e) => updateField("roadmap.statusLabel", e.target.value)}
+                  className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
+                />
+              </div>
+
+              {/* Stages List */}
+              <div className="pt-2 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-semibold text-foreground">
+                    Roadmap Stages ({stages.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextN = stages.length + 1;
+                      const newStage = {
+                        n: nextN,
+                        id: `stage-${nextN}`,
+                        title: `Stage ${nextN}`,
+                        short: `stage ${nextN}`,
+                        file: "",
+                        status: "planned" as const,
+                        summary: "Stage description",
+                        items: [],
+                      };
+                      updateField("roadmap.stages", [...stages, newStage]);
+                    }}
+                    className="inline-flex items-center gap-1 font-mono text-[11px] text-signal hover:underline cursor-pointer"
+                  >
+                    <Plus className="size-3" /> Add Stage
+                  </button>
+                </div>
+
+                {stages.map((stage, idx) => (
+                  <div key={idx} className="rounded-xl border border-border/60 bg-neutral-950/70 p-3 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[11px] font-bold text-signal">
+                        Stage {stage.n}: {stage.title}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = stages.filter((_, i) => i !== idx);
+                          updateField("roadmap.stages", updated);
+                        }}
+                        className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="size-3" />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-2 space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Title</label>
+                        <input
+                          type="text"
+                          value={stage.title || ""}
+                          onChange={(e) => updateField(`roadmap.stages.${idx}.title`, e.target.value)}
+                          className="w-full rounded-lg border border-border/60 bg-neutral-900/90 px-2.5 py-1.5 font-sans text-xs text-foreground"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-mono text-[10px] text-muted-foreground">Status</label>
+                        <select
+                          value={stage.status}
+                          onChange={(e) => updateField(`roadmap.stages.${idx}.status`, e.target.value)}
+                          className="w-full rounded-lg border border-border/60 bg-neutral-900/90 px-2.5 py-1.5 font-mono text-xs text-foreground"
+                        >
+                          <option value="done">done</option>
+                          <option value="current">current</option>
+                          <option value="planned">planned</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-mono text-[10px] text-muted-foreground">Summary</label>
+                      <textarea
+                        rows={2}
+                        value={stage.summary || ""}
+                        onChange={(e) => updateField(`roadmap.stages.${idx}.summary`, e.target.value)}
+                        className="w-full rounded-lg border border-border/60 bg-neutral-900/90 p-2 font-sans text-xs text-foreground"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

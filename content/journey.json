@@ -1,5 +1,20 @@
 [
   {
+    "date": "2026",
+    "category": "main",
+    "title": "CataAI",
+    "note": "Generative language model built from first principles in PyTorch - character-level tokenization, autoregressive tensor pipeline, attention blocks and causal training stack.",
+    "image": "",
+    "link": "/projects/llm-from-scratch",
+    "tags": [
+      "AI",
+      "PyTorch",
+      "Python",
+      "CUDA",
+      "Transformers"
+    ]
+  },
+  {
     "date": "May 2026",
     "category": "main",
     "title": "Jarvis & Neuroshell CLI",

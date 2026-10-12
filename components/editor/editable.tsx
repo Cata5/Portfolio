@@ -60,8 +60,8 @@ export function Editable({
         "group/editable relative transition-all duration-150 cursor-pointer",
         inline ? "inline-block" : "block",
         isSelected
-          ? "outline outline-2 outline-signal outline-offset-4 rounded-md bg-signal/[0.06] shadow-[0_0_20px_rgba(128,82,255,0.25)]"
-          : "hover:outline hover:outline-1 hover:outline-dashed hover:outline-signal/70 hover:outline-offset-4 rounded-sm hover:bg-signal/[0.02]",
+          ? "outline outline-2 outline-signal outline-offset-4 rounded-md bg-signal/[0.08] shadow-[0_0_20px_rgba(128,82,255,0.25)] ring-1 ring-signal/30"
+          : "outline outline-1 outline-dashed outline-signal/40 hover:outline-signal hover:outline-offset-4 rounded-sm hover:bg-signal/[0.04]",
         className,
       )}
     >

@@ -115,10 +115,16 @@ export function Hero() {
           0.8,
         )
         .fromTo(
+          ".hero-proof-strip",
+          { y: 16, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8 },
+          0.88,
+        )
+        .fromTo(
           ".hero-ctas",
           { y: 16, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.8 },
-          0.95,
+          0.98,
         )
         .fromTo(
           ".hero-glass",
@@ -218,6 +224,27 @@ export function Hero() {
                 {site.tagline}
               </p>
             </Editable>
+
+            {/* Verified proof strip — quick technical signals */}
+            <div className="hero-proof-strip mt-5 sm:mt-6 flex flex-wrap items-center gap-2 font-mono text-[11px]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
+                <span className="size-1.5 rounded-full bg-signal shadow-[0_0_8px_var(--signal)]" />
+                UniHack 1st
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
+                <span className="size-1.5 rounded-full bg-signal/80" />
+                2× InfoEducație Silver
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
+                <span className="size-1.5 rounded-full bg-signal/80" />
+                FTC Nationals
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
+                <span className="size-1.5 rounded-full bg-signal/60" />
+                40+ Repos
+              </span>
+            </div>
+
             <div className="hero-ctas mt-8 sm:mt-10 lg:mt-12 flex flex-wrap items-center gap-6 sm:gap-8">
               <Magnetic>
                 <Button nativeButton={false} render={<a href="#work" />}>

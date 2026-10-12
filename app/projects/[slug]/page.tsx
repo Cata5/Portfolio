@@ -12,6 +12,7 @@ import { ScrollScale } from "@/components/motion/scroll-scale";
 import { TextReveal } from "@/components/motion/text-reveal";
 import { ProjectVisual } from "@/components/project-visual";
 import { MediaBand } from "@/components/projects/media-band";
+import { RoadmapSection } from "@/components/projects/roadmap-section";
 import { ScreenshotGallery } from "@/components/projects/screenshot-gallery";
 import {
   SectionNav,
@@ -184,6 +185,9 @@ export default async function ProjectPage({
 
   const sections: SectionAnchor[] = [];
   if (project.description) sections.push({ id: "overview", label: "Overview" });
+  if (project.id === "llm-from-scratch") {
+    sections.push({ id: "roadmap", label: "Roadmap" });
+  }
   sections.push({ id: "features", label: "Features" });
   if (project.architecture) {
     sections.push({ id: "architecture", label: "Architecture" });
@@ -338,6 +342,9 @@ export default async function ProjectPage({
               </div>
             </section>
           )}
+
+          {/* ---- Roadmap (LLM from Scratch) ---------------------------- */}
+          <RoadmapSection id={project.id} />
 
           {bands[0] && (
             <MediaBand

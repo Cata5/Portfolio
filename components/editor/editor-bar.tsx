@@ -70,7 +70,7 @@ export function EditorBar() {
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex items-center gap-2 rounded-full border border-border/80 bg-neutral-950/90 px-3.5 py-2 shadow-2xl shadow-black/80 ring-1 ring-white/10 backdrop-blur-xl"
+        className="dark flex items-center gap-2 rounded-full border border-border/80 bg-neutral-950/90 text-neutral-100 px-3.5 py-2 shadow-2xl shadow-black/80 ring-1 ring-white/10 backdrop-blur-xl"
       >
         {/* Mode Toggle Button */}
         <button

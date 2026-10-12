@@ -18,6 +18,7 @@ import activitiesData from "@/content/activities.json";
 import certsData from "@/content/certifications.json";
 import mlData from "@/content/ml.json";
 import projectsData from "@/content/projects.json";
+import roadmapData from "@/content/roadmap.json";
 import offlineThemesData from "@/content/offline-themes.json";
 import sectionsData from "@/content/sections.json";
 import type { Project } from "@/data/projects";
@@ -25,6 +26,7 @@ import type { Activity } from "@/data/activities";
 import type { Certification } from "@/data/certifications";
 import type { JourneyEntry } from "@/data/journey";
 import type { MlRun } from "@/data/ml";
+import type { RoadmapStage } from "@/data/roadmap";
 import type { PageSection, SectionType } from "@/data/sections";
 import { ScrollTrigger } from "@/components/motion/gsap";
 import { withBasePath } from "@/lib/base-path";
@@ -38,6 +40,21 @@ export type ContentState = {
   certifications: Certification[];
   ml: typeof mlData;
   projects: Project[];
+  roadmap: {
+    eyebrow: string;
+    intro: string;
+    statusLabel: string;
+    roadmapLabel: string;
+    shippedLabel: string;
+    ctaLabel: string;
+    railLabel: string;
+    buildingLabel: string;
+    plannedLabel: string;
+    noteLead: string;
+    noteLink: string;
+    runtime: { label: string; value: string }[];
+    stages: RoadmapStage[];
+  };
   offlineThemes: typeof offlineThemesData;
   sections: PageSection[];
 };
@@ -151,6 +168,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     certifications: certsData as Certification[],
     ml: mlData,
     projects: projectsData as unknown as Project[],
+    roadmap: roadmapData as unknown as ContentState["roadmap"],
     offlineThemes: offlineThemesData,
     sections: sectionsData as PageSection[],
   }));

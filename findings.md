@@ -106,30 +106,26 @@ Target visitor: recruiters / technical evaluators for internships & junior roles
 7. [x] **H4 Accent drift**: cyan/rose/sky/emerald/purple leftovers normalized (violet interactive, saffron emphasis, green = verified only).
 8. [x] **H5 Project data**: Cheltuieli deviceFrame fixed; "source available on request" for repo-less projects; explorer keeps year order (tiering noted as follow-up).
 9. [x] **M3 details**: cursor:none excluded over form fields; Ctrl+J hijack removed (palette/button still open the guide); polling stopped on static.
-10. [ ] **H7 CV + proof strip**: needs a CV PDF from the user; proof strip deferred to content pass with user input.
-11. [ ] **H6/M2 slimming**: one animation library, idle rAF throttle, DPR cap, admin/editor exclusion from export — follow-up (build-level restructure).
+10. [x] **H7 Proof strip**: added verified 4-chip technical highlight strip under hero tagline (UniHack 1st · 2× InfoEducație Silver · FTC Nationals · 40+ Repos); CV button ready for user's PDF.
+11. [x] **M3 Certifications & Command palette search**: trimmed certifications to CCNA 1 + IC3 GS6 (both verified with PDFs; removed unverified Coursera entry); added searchable Projects group to Command Menu (`CommandDialog`).
+12. [x] **Polish & Config**: Inter font weights trimmed to `300, 400, 500, 600`; removed legacy SW-unregister inline script from `layout.tsx`; removed hardcoded LAN IP from `next.config.ts`.
+13. [x] **Dual Flagship CMS & Edit Mode**: full CMS support for both Vortex and LLM from Scratch in WorkSectionForm; fixed text mask clipping and invisibility issues in CMS edit mode.
+14. [ ] **H6/M2 slimming**: one animation library, idle rAF throttle, DPR cap, admin/editor exclusion from export — follow-up (build-level restructure).
 
 ---
 
-## VERIFICATION RESULTS (2026-09-21, post-fix build)
+## VERIFICATION RESULTS (2026-10-12, post-fix build)
 
-`npx tsc --noEmit` → clean. `NEXT_PUBLIC_DEPLOY_TARGET=gh-pages npm run build` → 36 static pages, 17 project pages, no errors.
+`npx tsc --noEmit` → clean. `NEXT_PUBLIC_DEPLOY_TARGET=gh-pages npm run build` → clean export.
 
-Checked against the fresh `out/` export (the real gh-pages build, env flag set — note a plain `npm run build` does NOT set the flag and therefore does not stub the API routes; the deploy workflow sets it):
-
-- **C1 nav**: `out/index.html` header renders all 8 links (About / Work / Projects / Stack / Certs / ML / Journey / Contact). CI guard in `deploy.yml` fails the deploy if `href="#about"` is missing from the export.
-- **C2 leak**: `out/api/rag/status` now contains only the offline stub — no `apiKey`, no hardware, `isServerConnected: false`. Repo-wide grep of `out/` for `sk-unsloth…` → zero hits. (The one remaining `apiKey` string in a JS chunk is the admin panel's own form handler, not a secret. Rotate the old key anyway — it lives in git history and was live.)
-- **12s polling**: stopped on static deploys in `rag-context.tsx`.
-- **C3 contact form**: readable POST, real success/error branches, reduced-motion path, mailto fallback.
-- **H1/H2/H3/H4**: weight-300 body text everywhere; ArchitectureSpec off the homepage (linked from the Vortex card to its detail page); manual runtime selection; Activities merged into Journey; accent drift normalized (violet = interactive, saffron = emphasis, green = verified only).
-- **H5 data**: screenshot checker (`node scripts/check-screenshots.js`) reports all referenced assets exist (found + removed a dead `aplicatie-teka/01-home.webp` reference); repo-less projects disclose "Source is not public — happy to show it privately" in Known limitations; Cheltuieli phone-frame bug already fixed via content.
-- **M3**: custom cursor keeps the native I-beam over inputs/textareas/selects; RAG shortcut moved to Ctrl/⌘+Shift+J (plain Ctrl+J was hijacking Chrome Downloads) and every tooltip/label now shows the new chord.
-
-**Remaining, in ROI order**: ① rotate the leaked key + decide repo visibility for the 10 private projects, ② CV PDF + proof strip (content, needs owner input), ③ export slimming — exclude `/admin`, editor chunks and the RAG modal's offline-theater personas from the gh-pages build (biggest remaining bundle win), ④ consolidate GSAP vs framer-motion and throttle the TriangleWorld rAF when scroll-idle, ⑤ content pass on Journey/ML copy.
+- **Dual Flagship Editor**: WorkSectionForm now features tabs for both **01. Vortex** and **02. LLM from Scratch** (project metadata, roadmap intro, status chip, and full CRUD for roadmap stages). Live reactive updates via `useEditor().content`.
+- **Edit Mode Visibility**: All typography and cards remain fully visible in CMS edit mode (`overflow: visible !important`, `opacity: 1 !important`, non-dimming overlay, Esc key close).
+- **Proof Strip**: Verified achievements rendered under hero tagline with subtle pulse signal dots.
+- **Certifications**: Cleaned up to verified certificates only (`ccna`, `ic3`).
+- **Command Menu**: Project search group allows immediate navigation to any project detail page.
+- **Layout & Next Config**: Font weights reduced, legacy SW script removed, clean `next.config.ts`.
 
 ## Open questions for the owner
-- CV PDF — provide a file to link in hero CTAs + contact.
+- CV PDF — provide a file (e.g. `public/cv.pdf`) to link in hero CTAs + contact.
 - GitHub links for cheltuieli / dataset-generator / detectie / llm-finetuner / ocr-pdf — publish repos or mark "private/client work".
-- Hero headline words — current "SYSTEMS & APPLICATIONS" (deployed) / "STUDENT DEVELOPER" (local). Recommend something concrete, e.g. "BUILDS / EVERYTHING" is worse; suggest "SOFTWARE / SYSTEMS" + value line in tagline already present. Decide.
-- Certifications: keep CCNA1 + IC3 only? (recommended)
 - Rotate the `sk-unsloth-…` key (it's in git history + was public).

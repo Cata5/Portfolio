@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowUpRight,
   Bot,
@@ -566,16 +567,27 @@ export function Journey() {
                                   </h3>
 
                                   {entry.link && (
-                                    <a
-                                      href={entry.link}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      aria-label={`Link for ${entry.title}`}
-                                      className="inline-flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-signal transition-colors shrink-0 pt-1"
-                                    >
-                                      <span>Link</span>
-                                      <ArrowUpRight className="size-3.5" />
-                                    </a>
+                                    entry.link.startsWith("http") ? (
+                                      <a
+                                        href={entry.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        aria-label={`Link for ${entry.title}`}
+                                        className="inline-flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-signal transition-colors shrink-0 pt-1"
+                                      >
+                                        <span>Link</span>
+                                        <ArrowUpRight className="size-3.5" />
+                                      </a>
+                                    ) : (
+                                      <Link
+                                        href={entry.link}
+                                        aria-label={`Project link for ${entry.title}`}
+                                        className="inline-flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-signal transition-colors shrink-0 pt-1"
+                                      >
+                                        <span>Project</span>
+                                        <ArrowUpRight className="size-3.5" />
+                                      </Link>
+                                    )
                                   )}
                                 </div>
 

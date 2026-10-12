@@ -65,7 +65,7 @@ export function AuthDialog() {
           }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-border/80 bg-neutral-950/95 p-6 shadow-2xl shadow-black/80 ring-1 ring-white/10 backdrop-blur-xl sm:p-8"
+          className="dark relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-border/80 bg-neutral-950/95 text-neutral-100 p-6 shadow-2xl shadow-black/80 ring-1 ring-white/10 backdrop-blur-xl sm:p-8"
         >
           {/* Close button */}
           <button
