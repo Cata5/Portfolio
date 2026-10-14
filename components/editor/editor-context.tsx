@@ -26,7 +26,7 @@ import type { Activity } from "@/data/activities";
 import type { Certification } from "@/data/certifications";
 import type { JourneyEntry } from "@/data/journey";
 import type { MlRun } from "@/data/ml";
-import type { RoadmapStage } from "@/data/roadmap";
+import type { RoadmapRun, RoadmapRunsSection, RoadmapStage } from "@/data/roadmap";
 import type { PageSection, SectionType } from "@/data/sections";
 import { ScrollTrigger } from "@/components/motion/gsap";
 import { withBasePath } from "@/lib/base-path";
@@ -54,6 +54,10 @@ export type ContentState = {
     noteLink: string;
     runtime: { label: string; value: string }[];
     stages: RoadmapStage[];
+    /** Copy for the training-run comparison section. */
+    runsSection: RoadmapRunsSection;
+    /** Recorded runs of the LLM build, rendered by RunComparison. */
+    runs: RoadmapRun[];
   };
   offlineThemes: typeof offlineThemesData;
   sections: PageSection[];

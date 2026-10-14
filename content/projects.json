@@ -136,49 +136,57 @@
     "platform": "Python",
     "year": 2026,
     "status": "In Development",
-    "summary": "A generative language model written from first principles - character-level tokenization and an autoregressive data pipeline today, then scaled dot-product attention, a Transformer block and a full training stack.",
-    "description": "LLM from Scratch builds a language model without leaning on high-level model libraries, so every step is one I can explain and defend. The corpus is read once and tokenized into a vocabulary of unique symbols with bijective string-to-integer and integer-to-string maps; encode and decode are verified to round-trip. That vocabulary becomes a single long tensor, split into a train and a validation set so overfitting stays visible, and a batch sampler hands the model fixed-length context windows paired with their targets shifted one token ahead - the same next-token objective the whole system runs on. Everything after that is still being built: a small attention-free baseline to prove the pipeline end to end, then multi-head self-attention with a causal mask, a residual Transformer block, and a training and inference stack with warmup, cosine decay and top-k sampling.",
+    "summary": "A generative language model written from first principles - my own tokenizer (character-level, then BPE), my own multi-head causal attention, my own Pre-LN Transformer block, trained on Shakespeare and re-run on the GPU.",
+    "description": "CataAI is a language model built without leaning on any model library, so every step is one I can explain and defend. The corpus is tokenized into a vocabulary of unique symbols with bijective maps in both directions, encoded once into a single long tensor, split 90/10, and cut into fixed-length context windows paired with targets shifted one token ahead - the same next-token objective everything else runs on. From there the model climbs in recorded steps: an attention-free Bigram baseline, then a single scaled dot-product head with a causal mask, then four parallel heads, then a feed-forward net, then four Pre-LN blocks with residual connections trained on CUDA. Finally the whole thing is re-run with a Byte Pair Encoding tokenizer I trained from scratch on the corpus. Every one of those runs is logged, screenshotted and compared further down this page - same corpus, same window, same optimizer, one mechanism changed at a time.",
     "technologies": [
       "Python 3.14",
       "PyTorch",
-      "NumPy",
       "CUDA",
-      "Character-level tokenization",
+      "NumPy",
+      "BPE tokenization",
+      "Multi-head self-attention",
       "Autoregressive modeling"
     ],
     "image": "/projects/llm-from-scratch/cover.svg",
     "featured": true,
     "features": [
-      "Character-level tokenizer over the raw corpus - sorted unique symbols with bijective string-to-integer and integer-to-string maps",
-      "encode() and decode() verified to round-trip, so tokens can be mapped back to exactly the text they came from",
-      "Encoded corpus flattened into one long integer tensor, ready to be indexed into training windows",
-      "Train / validation split over the token stream, so generalization is measured rather than assumed",
-      "Batch sampler that hands out fixed-length context windows as input and target pairs, with targets shifted one token ahead"
+      "Character-level tokenizer over the raw corpus - sorted unique symbols with bijective string-to-integer and integer-to-string maps, encode / decode verified to round-trip",
+      "Byte Pair Encoding written from scratch: a byte-level base vocabulary plus learned merges, trained to 384 tokens and used to encode the same corpus",
+      "Data layer that flattens the encoded corpus into one long torch.long tensor, splits it 90 / 10 and samples fixed-length context windows with targets shifted one token ahead",
+      "Attention-free Bigram baseline that exercises the entire training and sampling loop end to end and sets the loss every later stage has to beat",
+      "Single-head scaled dot-product attention: bias-free Q / K / V projections, scores scaled by 1 / sqrt(head_size), causal mask applied as -inf before the softmax",
+      "Multi-head attention with 4 heads of head_size = n_embed / 4 = 16, concatenated and projected back through a single Linear",
+      "Feed-forward network per token - Linear(64, 256) → ReLU → Linear(256, 64), the nonlinearity attention itself does not provide",
+      "Pre-LayerNorm Transformer block with residual connections, four blocks stacked in an nn.Sequential plus a final LayerNorm before the head",
+      "Trainer class around AdamW running the standard zero_grad → backward → step loop, on CPU or CUDA depending on what torch reports",
+      "experiments.py that sweeps the tokenizer × architecture matrix and writes every run's results to JSON"
     ],
     "partialFeatures": [
-      "Runs on CPU for now; the discrete GPU is currently disabled, so the CUDA path is installed but not exercised"
+      "Autoregressive sampling works from the softmax distribution, but temperature, top-k / top-p filtering and a KV-cache are not implemented yet",
+      "Loss is printed during training but never validated against the held-out split, so there is no train / val gap to rule out overfitting"
     ],
     "plannedFeatures": [
-      "A small attention-free baseline model to prove the training and sampling loop end to end",
-      "Multi-head scaled dot-product attention with a causal mask",
-      "A residual Transformer block with layer normalization",
-      "Training stack - warmup, cosine learning-rate decay and periodic validation",
-      "Inference sampling with temperature and top-k filtering"
+      "Cosine learning-rate decay with warmup, plus checkpointing so longer runs can be resumed",
+      "Temperature and top-k sampling, to trade coherence against variety at generation time",
+      "A KV-cache so generation cost grows linearly instead of quadratically in the window",
+      "Larger context windows - BPE makes a 128-token window affordable now",
+      "A wider sweep over block size, head count, embedding width and layer count, plotted instead of eyeballed"
     ],
-    "architecture": "A single Python pipeline with clean seams between stages, each one consuming the output of the stage before it. The tokenizer turns raw text into an integer vocabulary and owns the two mapping directions. The data layer reads the corpus once, flattens the encoded tokens into one long tensor, splits it into train and validation, and hands out fixed-length windows whose targets are shifted a single token ahead. That shift is the whole point: every position in a window is a supervised next-token example, so a window of length T trains T predictions at once. The model side climbs from an attention-free baseline up to multi-head self-attention and a residual Transformer block, and the training loop wraps it with warmup, cosine decay and validation. Keeping the seams explicit means each stage can be swapped - character-level tokens for a subword vocabulary, the baseline for a Transformer - without touching the rest.",
-    "architectureDiagram": "Raw text corpus (input.txt)\n        ↓\n[ Tokenizer ]  unique symbols → stoi / itos maps\n        ↓       encode(text) ↔ decode(tokens), round-trip verified\n  Integer token stream\n        ↓\n[ Data layer ]  one long tensor → train / val split\n        ↓       fixed-length windows, targets shifted +1 token\n  (input, target) batches\n        ↓\n[ Model ]  baseline → self-attention → Transformer block\n        ↓\n[ Training loop ]  warmup + cosine decay + validation\n        ↓\n[ Inference ]  temperature + top-k sampling",
+    "architecture": "One Python pipeline with explicit seams between stages, each consuming the output of the one before it. The tokenizer owns the two mapping directions and comes in two flavours: a 65-symbol character vocabulary, and a BPE vocabulary of 384 tokens trained on the corpus itself. The data layer reads the corpus once, flattens the ids into one long tensor, splits 90 / 10, and hands out windows whose targets are shifted a single token ahead - that shift is the point, because every position in a window is a supervised example and a window of length T trains T predictions at once. The model is token embedding plus learned position embedding, then a stack of four Pre-LN blocks: x = x + Attention(LayerNorm(x)), then x = x + FeedForward(LayerNorm(x)), then a final LayerNorm and a linear head back to the vocabulary. Attention itself is the standard construction, written by hand: bias-free Q / K / V projections, dot products scaled by 1 / sqrt(head_size), a registered lower-triangular buffer masking the future with -inf, softmax, then a weighted sum of the values. Keeping the seams explicit is what makes the comparison possible - experiments.py flips one flag at a time (attention on or off, feed-forward on or off, residual and LayerNorm on or off, character or BPE tokens) and re-runs the same pipeline, which is how the six runs on this page were produced.",
+    "architectureDiagram": "Raw text corpus (input.txt, ~1.1 MB Shakespeare)\n        ↓\n[ Tokenizer ]  character (65 sym)  |  BPE (256 bytes + 128 merges)\n        ↓       encode(text) ↔ decode(tokens), round-trip verified\n  Integer token stream\n        ↓\n[ Data layer ]  one long torch.long tensor → 90 / 10 split\n        ↓       windows (B, T): x = data[i:i+T], y = data[i+1:i+T+1]\n  (input, target) batches\n        ↓\n[ Model ]  tok_emb + pos_emb → 4 × [ x + MHA(LN(x)) ; x + FFN(LN(x)) ]\n        ↓       MHA = 4 heads × 16, scaled dot product, causal mask\n        ↓       LN_f → Linear(n_embed, vocab)\n  logits (B, T, V) → cross entropy vs shifted targets\n        ↓\n[ Training ]  AdamW · zero_grad → backward → step · loss every 500 iters\n        ↓\n[ Inference ]  softmax → multinomial sampling, context trimmed to block_size\n        ↓\n[ experiments.py ]  tokenizer × architecture matrix → runs.json",
     "limitations": [
-      "Trains on CPU only for now - the discrete GPU is disabled, so the CUDA path is installed but unexercised",
-      "Character-level tokens give a tiny vocabulary but very long sequences, which costs compute per useful token",
-      "The corpus is a single local file, so the model only ever learns the distribution of that one text",
-      "No baseline loss has been recorded yet, so there is nothing to compare the Transformer against"
+      "One corpus, one size - a single Shakespeare file of about 1.1 MB, so the model only ever learns the distribution of that one text",
+      "A 32-token context window is short even with BPE tokens - roughly 20-25 words of history",
+      "4000 iterations is brief for a four-layer model, so the loss curves are still descending when training stops",
+      "Validation loss is never logged, so the recorded numbers are training loss only and overfitting cannot be ruled out",
+      "The BPE tokenizer is trained on a 40k-character sample rather than the whole corpus, so rarer words are split back into bytes"
     ],
     "futureWork": [
-      "Swap character-level tokens for a subword (BPE) vocabulary to cut sequence length",
-      "Re-enable the discrete GPU and exercise the CUDA training path",
-      "Log training and validation loss across steps so progress and overfitting are visible",
-      "Move the corpus loading to a streaming reader so larger texts do not need to fit in memory",
-      "Sample and save generated text at checkpoints to eyeball quality over training"
+      "Log training and validation loss together, and checkpoint at intervals",
+      "Temperature, top-k / top-p sampling and a KV-cache for inference",
+      "Cosine learning-rate decay with warmup, then runs long enough for the curves to flatten",
+      "Bigger context windows and a corpus of more than one book",
+      "Sweep block size, head count, embedding width and n_layer, and plot the matrix instead of eyeballing it"
     ]
   },
   {

@@ -13,12 +13,14 @@ import { TextReveal } from "@/components/motion/text-reveal";
 import { ProjectVisual } from "@/components/project-visual";
 import { MediaBand } from "@/components/projects/media-band";
 import { RoadmapSection } from "@/components/projects/roadmap-section";
+import { RunComparison } from "@/components/projects/run-comparison";
 import { ScreenshotGallery } from "@/components/projects/screenshot-gallery";
 import {
   SectionNav,
   type SectionAnchor,
 } from "@/components/projects/section-nav";
 import { limitationsWithSource, sourceAvailability } from "@/data/project-extras";
+import { llmRuns, llmRunsSection } from "@/data/roadmap";
 import { site } from "@/data/site";
 import {
   getProject,
@@ -187,6 +189,9 @@ export default async function ProjectPage({
   if (project.description) sections.push({ id: "overview", label: "Overview" });
   if (project.id === "llm-from-scratch") {
     sections.push({ id: "roadmap", label: "Roadmap" });
+    if (llmRuns.length > 0) {
+      sections.push({ id: "runs", label: llmRunsSection.navLabel });
+    }
   }
   sections.push({ id: "features", label: "Features" });
   if (project.architecture) {
@@ -345,6 +350,11 @@ export default async function ProjectPage({
 
           {/* ---- Roadmap (LLM from Scratch) ---------------------------- */}
           <RoadmapSection id={project.id} />
+
+          {/* ---- Recorded training runs (LLM from Scratch) ----------- */}
+          {project.id === "llm-from-scratch" && llmRuns.length > 0 && (
+            <RunComparison runs={llmRuns} copy={llmRunsSection} />
+          )}
 
           {bands[0] && (
             <MediaBand

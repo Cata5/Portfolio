@@ -18,6 +18,47 @@ export type RoadmapStage = {
 
 export type RoadmapRuntime = { label: string; value: string };
 
+/** One recorded training run - the terminal screenshot plus what it produced. */
+export type RoadmapRun = {
+  n: number;
+  id: string;
+  /** Terse label under the stage rail. */
+  short: string;
+  title: string;
+  /** Source file this run was produced by. */
+  file?: string;
+  /** Architecture line shown under the title. */
+  model: string;
+  /** Vocabulary line - how many symbols the model scores against. */
+  tokenizer: string;
+  /** Drives the rail marker: char-level runs vs the BPE run. */
+  tokenizerKind: "char" | "bpe";
+  /** Window / batch / steps / device, as printed in the run. */
+  config: string;
+  /** First and last logged cross-entropy for this run. */
+  lossStart: number;
+  lossEnd: number;
+  /** Terminal screenshot in public/. */
+  shot: string;
+  /** What this stage changed about the output. */
+  note: string;
+  /** Text the model generated after training. */
+  sample: string;
+};
+
+/** Copy for the run-comparison section on the project page. */
+export type RoadmapRunsSection = {
+  label: string;
+  navLabel: string;
+  title: string;
+  intro: string;
+  hint: string;
+  chartLabel: string;
+  chartBaseline: string;
+  sampleLabel: string;
+  caveat: string;
+};
+
 /**
  * The LLM from Scratch build board. Copy, runtime facts and every stage live
  * in content/roadmap.json, so the whole flagship block is editable from the
@@ -37,10 +78,14 @@ export const roadmap = roadmapJson as unknown as {
   noteLink: string;
   runtime: RoadmapRuntime[];
   stages: RoadmapStage[];
+  runsSection: RoadmapRunsSection;
+  runs: RoadmapRun[];
 };
 
 export const llmRoadmap: RoadmapStage[] = roadmap.stages;
 export const llmRuntime: RoadmapRuntime[] = roadmap.runtime;
+export const llmRuns: RoadmapRun[] = roadmap.runs;
+export const llmRunsSection: RoadmapRunsSection = roadmap.runsSection;
 
 export function roadmapProgress(stages: RoadmapStage[]) {
   const done = stages.filter((s) => s.status === "done").length;
