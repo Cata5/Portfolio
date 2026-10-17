@@ -66,10 +66,11 @@ jobs:
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
 
-      # This site is fully static (no app/api or app/admin routes to strip) —
-      # next.config.ts switches to `output: "export"` when the flag below is set.
-      # The flag is defined at the job level (see top-level `env`), so it is
-      # inherited by the build and every process it spawns.
+      # The exported site is fully static. The four public Read API routes
+      # (status/config/documents/models) still exist as route handlers: with the
+      # flag below they return the baked offline stubs from
+      # lib/rag/gh-pages-stubs.ts (no secrets, no live probing). Mutating routes
+      # are POST/DELETE-only modules, which the export never evaluates.
 
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build

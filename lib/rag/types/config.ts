@@ -30,19 +30,18 @@ export interface RerankerConfig {
 
 export interface ContextBudgetConfig {
   maxContextTokens: number; // default: 3072
-  reservedGenerationTokens: number; // default: 1024
   targetChunkTokens: number; // default: 250
   chunkOverlapTokens: number; // default: 40
   enableParentContextExpansion: boolean; // default: true
 }
 
 export interface IndexingConfig {
-  chunkSizeTokens: number; // default: 250
-  chunkOverlapTokens: number; // default: 40
+  /** Embedding request batch size (consumed by `embedBatch`). */
   batchSize: number; // default: 32
+  /** Skip unchanged documents by content hash (consumed by the ingestion pipeline). */
   enableIncremental: boolean; // default: true
+  /** Reuse embeddings across runs (consumed by the embedding provider). */
   enableEmbeddingCache: boolean; // default: true
-  autoScanIntervalMinutes: number; // default: 0 (disabled)
 }
 
 export interface RAGConfig {

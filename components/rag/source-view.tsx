@@ -5,8 +5,15 @@ import { FileText, ArrowLeft, Copy, Check } from "lucide-react";
 import { useState } from "react";
 
 export function SourceView() {
-  const { selectedCitation, setActiveTab } = useRAG();
+  const { selectedCitation, setActiveTab, setIsOpen } = useRAG();
   const [copied, setCopied] = useState(false);
+
+  const backToChat = () => {
+    setActiveTab("chat");
+    // SourceView renders inside the chat modal in admin views; reopen it so the
+    // click always lands on the conversation.
+    setIsOpen(true);
+  };
 
   if (!selectedCitation) {
     return (
@@ -32,7 +39,7 @@ export function SourceView() {
       <div className="flex items-center justify-between border-b border-border/50 pb-4">
         <button
           type="button"
-          onClick={() => setActiveTab("chat")}
+          onClick={backToChat}
           className="inline-flex items-center gap-1.5 font-mono text-[12px] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" /> Back to Chat

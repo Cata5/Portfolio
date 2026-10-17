@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { rag } from "@/lib/rag/rag-facade";
+import { requireAdminAuth } from "@/lib/api-auth";
 
-export async function POST() {
+export async function POST(request: Request) {
+  const unauthorized = requireAdminAuth(request);
+  if (unauthorized) return unauthorized;
   try {
     const result = await rag.syncPortfolio(true);
     return NextResponse.json({ success: true, ...result });

@@ -5,26 +5,10 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  Cpu,
-  Database,
-  DownloadCloud,
   FileCode2,
   Folder,
   FolderOpen,
-  HardDrive,
-  Key,
-  Layers,
-  Lock,
-  Monitor,
-  Play,
   Search,
-  Server,
-  ShieldCheck,
-  Smartphone,
-  Table,
-  Tv,
-  Workflow,
-  Zap,
 } from "lucide-react";
 
 import { GlassCard } from "@/components/glass-card";
@@ -36,42 +20,36 @@ import { cn } from "@/lib/utils";
 export const PLATFORM_MATRIX = [
   {
     dimension: "UI Architecture",
-    icon: Layers,
     android: "Jetpack Compose (Material 3)",
     tv: "Compose TV + Leanback launcher",
     pc: "Compose Multiplatform (desktop)",
   },
   {
     dimension: "Primary Input",
-    icon: Zap,
     android: "Touch & gestures",
     tv: "5-way D-pad & remote controls",
     pc: "Mouse, keyboard & mpv hotkeys",
   },
   {
     dimension: "OAuth 2.0 Auth",
-    icon: Key,
     android: "Google Sign-In SDK (Drive)",
     tv: "Embedded WebView flow · device-flow fallback",
     pc: "Browser loopback callback (localhost)",
   },
   {
     dimension: "Playback Pipeline",
-    icon: Play,
     android: "Media3 / ExoPlayer · RAM-only buffering",
     tv: "Media3 / ExoPlayer · audio routing & equalizer",
     pc: "In-app mpv (mediamp) · external mpv fallback · DriveStreamProxy",
   },
   {
     dimension: "Offline & Downloads",
-    icon: DownloadCloud,
     android: "Multi-provider queue · Wi-Fi-only · auto cleanup",
     tv: "Same offline queue + local TMDB cache",
     pc: "Streaming-first · trailer URL cache (6 h)",
   },
   {
     dimension: "Target Hardware",
-    icon: Monitor,
     android: "Android 11+ (minSdk 30) phones & tablets",
     tv: "Android TV 11+ · Google TV",
     pc: "Windows · JDK 17+ · packaged distributable",
@@ -82,28 +60,24 @@ export const PLATFORM_MATRIX = [
 export const ARCH_LAYERS = [
   {
     layer: "Presentation Tier",
-    icon: LayoutGridIcon,
     tech: "Jetpack Compose · Compose TV · Compose Multiplatform",
     desc: "One Kotlin UI framework across two apps: touch UI on phones and tablets, a 10-foot D-pad UI on Android TV, plus a Compose Multiplatform desktop client built on a shared module.",
     flow: "view models · navigation · profile state",
   },
   {
     layer: "State & Repository Engine",
-    icon: Database,
     tech: "Room (KMP) · shared Kotlin core · TMDB cache",
     desc: "A shared MediaRepository and library scanner feed a Room database - movies, TV, music, per-profile state, collections and resume positions - with TMDB metadata cached locally (24 h TTL).",
     flow: "media queries · connection metadata",
   },
   {
     layer: "Storage & Provider Protocols",
-    icon: HardDrive,
     tech: "Drive - SMB - SFTP - FTP - WebDAV",
     desc: "Pluggable client-side provider abstraction with LAN discovery (NSD/mDNS). Streams directly from personal cloud & LAN shares - zero central server.",
     flow: "authenticated stream URLs · range requests",
   },
   {
     layer: "Playback & Security Pipeline",
-    icon: Lock,
     tech: "Media3 / ExoPlayer · mpv (mediamp) · Android Keystore",
     desc: "Hardware-accelerated playback - ExoPlayer on mobile and TV, an in-app mpv player with external fallback on desktop (via a loopback DriveStreamProxy). Secrets live in Keystore, never Room.",
     flow: "audio tracks · subtitles · seek · resume",
@@ -112,12 +86,12 @@ export const ARCH_LAYERS = [
 
 /** Real engineering metrics — counted / verified against the Vortex source on 2026-08-17. */
 export const HUD_STATS = [
-  { icon: Smartphone, value: "3", label: "client runtimes" },
-  { icon: HardDrive, value: "7", label: "storage providers" },
-  { icon: FileCode2, value: "203", label: "kotlin files" },
-  { icon: ShieldCheck, value: "100", label: "unit tests" },
-  { icon: Server, value: "0", label: "backend servers" },
-  { icon: Database, value: "v21", label: "room schema" },
+  { value: "3", label: "client runtimes" },
+  { value: "7", label: "storage providers" },
+  { value: "203", label: "kotlin files" },
+  { value: "100", label: "unit tests" },
+  { value: "0", label: "backend servers" },
+  { value: "v21", label: "room schema" },
 ];
 
 export type ModuleNode = {
@@ -241,10 +215,6 @@ export const SHARED_CORE_ITEMS = [
     tag: "Stream Protocol",
   },
 ];
-
-function LayoutGridIcon(props: { className?: string }) {
-  return <Layers {...props} />;
-}
 
 /** Interactive Collapsible Tree Node Component with zero layout overflow and theme-aware styling */
 function InteractiveTreeNode({
@@ -370,7 +340,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
           <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 min-w-0">
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <Cpu className="size-4 text-signal shrink-0" />
                 <h3 className="font-mono text-sm font-semibold uppercase tracking-wider text-foreground">
                   Engineering Architecture Spec
                 </h3>
@@ -395,7 +364,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Table className="size-3.5" />
                 <span>Matrix</span>
               </button>
 
@@ -409,7 +377,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Workflow className="size-3.5" />
                 <span>Architecture</span>
               </button>
 
@@ -423,7 +390,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Layers className="size-3.5" />
                 <span>Module Map</span>
               </button>
 
@@ -437,7 +403,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Layers className="size-3.5" />
                 <span>Capabilities</span>
               </button>
             </div>
@@ -446,13 +411,11 @@ export function ArchitectureSpec({ project }: { project: Project }) {
           {/* Real metrics strip */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px overflow-hidden rounded-lg border border-border/50 bg-border/40 min-w-0">
             {HUD_STATS.map((s) => {
-              const Icon = s.icon;
               return (
                 <div
                   key={s.label}
                   className="flex flex-col items-center gap-1.5 bg-card/85 dark:bg-neutral-950/80 px-2 py-3 text-center min-w-0"
                 >
-                  <Icon className="size-3.5 text-signal/80 shrink-0" />
                   <span className="font-mono text-base font-semibold leading-none text-foreground">
                     {s.value}
                   </span>
@@ -478,19 +441,16 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                     </th>
                     <th className="pb-3 font-semibold uppercase tracking-wider text-foreground w-[26%]">
                       <span className="inline-flex items-center gap-1.5">
-                        <Smartphone className="size-3.5" />
                         Android
                       </span>
                     </th>
                     <th className="pb-3 font-semibold uppercase tracking-wider text-signal w-[26%]">
                       <span className="inline-flex items-center gap-1.5">
-                        <Tv className="size-3.5" />
                         Android TV
                       </span>
                     </th>
                     <th className="pb-3 font-semibold uppercase tracking-wider text-foreground/80 w-[26%]">
                       <span className="inline-flex items-center gap-1.5">
-                        <Monitor className="size-3.5" />
                         PC Desktop
                       </span>
                     </th>
@@ -498,7 +458,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                 </thead>
                 <tbody className="divide-y divide-border/40">
                   {PLATFORM_MATRIX.map((row) => {
-                    const RowIcon = row.icon;
                     return (
                       <tr
                         key={row.dimension}
@@ -506,7 +465,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                       >
                         <td className="py-3.5">
                           <span className="flex items-center gap-2 font-semibold text-foreground/90">
-                            <RowIcon className="size-3.5 shrink-0 text-signal/80" />
                             {row.dimension}
                           </span>
                         </td>
@@ -529,34 +487,29 @@ export function ArchitectureSpec({ project }: { project: Project }) {
             {/* Mobile Stacked Matrix Cards */}
             <div className="md:hidden space-y-3 min-w-0">
               {PLATFORM_MATRIX.map((row) => {
-                const RowIcon = row.icon;
                 return (
                   <div
                     key={row.dimension}
                     className="rounded-xl border border-border/60 bg-card/75 dark:bg-neutral-950/60 p-3.5 space-y-2.5 font-mono text-[11px]"
                   >
                     <div className="flex items-center gap-2 font-semibold text-saffron uppercase tracking-wider text-[10px] pb-1 border-b border-border/40">
-                      <RowIcon className="size-3 text-signal/80" />
                       {row.dimension}
                     </div>
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-start gap-2">
-                        <span className="flex items-center gap-1.5 text-muted-foreground shrink-0">
-                          <Smartphone className="size-3" />
+                        <span className="text-muted-foreground shrink-0">
                           Android:
                         </span>
                         <span className="text-foreground text-right">{row.android}</span>
                       </div>
                       <div className="flex justify-between items-start gap-2">
-                        <span className="flex items-center gap-1.5 text-signal shrink-0">
-                          <Tv className="size-3" />
+                        <span className="text-signal shrink-0">
                           TV:
                         </span>
                         <span className="text-signal font-medium text-right">{row.tv}</span>
                       </div>
                       <div className="flex justify-between items-start gap-2">
-                        <span className="flex items-center gap-1.5 text-foreground/80 shrink-0">
-                          <Monitor className="size-3" />
+                        <span className="text-foreground/80 shrink-0">
                           PC:
                         </span>
                         <span className="text-foreground text-right">{row.pc}</span>
@@ -574,7 +527,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
           <div className="mt-6 animate-in fade-in duration-200 min-w-0">
             <div className="space-y-0 min-w-0">
               {ARCH_LAYERS.map((item, idx) => {
-                const Icon = item.icon;
                 const last = idx === ARCH_LAYERS.length - 1;
                 return (
                   <div key={item.layer} className="min-w-0">
@@ -583,11 +535,9 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                         <span className="font-mono text-xl font-bold leading-none text-signal/90">
                           {String(idx + 1).padStart(2, "0")}
                         </span>
-                        <Icon className="size-4 text-signal/70" />
                       </div>
 
                       <div className="flex items-center gap-2 border-b border-border/40 pb-2 sm:hidden">
-                        <Icon className="size-3.5 text-signal" />
                         <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-saffron">
                           {item.layer}
                         </span>
@@ -682,7 +632,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                       : "text-muted-foreground hover:bg-muted/60 dark:hover:bg-neutral-900 hover:text-foreground",
                   )}
                 >
-                  <Smartphone className="size-3" />
                   <span>app/ (139 files)</span>
                 </button>
                 <button
@@ -695,7 +644,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                       : "text-muted-foreground hover:bg-muted/60 dark:hover:bg-neutral-900 hover:text-foreground",
                   )}
                 >
-                  <Layers className="size-3" />
                   <span>KMP Core (47 files)</span>
                 </button>
               </div>
@@ -717,7 +665,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
             <div className="rounded-xl border border-signal/30 bg-signal/[0.06] p-4 space-y-3 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-signal/20 pb-2.5">
                 <div className="flex items-center gap-2">
-                  <Workflow className="size-4 text-signal shrink-0" />
                   <span className="font-mono text-xs font-bold uppercase tracking-wider text-signal">
                     Shared Kotlin Multiplatform Bridge
                   </span>
@@ -761,7 +708,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                 <div className="rounded-xl border border-border/60 bg-card/80 dark:bg-neutral-950/80 p-4 min-w-0 overflow-hidden flex flex-col">
                   <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2.5 mb-3">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Smartphone className="size-4 shrink-0 text-foreground/70" />
                       <span className="truncate font-mono text-xs font-bold uppercase tracking-wider text-foreground">
                         app/ · Android Runtime
                       </span>
@@ -788,7 +734,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
                 <div className="rounded-xl border border-border/60 bg-card/80 dark:bg-neutral-950/80 p-4 min-w-0 overflow-hidden flex flex-col">
                   <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2.5 mb-3">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Layers className="size-4 shrink-0 text-signal" />
                       <span className="truncate font-mono text-xs font-bold uppercase tracking-wider text-foreground">
                         VortexDesktop/shared/ · KMP Engine
                       </span>
@@ -841,7 +786,6 @@ export function ArchitectureSpec({ project }: { project: Project }) {
         {/* Footer */}
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-3 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground min-w-0">
           <span className="flex items-center gap-1.5">
-            <span className="size-1 rounded-full bg-signal" />
             all metrics verified against source · app/ + VortexDesktop/
           </span>
           <span>vortex :: architecture-spec</span>

@@ -1,5 +1,7 @@
 import type { DeepPartial, RAGConfig } from "./types/config";
 import type { ModelConfig } from "./types/models";
+import { queryCache } from "./caching/query-cache";
+import { stateStore } from "./storage/state-store";
 
 export function getDefaultRAGConfig(): RAGConfig {
   const llmBaseUrl =
@@ -29,7 +31,7 @@ export function getDefaultRAGConfig(): RAGConfig {
       generationProvider: (process.env.RAG_GENERATION_PROVIDER as ModelConfig["generationProvider"]) || "openai-compatible",
       generationBaseUrl: llmBaseUrl,
       generationModel: process.env.LOCAL_LLM_MODEL || "unsloth/gemma-4-E2B-it-qat-GGUF",
-      apiKey: process.env.LOCAL_LLM_API_KEY || "sk-unsloth-f4823b690552e8812ba5884dc4cccb26",
+      apiKey: process.env.LOCAL_LLM_API_KEY || "",
       temperature: parseFloat(process.env.LOCAL_LLM_TEMPERATURE || "0.2"),
       maxTokens: parseInt(process.env.LOCAL_LLM_MAX_TOKENS || "2048", 10),
       topP: parseFloat(process.env.LOCAL_LLM_TOP_P || "0.95"),
@@ -59,44 +61,45 @@ export function getDefaultRAGConfig(): RAGConfig {
     },
     context: {
       maxContextTokens: parseInt(process.env.RAG_MAX_CONTEXT_TOKENS || "3072", 10),
-      reservedGenerationTokens: parseInt(process.env.RAG_RESERVED_GEN_TOKENS || "1024", 10),
       targetChunkTokens: parseInt(process.env.RAG_TARGET_CHUNK_TOKENS || "250", 10),
       chunkOverlapTokens: parseInt(process.env.RAG_CHUNK_OVERLAP_TOKENS || "40", 10),
       enableParentContextExpansion: process.env.RAG_PARENT_EXPANSION !== "false",
     },
     indexing: {
-      chunkSizeTokens: parseInt(process.env.RAG_CHUNK_SIZE || "250", 10),
-      chunkOverlapTokens: parseInt(process.env.RAG_CHUNK_OVERLAP || "40", 10),
       batchSize: parseInt(process.env.RAG_INDEX_BATCH_SIZE || "32", 10),
       enableIncremental: process.env.RAG_INCREMENTAL !== "false",
       enableEmbeddingCache: process.env.RAG_EMBEDDING_CACHE !== "false",
-      autoScanIntervalMinutes: 0,
     },
     debug: process.env.RAG_DEBUG === "true" || process.env.NODE_ENV !== "production",
   };
 }
 
-let activeConfig: RAGConfig = getDefaultRAGConfig();
+/** Shallow-per-section merge so partial patches never drop sibling fields. */
+function mergeConfig(base: RAGConfig, patch: DeepPartial<RAGConfig> | null): RAGConfig {
+  if (!patch) return base;
+  return {
+    ...base,
+    ...patch,
+    models: { ...base.models, ...(patch.models || {}) } as ModelConfig,
+    retrieval: { ...base.retrieval, ...(patch.retrieval || {}) } as RAGConfig["retrieval"],
+    fusion: { ...base.fusion, ...(patch.fusion || {}) } as RAGConfig["fusion"],
+    reranker: { ...base.reranker, ...(patch.reranker || {}) } as RAGConfig["reranker"],
+    context: { ...base.context, ...(patch.context || {}) } as RAGConfig["context"],
+    indexing: { ...base.indexing, ...(patch.indexing || {}) } as RAGConfig["indexing"],
+  } as RAGConfig;
+}
+
+// Console tuning survives restarts via `.rag/config.json` (keys excluded).
+let activeConfig: RAGConfig = mergeConfig(getDefaultRAGConfig(), stateStore.loadConfigSync());
 
 export function getRAGConfig(): RAGConfig {
-  if (!activeConfig.models.apiKey) {
-    activeConfig.models.apiKey =
-      process.env.LOCAL_LLM_API_KEY ||
-      "sk-unsloth-f4823b690552e8812ba5884dc4cccb26";
-  }
   return activeConfig;
 }
 
 export function updateRAGConfig(patch: DeepPartial<RAGConfig>): RAGConfig {
-  activeConfig = {
-    ...activeConfig,
-    ...patch,
-    models: { ...activeConfig.models, ...(patch.models || {}) } as ModelConfig,
-    retrieval: { ...activeConfig.retrieval, ...(patch.retrieval || {}) } as RAGConfig["retrieval"],
-    fusion: { ...activeConfig.fusion, ...(patch.fusion || {}) } as RAGConfig["fusion"],
-    reranker: { ...activeConfig.reranker, ...(patch.reranker || {}) } as RAGConfig["reranker"],
-    context: { ...activeConfig.context, ...(patch.context || {}) } as RAGConfig["context"],
-    indexing: { ...activeConfig.indexing, ...(patch.indexing || {}) } as RAGConfig["indexing"],
-  };
+  activeConfig = mergeConfig(activeConfig, patch);
+  // Answers cached under the previous configuration are no longer valid.
+  queryCache.clear();
+  void stateStore.saveConfig(activeConfig);
   return activeConfig;
 }

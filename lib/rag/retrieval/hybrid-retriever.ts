@@ -36,31 +36,66 @@ export interface HybridRetrievalResult {
 }
 
 export class HybridRetriever {
-  private denseRetriever: DenseRetriever;
-  private reranker: IRerankerProvider;
+  private vectorStore: IVectorStore;
+  private injectedEmbeddingProvider: IEmbeddingProvider | null;
+  private injectedReranker: IRerankerProvider | null;
+  private embeddingProvider: IEmbeddingProvider | null = null;
+  private embeddingProviderKey = "";
+  private reranker: IRerankerProvider | null = null;
+  private rerankerKey = "";
 
   constructor(
     vectorStore?: IVectorStore,
     embeddingProvider?: IEmbeddingProvider,
     reranker?: IRerankerProvider
   ) {
+    this.vectorStore = vectorStore || defaultVectorStore;
+    this.injectedEmbeddingProvider = embeddingProvider || null;
+    this.injectedReranker = reranker || null;
+  }
+
+  /** Rebuilds derived providers when model settings change (admin console tuning). */
+  private resolveEmbeddingProvider(): IEmbeddingProvider {
+    if (this.injectedEmbeddingProvider) return this.injectedEmbeddingProvider;
     const config = getRAGConfig();
-    const vStore = vectorStore || defaultVectorStore;
-    const emb =
-      embeddingProvider ||
-      new OpenAICompatibleEmbeddingProvider({
+    const key = [
+      config.models.embeddingBaseUrl,
+      config.models.embeddingModel,
+      config.models.embeddingDimension,
+    ].join("|");
+    if (!this.embeddingProvider || this.embeddingProviderKey !== key) {
+      this.embeddingProvider = new OpenAICompatibleEmbeddingProvider({
         baseUrl: config.models.embeddingBaseUrl,
         modelName: config.models.embeddingModel,
         dimension: config.models.embeddingDimension,
       });
+      this.embeddingProviderKey = key;
+    }
+    return this.embeddingProvider;
+  }
 
-    this.denseRetriever = new DenseRetriever(vStore, emb);
-    this.reranker =
-      reranker ||
-      new QwenRerankerProvider({
+  private resolveReranker(): IRerankerProvider {
+    if (this.injectedReranker) return this.injectedReranker;
+    const config = getRAGConfig();
+    const key = [
+      config.models.rerankerBaseUrl,
+      config.models.rerankerModel,
+      String(config.reranker.batchSize),
+    ].join("|");
+    if (!this.reranker || this.rerankerKey !== key) {
+      this.reranker = new QwenRerankerProvider({
         baseUrl: config.models.rerankerBaseUrl,
         modelName: config.models.rerankerModel,
+        batchSize: config.reranker.batchSize,
       });
+      this.rerankerKey = key;
+    }
+    return this.reranker;
+  }
+
+  /** Query-time embedding health for status reporting (resolves the current provider). */
+  public getEmbeddingHealth() {
+    return this.resolveEmbeddingProvider().getHealth?.() ?? null;
   }
 
   public async retrieve(
@@ -93,8 +128,9 @@ export class HybridRetriever {
 
     // 2. Parallel Dense & BM25 Retrieval across query variants
     const t1 = Date.now();
+    const denseRetriever = new DenseRetriever(this.vectorStore, this.resolveEmbeddingProvider());
     const densePromises = variants.map((v) =>
-      this.denseRetriever.retrieve(v, denseTopK, config.retrieval.denseThreshold)
+      denseRetriever.retrieve(v, denseTopK, config.retrieval.denseThreshold)
     );
     const denseBatches = await Promise.all(densePromises);
     const denseRetrievalMs = Date.now() - t1;
@@ -150,7 +186,7 @@ export class HybridRetriever {
         .slice(0, config.reranker.topCandidates)
         .map((f) => ({ id: f.chunk.id, text: f.chunk.content }));
 
-      const scores = await this.reranker.rerank(
+      const scores = await this.resolveReranker().rerank(
         query.normalizedQuery,
         candidates,
         finalTopK

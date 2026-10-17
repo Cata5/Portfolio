@@ -1,10 +1,12 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { computeContentHash } from "./registry";
+import { isPathSafe } from "../security/path-guard";
 import { parseMarkdownFile } from "./parsers/markdown";
 import { parseJsonFile } from "./parsers/json";
 import { parseCodeFile } from "./parsers/code";
 import { parseTextFile } from "./parsers/text";
+import type { MarkdownChunkerOptions } from "../chunking/markdown-chunker";
 import type { Chunk, Document } from "../types/document";
 
 export interface ScannedFile {
@@ -20,6 +22,7 @@ export interface ScannedFile {
 export async function scanPortfolioFiles(rootDir?: string): Promise<ScannedFile[]> {
   const cwd = rootDir || process.cwd();
   const scanned: ScannedFile[] = [];
+  const missing: string[] = [];
 
   const candidatePaths = [
     // Markdown docs
@@ -37,6 +40,9 @@ export async function scanPortfolioFiles(rootDir?: string): Promise<ScannedFile[
     { rel: "content/activities.json", title: "Activities & Extracurriculars", type: "json" as const },
     { rel: "content/certifications.json", title: "Certifications & Credentials", type: "json" as const },
     { rel: "content/copy.json", title: "Portfolio Copy & Text Content", type: "json" as const },
+    { rel: "content/roadmap.json", title: "Learning Roadmap & Goals", type: "json" as const },
+    { rel: "content/sections.json", title: "Portfolio Sections Content", type: "json" as const },
+    { rel: "content/offline-themes.json", title: "Offline Theme Definitions", type: "json" as const },
 
     // Data TS files
     { rel: "data/projects.ts", title: "Projects Data Model & Helpers", type: "code" as const },
@@ -44,6 +50,11 @@ export async function scanPortfolioFiles(rootDir?: string): Promise<ScannedFile[
     { rel: "data/skills.ts", title: "Skills Data Types & Helpers", type: "code" as const },
     { rel: "data/journey.ts", title: "Journey Timeline Types", type: "code" as const },
     { rel: "data/ml.ts", title: "Machine Learning Types", type: "code" as const },
+    { rel: "data/activities.ts", title: "Activities & Extracurricular Data", type: "code" as const },
+    { rel: "data/certifications.ts", title: "Certifications Data", type: "code" as const },
+    { rel: "data/roadmap.ts", title: "Roadmap Data & Milestones", type: "code" as const },
+    { rel: "data/sections.ts", title: "Portfolio Sections Registry", type: "code" as const },
+    { rel: "data/project-extras.ts", title: "Extended Project Details & Case Studies", type: "code" as const },
 
     // Core application architecture
     { rel: "next.config.ts", title: "Next.js Build & Export Configuration", type: "code" as const },
@@ -57,6 +68,10 @@ export async function scanPortfolioFiles(rootDir?: string): Promise<ScannedFile[
 
   for (const item of candidatePaths) {
     const fullPath = path.join(/* turbopackIgnore: true */ cwd, item.rel);
+    if (!isPathSafe(item.rel, cwd)) {
+      missing.push(`${item.rel} (unsafe path)`);
+      continue;
+    }
     try {
       const content = await fs.readFile(/* turbopackIgnore: true */ fullPath, "utf8");
       const hash = computeContentHash(content);
@@ -72,14 +87,24 @@ export async function scanPortfolioFiles(rootDir?: string): Promise<ScannedFile[
         fileType: item.type,
       });
     } catch {
-      // File not found or not accessible, skip gracefully
+      // File not found or not accessible: record it so misconfiguration is visible.
+      missing.push(item.rel);
     }
+  }
+
+  if (missing.length > 0) {
+    console.warn(
+      `[RAG scanner] ${missing.length} configured file(s) missing or skipped: ${missing.join(", ")}`
+    );
   }
 
   return scanned;
 }
 
-export function parseScannedFile(scanned: ScannedFile): { document: Document; chunks: Chunk[] } {
+export function parseScannedFile(
+  scanned: ScannedFile,
+  options?: MarkdownChunkerOptions
+): { document: Document; chunks: Chunk[] } {
   switch (scanned.fileType) {
     case "markdown":
       return parseMarkdownFile(
@@ -87,7 +112,8 @@ export function parseScannedFile(scanned: ScannedFile): { document: Document; ch
         scanned.filePath,
         scanned.content,
         scanned.hash,
-        scanned.title
+        scanned.title,
+        options
       );
     case "json":
       return parseJsonFile(
@@ -95,7 +121,8 @@ export function parseScannedFile(scanned: ScannedFile): { document: Document; ch
         scanned.filePath,
         scanned.content,
         scanned.hash,
-        scanned.title
+        scanned.title,
+        options
       );
     case "code":
       return parseCodeFile(

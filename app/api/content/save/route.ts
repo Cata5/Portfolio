@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
 import { extractBearerToken, verifyAdminAuth } from "@/lib/auth-guard";
+import { queryCache } from "@/lib/rag/caching/query-cache";
 
 const VALID_STORES: Record<string, string> = {
   site: "site.json",
@@ -63,6 +64,9 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+
+    // Content changed on disk: cached answers referencing it are stale.
+    queryCache.clear();
 
     return NextResponse.json({ success: true, saved });
   } catch (err) {

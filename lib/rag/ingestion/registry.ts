@@ -76,19 +76,6 @@ export class DocumentRegistry {
     this.entries.clear();
     this.documents.clear();
   }
-
-  public serialize(): { entries: DocumentRegistryEntry[] } {
-    return {
-      entries: Array.from(this.entries.values()),
-    };
-  }
-
-  public loadEntries(entries: DocumentRegistryEntry[]): void {
-    this.entries.clear();
-    for (const e of entries) {
-      this.entries.set(e.id, e);
-    }
-  }
 }
 
 export const documentRegistry = new DocumentRegistry();

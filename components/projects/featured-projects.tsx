@@ -7,9 +7,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Layers,
-  Monitor,
-  Smartphone,
-  Tv,
 } from "lucide-react";
 
 import { Container } from "@/components/container";
@@ -169,11 +166,7 @@ export function FeaturedProjects() {
                   </span>
                 </Editable>
                 {f.live && (
-                  <span className="hidden items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider text-saffron sm:inline-flex">
-                    <span
-                      aria-hidden="true"
-                      className="size-1.5 animate-pulse rounded-full bg-saffron"
-                    />
+                  <span className="hidden items-center font-mono text-[9px] uppercase tracking-wider text-saffron sm:inline-flex">
                     building
                   </span>
                 )}
@@ -233,7 +226,6 @@ export function FeaturedProjects() {
                 >
                   {runtimes.map((r, i) => {
                     const selected = i === index;
-                    const Icon = r.id === "android" ? Smartphone : r.id === "tv" ? Tv : Monitor;
                     return (
                       <button
                         key={r.id}
@@ -248,16 +240,6 @@ export function FeaturedProjects() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
-                            <div
-                              className={cn(
-                                "flex size-7 items-center justify-center rounded-lg border transition-colors",
-                                selected
-                                  ? "border-signal bg-signal/20 text-signal"
-                                  : "border-border/60 bg-muted/60 dark:bg-neutral-900/60 text-muted-foreground group-hover:text-foreground",
-                              )}
-                            >
-                              <Icon className="size-3.5" />
-                            </div>
                             <Editable
                               path={vortexIndex !== -1 ? `projects.${vortexIndex}.runtimes.${i}.label` : `projects.0.runtimes.${i}.label`}
                               label={`Runtime ${i + 1} Tab Name`}
@@ -274,13 +256,6 @@ export function FeaturedProjects() {
                               </span>
                             </Editable>
                           </div>
-
-                          {selected && (
-                            <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-signal font-semibold">
-                              <span className="size-1.5 rounded-full bg-signal" />
-                              active
-                            </span>
-                          )}
                         </div>
 
                         {selected && r.description && (

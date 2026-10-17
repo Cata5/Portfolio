@@ -150,6 +150,21 @@ export function chunkMarkdownDocument(
   // Heading hierarchy stack: { level, text, slug, path }
   const headingStack: { level: number; text: string }[] = [];
 
+  // Section tracking: each heading opens a section; flushed chunks feed its
+  // content so parent-context expansion has something to expand with.
+  let currentSection: Section | null = null;
+
+  function slugifyHeading(text: string): string {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
+  function closeSection() {
+    if (currentSection && currentSection.content.trim().length > 0) {
+      sections.push(currentSection);
+    }
+    currentSection = null;
+  }
+
   function getCurrentHeadingPath(): string[] {
     return headingStack.map((h) => h.text);
   }
@@ -212,6 +227,11 @@ export function chunkMarkdownDocument(
       metadata,
     });
 
+    // Feed the current heading section for parent-context expansion
+    if (currentSection) {
+      currentSection.content += (currentSection.content ? "\n\n" : "") + cleanContent;
+    }
+
     chunkIndex++;
 
     // Retain overlap if last block was a paragraph
@@ -242,6 +262,19 @@ export function chunkMarkdownDocument(
       if (currentChunkTokens >= targetTokens * 0.6) {
         flushChunk();
       }
+
+      // Open a fresh section for the heading that just started
+      closeSection();
+      const headingPath = getCurrentHeadingPath();
+      currentSection = {
+        heading: {
+          level,
+          text: block.headingText || "",
+          slug: slugifyHeading(block.headingText || ""),
+          path: headingPath,
+        },
+        content: "",
+      };
 
       currentChunkBlocks.push(block);
       currentChunkTokens += estimateTokenCount(block.raw);
@@ -297,6 +330,7 @@ export function chunkMarkdownDocument(
   }
 
   flushChunk();
+  closeSection();
 
   // Patch totalChunks in all chunk metadata
   const total = chunks.length;

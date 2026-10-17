@@ -20,29 +20,51 @@ export interface IngestionResult {
 
 export class IngestionPipeline {
   private vectorStore: IVectorStore;
-  private embeddingProvider: IEmbeddingProvider;
+  private embeddingProvider: IEmbeddingProvider | null = null;
+  private embeddingProviderKey = "";
+  private injectedEmbeddingProvider: IEmbeddingProvider | null;
+  /** Wall-clock start of the most recent sync; 0 until one has run. */
+  private lastSyncAt = 0;
+  /** Shared in-flight auto re-sync so concurrent queries trigger only one. */
+  private autoSyncPromise: Promise<IngestionResult | null> | null = null;
 
   constructor(
     vectorStore?: IVectorStore,
     embeddingProvider?: IEmbeddingProvider
   ) {
     this.vectorStore = vectorStore || defaultVectorStore;
+    this.injectedEmbeddingProvider = embeddingProvider || null;
+  }
+
+  /** Rebuilds the provider when model settings change (admin console tuning). */
+  private resolveEmbeddingProvider(): IEmbeddingProvider {
+    if (this.injectedEmbeddingProvider) return this.injectedEmbeddingProvider;
     const config = getRAGConfig();
-    this.embeddingProvider =
-      embeddingProvider ||
-      new OpenAICompatibleEmbeddingProvider({
+    const key = [
+      config.models.embeddingBaseUrl,
+      config.models.embeddingModel,
+      config.models.embeddingDimension,
+      config.indexing.enableEmbeddingCache ? "cache" : "nocache",
+    ].join("|");
+    if (!this.embeddingProvider || this.embeddingProviderKey !== key) {
+      this.embeddingProvider = new OpenAICompatibleEmbeddingProvider({
         baseUrl: config.models.embeddingBaseUrl,
         modelName: config.models.embeddingModel,
         dimension: config.models.embeddingDimension,
+        cacheEnabled: config.indexing.enableEmbeddingCache,
       });
+      this.embeddingProviderKey = key;
+    }
+    return this.embeddingProvider;
   }
 
   public async indexDocument(
     scanned: ScannedFile,
     forceReindex = false
   ): Promise<{ document: Document; chunkCount: number; skipped: boolean }> {
+    const config = getRAGConfig();
     const isChanged = documentRegistry.hasChanged(scanned.id, scanned.hash);
-    if (!isChanged && !forceReindex) {
+    if (!forceReindex && config.indexing.enableIncremental && !isChanged) {
       const existingDoc = documentRegistry.getDocument(scanned.id);
       if (existingDoc) {
         return { document: existingDoc, chunkCount: existingDoc.chunks.length, skipped: true };
@@ -53,8 +75,11 @@ export class IngestionPipeline {
     await this.vectorStore.deleteByDocumentId(scanned.id);
     lexicalIndex.deleteDocument(scanned.id);
 
-    // 2. Parse and chunk
-    const { document, chunks } = parseScannedFile(scanned);
+    // 2. Parse and chunk (chunk size/overlap come from the context budget config)
+    const { document, chunks } = parseScannedFile(scanned, {
+      targetChunkTokens: config.context.targetChunkTokens,
+      overlapTokens: config.context.chunkOverlapTokens,
+    });
 
     // 3. Register parent context
     parentChildManager.registerParent(
@@ -64,9 +89,18 @@ export class IngestionPipeline {
       document.sections?.map((s) => ({ heading: s.heading.text, content: s.content }))
     );
 
-    // 4. Batch embeddings
+    // 4. Batch embeddings (batch size from `indexing.batchSize`)
     const chunkTexts = chunks.map((c) => c.content);
-    const vectors = await this.embeddingProvider.embedBatch(chunkTexts);
+    const vectors = await this.resolveEmbeddingProvider().embedBatch(
+      chunkTexts,
+      config.indexing.batchSize
+    );
+
+    if (vectors.length !== chunks.length || vectors.some((v) => !Array.isArray(v) || v.length === 0)) {
+      throw new Error(
+        `Embedding batch returned ${vectors.length} valid vectors for ${chunks.length} chunks`
+      );
+    }
 
     // 5. Build vector records
     const vectorRecords: VectorRecord[] = chunks.map((chunk, idx) => ({
@@ -100,6 +134,9 @@ export class IngestionPipeline {
   ): Promise<IngestionResult> {
     const startTime = Date.now();
     const scannedFiles = await scanPortfolioFiles(rootDir);
+    // Recorded from the sync's start time so edits landing *during* this
+    // sync still trip the next staleness probe.
+    this.lastSyncAt = startTime;
 
     let indexedCount = 0;
     let skippedCount = 0;
@@ -142,6 +179,34 @@ export class IngestionPipeline {
       errors,
       durationMs: Date.now() - startTime,
     };
+  }
+
+  public getLastSyncAt(): number {
+    return this.lastSyncAt;
+  }
+
+  /**
+   * Brings the index in step with the sources before a query. The scan is a
+   * cheap read+hash pass (~20ms over the whole knowledge base), and unchanged
+   * documents are skipped by hash, so re-embedding only happens for files
+   * that actually changed. Concurrent callers share one in-flight run, and
+   * failures never propagate to the query that triggered the check.
+   */
+  public async syncIfChanged(rootDir?: string): Promise<IngestionResult | null> {
+    const cwd = rootDir || process.cwd();
+    if (this.autoSyncPromise) return this.autoSyncPromise;
+    this.autoSyncPromise = this.syncPortfolio(cwd, false)
+      .catch((err: unknown) => {
+        console.warn(
+          "[RAG ingestion] Auto re-sync failed:",
+          err instanceof Error ? err.message : err
+        );
+        return null;
+      })
+      .finally(() => {
+        this.autoSyncPromise = null;
+      });
+    return this.autoSyncPromise;
   }
 }
 

@@ -48,12 +48,6 @@ function StageNode({ stage }: { stage: RoadmapStage }) {
           "border-border/70 bg-background/70 text-muted-foreground",
       )}
     >
-      {current && (
-        <span
-          aria-hidden="true"
-          className="absolute -inset-1 animate-pulse rounded-full border border-saffron/40"
-        />
-      )}
       {done ? (
         <Check className="size-3.5" aria-hidden="true" />
       ) : (
@@ -84,16 +78,10 @@ function StageCard({ stage, stageIndex }: { stage: RoadmapStage; stageIndex: num
         </span>
         <span
           className={cn(
-            "inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider",
+            "inline-flex items-center font-mono text-[9px] uppercase tracking-wider",
             meta.className,
           )}
         >
-          {current && (
-            <span
-              aria-hidden="true"
-              className="size-1.5 animate-pulse rounded-full bg-current"
-            />
-          )}
           {meta.label}
         </span>
       </div>
@@ -172,11 +160,7 @@ export function LlmShowcase({ project }: { project: Project }) {
           <Reveal delay={0.15}>
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
               <Editable path="roadmap.statusLabel" label="Status Label" inline>
-                <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-saffron">
-                  <span
-                    aria-hidden="true"
-                    className="size-1.5 animate-pulse rounded-full bg-saffron"
-                  />
+                <span className="inline-flex items-center font-mono text-[10px] uppercase tracking-[0.16em] text-saffron">
                   {currentRoadmap.statusLabel}
                 </span>
               </Editable>

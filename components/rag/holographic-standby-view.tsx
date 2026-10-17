@@ -5,18 +5,10 @@ import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
   Send,
-  Radio,
-  Cpu,
-  Layers,
-  Code,
-  FolderGit2,
-  Mail,
   ChevronRight,
   ChevronDown,
   AlertTriangle,
   RefreshCw,
-  Terminal,
-  FileText,
 } from "lucide-react";
 import { highlightAndScrollTo } from "./navigation-highlighter";
 import { CLogo } from "./c-logo";
@@ -40,22 +32,18 @@ const TOPIC_CHIPS = [
   {
     label: "Flagship: Vortex",
     query: "Tell me about Vortex: how does it work and what technologies are used?",
-    icon: FolderGit2,
   },
   {
     label: "Tech Stack & Skills",
     query: "What are Catalin's primary programming languages and frameworks?",
-    icon: Code,
   },
   {
     label: "Contact & Channels",
     query: "How can I contact Catalin directly?",
-    icon: Mail,
   },
   {
     label: "Machine Learning Lab",
     query: "What machine learning models and experiments has Catalin trained?",
-    icon: Cpu,
   },
 ];
 
@@ -265,7 +253,6 @@ export function HolographicStandbyView() {
       {/* Real-time Embedded Glitch Notification Banner */}
       <div className="border-b border-amber-500/30 bg-amber-500/10 px-3.5 py-2 backdrop-blur-md flex items-center justify-between text-xs font-mono">
         <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-amber-400" />
           <span className="font-bold text-amber-300">
             {themes?.glitchedAssistant?.bannerText || "[ ERROR 0x503: LOCAL LLM UNREACHABLE // READING OFFLINE ARCHIVE ]"}
           </span>
@@ -304,7 +291,6 @@ export function HolographicStandbyView() {
           {/* Preset Topic Chips matching default UI */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left pt-1">
             {TOPIC_CHIPS.map((chip, idx) => {
-              const Icon = chip.icon;
               return (
                 <button
                   key={idx}
@@ -312,14 +298,9 @@ export function HolographicStandbyView() {
                   onClick={() => handleSend(chip.query)}
                   className="group relative flex items-center justify-between rounded-xl border border-border/40 bg-card/30 p-2.5 sm:p-3 backdrop-blur-md transition-all duration-200 hover:border-signal/50 hover:bg-card/50 hover:shadow-lg hover:shadow-signal/10 cursor-pointer"
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="rounded-lg border border-border/50 bg-neutral-950/60 p-1.5 text-muted-foreground transition-colors group-hover:text-signal group-hover:border-signal/30 shrink-0">
-                      <Icon className="size-3.5" />
-                    </div>
-                    <span className="font-mono text-xs font-semibold text-foreground group-hover:text-signal transition-colors">
-                      {chip.label}
-                    </span>
-                  </div>
+                  <span className="font-mono text-xs font-semibold text-foreground group-hover:text-signal transition-colors">
+                    {chip.label}
+                  </span>
                   <ChevronRight className="size-3 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-signal shrink-0" />
                 </button>
               );
@@ -355,7 +336,6 @@ export function HolographicStandbyView() {
                 {/* Glitched Response Title */}
                 {msg.title && (
                   <h3 className="glitch-text-active font-mono font-bold text-sm text-foreground tracking-tight flex items-center gap-2">
-                    <Terminal className="size-3.5 text-signal shrink-0" />
                     <GlitchText text={msg.title} speed={15} />
                   </h3>
                 )}

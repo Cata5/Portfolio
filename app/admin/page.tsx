@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { MainAdminDashboard } from "@/components/admin/admin-dashboard";
-import { TriangleWorld } from "@/components/triangle-world";
+import { AdminConsole } from "@/components/admin/admin-console";
 
 export const metadata: Metadata = {
-  title: "Portfolio Control Center - Admin Console",
-  description: "Unified admin dashboard to configure projects, skills, ML experiments, copy, and AI telemetry across the portfolio.",
+  title: "Console - Admin",
+  description:
+    "Operations console for the portfolio: RAG pipeline, retrieval index, page structure and deployment.",
   robots: {
     index: false,
     follow: false,
@@ -13,11 +13,12 @@ export const metadata: Metadata = {
 
 export default function AdminPage() {
   return (
-    <>
-      <TriangleWorld />
-      <div className="relative z-10">
-        <MainAdminDashboard />
-      </div>
-    </>
+    <div className="relative">
+      <div
+        aria-hidden="true"
+        className="hero-grid pointer-events-none absolute inset-0 -z-10 opacity-30"
+      />
+      <AdminConsole />
+    </div>
   );
 }

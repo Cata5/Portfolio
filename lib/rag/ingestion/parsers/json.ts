@@ -1,4 +1,5 @@
 import { chunkMarkdownDocument } from "../../chunking/markdown-chunker";
+import type { MarkdownChunkerOptions } from "../../chunking/markdown-chunker";
 import { chunkTextDocument } from "../../chunking/text-chunker";
 import type { Chunk, Document } from "../../types/document";
 
@@ -12,7 +13,8 @@ export function parseJsonFile(
   filePath: string,
   rawContent: string,
   hash: string,
-  customTitle?: string
+  customTitle?: string,
+  options?: MarkdownChunkerOptions
 ): { document: Document; chunks: Chunk[] } {
   const fileName = filePath.split(/[/\\]/).pop() || documentId;
   const title = customTitle || fileName.replace(/\.json$/i, "");
@@ -205,7 +207,8 @@ export function parseJsonFile(
     title,
     filePath,
     markdown,
-    hash
+    hash,
+    options
   );
 
   const document: Document = {

@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 
-import { ArrowDown, ArrowUpRight, Layers } from "lucide-react";
+import { ArrowDown, ArrowUpRight } from "lucide-react";
 
 import { Container } from "@/components/container";
 import { CurrentYear } from "@/components/current-year";
@@ -199,7 +199,6 @@ export function Hero() {
       {/* Floating Section Status Badge when Selected in Edit Mode */}
       {isEditing && isSectionSelected && (
         <div className="pointer-events-none absolute right-6 top-6 z-40 inline-flex items-center gap-1.5 rounded-full bg-signal px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-signal-ink shadow-xl shadow-signal/30 animate-in fade-in zoom-in-95 duration-150">
-          <Layers className="size-3" />
           <span>Section: Hero (Editing All Text)</span>
         </div>
       )}
@@ -228,19 +227,15 @@ export function Hero() {
             {/* Verified proof strip — quick technical signals */}
             <div className="hero-proof-strip mt-5 sm:mt-6 flex flex-wrap items-center gap-2 font-mono text-[11px]">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
-                <span className="size-1.5 rounded-full bg-signal shadow-[0_0_8px_var(--signal)]" />
                 UniHack 1st
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
-                <span className="size-1.5 rounded-full bg-signal/80" />
                 2× InfoEducație Silver
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
-                <span className="size-1.5 rounded-full bg-signal/80" />
                 FTC Nationals
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
-                <span className="size-1.5 rounded-full bg-signal/60" />
                 40+ Repos
               </span>
             </div>

@@ -262,10 +262,6 @@ export default async function ProjectPage({
               )}
               <MetaItem label="Status">
                 <span className="inline-flex items-center gap-2">
-                  <span
-                    className="size-1.5 rounded-full bg-signal"
-                    aria-hidden="true"
-                  />
                   {project.status}
                 </span>
               </MetaItem>

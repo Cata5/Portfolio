@@ -144,6 +144,11 @@ export function detectNavigationActions(
   return [];
 }
 
+/** Visitor-facing label for a section anchor, when one is known. */
+export function getSectionLabel(sectionId: string): string | undefined {
+  return PORTFOLIO_SECTIONS.find((s) => s.id === sectionId)?.label;
+}
+
 /**
  * Dynamically gets starter prompt suggestions based on active project data and focus areas.
  */

@@ -6,6 +6,8 @@ export interface RerankerOptions {
   modelName: string;
   apiKey?: string;
   timeoutMs?: number;
+  /** Candidates per HTTP rerank call (config: `reranker.batchSize`). */
+  batchSize?: number;
 }
 
 interface RerankApiResult {
@@ -58,12 +60,21 @@ export class QwenRerankerProvider implements IRerankerProvider {
   private baseUrl: string;
   private apiKey: string;
   private timeoutMs: number;
+  private batchSize: number;
 
   constructor(options: RerankerOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");
     this.modelName = options.modelName || "qwen3-reranker-0.6b";
-    this.apiKey = options.apiKey || "lm-studio";
+    // No fake default key: keyless servers must receive no auth header.
+    this.apiKey = options.apiKey || "";
     this.timeoutMs = options.timeoutMs || 3000;
+    this.batchSize = Math.max(1, options.batchSize || 16);
+  }
+
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+    return headers;
   }
 
   public async healthCheck(): Promise<boolean> {
@@ -71,13 +82,50 @@ export class QwenRerankerProvider implements IRerankerProvider {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), 1500);
       const res = await fetch(`${this.baseUrl}/models`, {
-        headers: { Authorization: `Bearer ${this.apiKey}` },
+        headers: this.getHeaders(),
         signal: controller.signal,
       });
       clearTimeout(id);
       return res.ok;
     } catch {
       return false;
+    }
+  }
+
+  /** One HTTP rerank call; returns null when the endpoint is unavailable. */
+  private async tryHttpRerank(
+    query: string,
+    batch: { id: string; text: string }[],
+    topK: number
+  ): Promise<{ id: string; score: number }[] | null> {
+    try {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), this.timeoutMs);
+
+      const res = await fetch(`${this.baseUrl}/rerank`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          model: this.modelName,
+          query,
+          documents: batch.map((c) => c.text),
+          top_n: topK,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(id);
+
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data.results || !Array.isArray(data.results)) return null;
+      return (data.results as RerankApiResult[])
+        .map((r) => ({
+          id: batch[r.index]?.id || "",
+          score: r.relevance_score ?? r.score ?? 0.5,
+        }))
+        .filter((r) => r.id);
+    } catch {
+      return null;
     }
   }
 
@@ -88,39 +136,22 @@ export class QwenRerankerProvider implements IRerankerProvider {
   ): Promise<{ id: string; score: number }[]> {
     if (candidates.length === 0) return [];
 
-    // 1. Try dedicated rerank endpoint if available (e.g. /v1/rerank or /rerank)
-    try {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), this.timeoutMs);
-
-      const res = await fetch(`${this.baseUrl}/rerank`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: this.modelName,
-          query,
-          documents: candidates.map((c) => c.text),
-          top_n: topK,
-        }),
-        signal: controller.signal,
-      });
-      clearTimeout(id);
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.results && Array.isArray(data.results)) {
-          const results = data.results as RerankApiResult[];
-          return results.map((r) => ({
-            id: candidates[r.index]?.id || "",
-            score: r.relevance_score ?? r.score ?? 0.5,
-          }));
-        }
+    // 1. Try the dedicated rerank endpoint (e.g. /v1/rerank or /rerank),
+    //    split into `batchSize` calls so large candidate pools don't time out.
+    const httpResults: { id: string; score: number }[] = [];
+    let httpOk = true;
+    for (let i = 0; i < candidates.length; i += this.batchSize) {
+      const batch = candidates.slice(i, i + this.batchSize);
+      const batchResults = await this.tryHttpRerank(query, batch, topK);
+      if (batchResults === null) {
+        httpOk = false;
+        break;
       }
-    } catch {
-      // Fallback
+      httpResults.push(...batchResults);
+    }
+    if (httpOk && httpResults.length > 0) {
+      httpResults.sort((a, b) => b.score - a.score);
+      return httpResults.slice(0, topK);
     }
 
     // 2. High-precision semantic cross-encoder fallback

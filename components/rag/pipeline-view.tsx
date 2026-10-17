@@ -1,7 +1,7 @@
 "use client";
 
 import { useRAG } from "./rag-context";
-import { Layers, Search, ShieldCheck, Database, Clock, Filter, ArrowDown } from "lucide-react";
+import { ArrowDown, Layers } from "lucide-react";
 
 export function PipelineView() {
   const { diagnostics, messages } = useRAG();
@@ -38,10 +38,9 @@ export function PipelineView() {
             &ldquo;{latestDiag.query}&rdquo;
           </h2>
         </div>
-        <div className="flex items-center gap-2 font-mono text-[12px] text-muted-foreground">
-          <Clock className="size-3.5 text-signal" />
-          <span>Total Latency: {timings.totalMs || 0} ms</span>
-        </div>
+        <span className="font-mono text-[12px] text-muted-foreground">
+          Total Latency: {timings.totalMs || 0} ms
+        </span>
       </div>
 
       {/* Latency Timing Breakdown */}
@@ -72,8 +71,7 @@ export function PipelineView() {
       {/* Step 1: Multi-Query Expansions */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 font-mono text-[12px] font-semibold text-saffron">
-          <Search className="size-4" />
-          <span>1. Query Understanding & Multi-Query Expansion</span>
+          <span>1. Query Understanding &amp; Multi-Query Expansion</span>
         </div>
         <div className="rounded-xl border border-border/50 bg-card/60 p-4 font-mono text-[12px] space-y-1.5">
           <p className="text-muted-foreground">Normalized Query: <span className="text-foreground">{latestDiag.normalizedQuery}</span></p>
@@ -95,8 +93,9 @@ export function PipelineView() {
       {/* Step 2: Dense vs BM25 Top Matches */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 font-mono text-[12px] font-semibold text-signal">
-          <Database className="size-4" />
-          <span>2. Parallel Hybrid Retrieval: Dense (Cosine) & Lexical (BM25)</span>
+          <span>
+            2. Parallel Hybrid Retrieval: Dense (Cosine) &amp; Lexical (BM25)
+          </span>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -143,8 +142,7 @@ export function PipelineView() {
       {/* Step 3: RRF Fusion & Cross-Encoder Reranking */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 font-mono text-[12px] font-semibold text-foreground">
-          <Filter className="size-4 text-signal" />
-          <span>3. Reciprocal Rank Fusion & Cross-Encoder Reranker</span>
+          <span>3. Reciprocal Rank Fusion &amp; Cross-Encoder Reranker</span>
         </div>
 
         <div className="rounded-xl border border-border/50 bg-card/60 p-4">
@@ -183,8 +181,7 @@ export function PipelineView() {
       {/* Step 4: Final Token Budget & Grounded Evidence */}
       <div className="space-y-3 pb-6">
         <div className="flex items-center gap-2 font-mono text-[12px] font-semibold text-signal">
-          <ShieldCheck className="size-4" />
-          <span>4. Token Budget Allocation & Final Grounded Evidence</span>
+          <span>4. Token Budget Allocation &amp; Final Grounded Evidence</span>
         </div>
         <div className="rounded-xl border border-border/50 bg-card/60 p-4 font-mono text-[12px] space-y-2">
           <div className="flex items-center justify-between text-muted-foreground">

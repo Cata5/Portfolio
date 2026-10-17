@@ -1,20 +1,55 @@
 "use client";
 
 import { useRAG } from "./rag-context";
-import { RefreshCw, CheckCircle2, Search, FileText } from "lucide-react";
+import { RefreshCw, CheckCircle2, Search, Trash2, AlertTriangle } from "lucide-react";
 import { useState, useMemo } from "react";
 
 export function KBView() {
-  const { documents, triggerReindex, status } = useRAG();
+  const { documents, triggerReindex, deleteDocument, status } = useRAG();
   const [isReindexing, setIsReindexing] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
   const [searchFilter, setSearchFilter] = useState("");
 
   const handleReindex = async () => {
     setIsReindexing(true);
+    setActionMessage(null);
     try {
-      await triggerReindex();
+      const outcome = await triggerReindex();
+      if (outcome.ok) {
+        const indexed = Number(outcome.data?.indexedCount ?? 0);
+        const skipped = Number(outcome.data?.skippedCount ?? 0);
+        const chunks = Number(outcome.data?.totalChunks ?? 0);
+        setActionMessage({
+          type: "success",
+          text: `Re-index complete: ${indexed} indexed, ${skipped} unchanged, ${chunks} chunks.`,
+        });
+      } else {
+        setActionMessage({ type: "error", text: outcome.error || "Re-index failed." });
+      }
     } finally {
       setIsReindexing(false);
+      setTimeout(() => setActionMessage(null), 8000);
+    }
+  };
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!window.confirm(`Remove "${title}" from the knowledge base? The source file stays on disk.`)) {
+      return;
+    }
+    setDeletingId(id);
+    setActionMessage(null);
+    try {
+      const outcome = await deleteDocument(id);
+      if (!outcome.ok) {
+        setActionMessage({ type: "error", text: outcome.error || "Delete failed." });
+      }
+    } finally {
+      setDeletingId(null);
+      setTimeout(() => setActionMessage(null), 8000);
     }
   };
 
@@ -54,6 +89,23 @@ export function KBView() {
           {isReindexing ? "Re-indexing..." : "Re-index All"}
         </button>
       </div>
+
+      {actionMessage && (
+        <div
+          className={`flex items-center gap-2.5 rounded-xl border p-3.5 font-mono text-xs ${
+            actionMessage.type === "success"
+              ? "border-green-500/50 bg-green-950/40 text-green-300"
+              : "border-destructive/50 bg-destructive/10 text-destructive"
+          }`}
+        >
+          {actionMessage.type === "success" ? (
+            <CheckCircle2 className="size-4 shrink-0" />
+          ) : (
+            <AlertTriangle className="size-4 shrink-0" />
+          )}
+          <span className="leading-snug">{actionMessage.text}</span>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -106,12 +158,13 @@ export function KBView() {
                 <th className="p-3 font-semibold text-center">Chunks</th>
                 <th className="p-3 font-semibold text-center">Tokens</th>
                 <th className="p-3 font-semibold text-right">Status</th>
+                <th className="p-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30 bg-card/30">
               {filteredDocs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
                     No documents matching &ldquo;{searchFilter}&rdquo;
                   </td>
                 </tr>
@@ -124,10 +177,7 @@ export function KBView() {
                       </span>
                     </td>
                     <td className="p-3 font-medium text-foreground">
-                      <div className="flex items-center gap-1.5">
-                        <FileText className="size-3 text-signal shrink-0" />
-                        <span>{doc.title}</span>
-                      </div>
+                      {doc.title}
                     </td>
                     <td className="p-3 text-muted-foreground truncate max-w-[200px]" title={doc.filePath}>
                       {doc.filePath}
@@ -135,9 +185,30 @@ export function KBView() {
                     <td className="p-3 text-center text-muted-foreground">{doc.chunkCount}</td>
                     <td className="p-3 text-center text-muted-foreground">~{doc.tokenCount}</td>
                     <td className="p-3 text-right">
-                      <span className="inline-flex items-center gap-1 text-signal text-[10px]">
-                        <CheckCircle2 className="size-3" /> indexed
-                      </span>
+                      {doc.status === "failed" ? (
+                        <span
+                          className="text-[10px] text-destructive"
+                          title={doc.error || "Indexing failed"}
+                        >
+                          failed
+                        </span>
+                      ) : doc.status === "stale" || doc.status === "pending" ? (
+                        <span className="text-[10px] text-saffron">{doc.status}</span>
+                      ) : (
+                        <span className="text-[10px] text-signal">{doc.status}</span>
+                      )}
+                    </td>
+                    <td className="p-3 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(doc.id, doc.title)}
+                        disabled={deletingId === doc.id}
+                        title="Remove from knowledge base"
+                        className="inline-flex items-center gap-1 rounded border border-border/60 px-2 py-1 text-[10px] text-muted-foreground transition-colors hover:border-destructive hover:text-destructive disabled:opacity-50 cursor-pointer"
+                      >
+                        <Trash2 className={`size-3 ${deletingId === doc.id ? "animate-pulse" : ""}`} />
+                        {deletingId === doc.id ? "Removing..." : "Remove"}
+                      </button>
                     </td>
                   </tr>
                 ))

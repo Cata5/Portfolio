@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
+import { useEditor } from "@/components/editor/editor-context";
 import { isGhPages, withBasePath } from "@/lib/base-path";
 import type { ValidatedCitation } from "@/lib/rag/citations/validator";
 import type { GroundedEvidence, RetrievalDiagnostics } from "@/lib/rag/types/retrieval";
@@ -37,6 +38,13 @@ export interface SystemStatusData {
   };
 }
 
+/** Outcome of an admin-only mutation; `error` is safe to display. */
+export interface AdminActionOutcome {
+  ok: boolean;
+  error?: string;
+  data?: Record<string, unknown>;
+}
+
 interface RAGContextType {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -52,14 +60,16 @@ interface RAGContextType {
   diagnostics: RetrievalDiagnostics | null;
   status: SystemStatusData | null;
   config: RAGConfig | null;
-  updateConfig: (patch: DeepPartial<RAGConfig>) => Promise<void>;
+  updateConfig: (patch: DeepPartial<RAGConfig>) => Promise<AdminActionOutcome>;
   fetchStatus: () => Promise<void>;
   fetchConfig: () => Promise<void>;
   documents: DocumentRegistryEntry[];
   refreshDocuments: () => Promise<void>;
-  triggerReindex: () => Promise<void>;
+  triggerReindex: () => Promise<AdminActionOutcome>;
+  deleteDocument: (id: string) => Promise<AdminActionOutcome>;
   evalComparison: BenchmarkComparison | null;
-  runEvaluation: () => Promise<void>;
+  runEvaluation: () => Promise<AdminActionOutcome>;
+  evalError: string | null;
   isEvaluating: boolean;
   isStreaming: boolean;
 }
@@ -67,6 +77,7 @@ interface RAGContextType {
 const RAGContext = createContext<RAGContextType | null>(null);
 
 export function RAGProvider({ children }: { children: React.ReactNode }) {
+  const { authToken } = useEditor();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"chat" | "pipeline" | "source" | "eval" | "kb" | "settings">("chat");
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
@@ -85,8 +96,49 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<RAGConfig | null>(null);
   const [documents, setDocuments] = useState<DocumentRegistryEntry[]>([]);
   const [evalComparison, setEvalComparison] = useState<BenchmarkComparison | null>(null);
+  const [evalError, setEvalError] = useState<string | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+
+  // sendMessage is long-lived; a ref keeps it from reading a stale `messages` array.
+  const messagesRef = useRef(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  /** Admin-only fetch with bearer auth and parsed, displayable errors. */
+  const adminFetch = useCallback(
+    async (path: string, init: RequestInit = {}): Promise<AdminActionOutcome> => {
+      try {
+        const headers = new Headers(init.headers);
+        if (init.body && !headers.has("Content-Type")) {
+          headers.set("Content-Type", "application/json");
+        }
+        if (authToken) headers.set("Authorization", `Bearer ${authToken}`);
+        const res = await fetch(withBasePath(path), { ...init, headers });
+        let data: Record<string, unknown> | undefined;
+        try {
+          data = (await res.json()) as Record<string, unknown>;
+        } catch {
+          // Non-JSON response (e.g. static export stub)
+        }
+        if (!res.ok) {
+          const error =
+            typeof data?.error === "string"
+              ? data.error
+              : `Request failed (HTTP ${res.status})`;
+          return { ok: false, error, data };
+        }
+        return { ok: true, data };
+      } catch (err) {
+        return {
+          ok: false,
+          error: err instanceof Error ? err.message : "Network error",
+        };
+      }
+    },
+    [authToken]
+  );
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -124,48 +176,62 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const triggerReindex = useCallback(async () => {
-    try {
-      const res = await fetch(withBasePath("/api/rag/reindex"), { method: "POST" });
-      if (res.ok) {
+  const triggerReindex = useCallback(async (): Promise<AdminActionOutcome> => {
+    const outcome = await adminFetch("/api/rag/reindex", { method: "POST" });
+    if (outcome.ok) {
+      await refreshDocuments();
+      await fetchStatus();
+    }
+    return outcome;
+  }, [adminFetch, refreshDocuments, fetchStatus]);
+
+  const updateConfig = useCallback(
+    async (patch: DeepPartial<RAGConfig>): Promise<AdminActionOutcome> => {
+      // POST-only sibling of GET /api/rag/config — the read route must stay
+      // force-static for the GitHub Pages export, which blanks request headers.
+      const outcome = await adminFetch("/api/rag/config/update", {
+        method: "POST",
+        body: JSON.stringify(patch),
+      });
+      if (outcome.ok) {
+        setConfig(outcome.data?.config as RAGConfig);
+      }
+      return outcome;
+    },
+    [adminFetch]
+  );
+
+  const deleteDocument = useCallback(
+    async (id: string): Promise<AdminActionOutcome> => {
+      // DELETE-only sibling of GET /api/rag/documents (see config/update).
+      const outcome = await adminFetch("/api/rag/documents/delete", {
+        method: "DELETE",
+        body: JSON.stringify({ id }),
+      });
+      if (outcome.ok) {
         await refreshDocuments();
         await fetchStatus();
       }
-    } catch {
-      // Ignore
-    }
-  }, [refreshDocuments, fetchStatus]);
+      return outcome;
+    },
+    [adminFetch, refreshDocuments, fetchStatus]
+  );
 
-  const updateConfig = useCallback(async (patch: DeepPartial<RAGConfig>) => {
-    try {
-      const res = await fetch(withBasePath("/api/rag/config"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patch),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setConfig(data.config);
-      }
-    } catch {
-      // Ignore
-    }
-  }, []);
-
-  const runEvaluation = useCallback(async () => {
+  const runEvaluation = useCallback(async (): Promise<AdminActionOutcome> => {
     setIsEvaluating(true);
+    setEvalError(null);
     try {
-      const res = await fetch(withBasePath("/api/rag/eval"), { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        setEvalComparison(data.comparison);
+      const outcome = await adminFetch("/api/rag/eval", { method: "POST" });
+      if (outcome.ok) {
+        setEvalComparison(outcome.data?.comparison as BenchmarkComparison);
+      } else {
+        setEvalError(outcome.error || "Evaluation failed");
       }
-    } catch (err) {
-      console.error("Eval failed:", err);
+      return outcome;
     } finally {
       setIsEvaluating(false);
     }
-  }, []);
+  }, [adminFetch]);
 
   // Keyboard shortcut listener: ⌘Shift+J / Ctrl+Shift+J (plain Ctrl+J is the
   // browser's "open downloads" shortcut — don't hijack it)
@@ -222,7 +288,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
         timestamp: Date.now(),
       };
 
-      const currentHistory = messages
+      const currentHistory = messagesRef.current
         .filter((m) => m.id !== "welcome" && m.content.trim())
         .slice(-6)
         .map((m) => ({ role: m.role, content: m.content }));
@@ -243,7 +309,14 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (!res.ok || !res.body) {
-          throw new Error("Failed to connect to RAG stream");
+          let message = `The assistant is unavailable (HTTP ${res.status}).`;
+          try {
+            const errData = await res.json();
+            if (typeof errData?.error === "string") message = errData.error;
+          } catch {
+            // Keep the generic message
+          }
+          throw new Error(message);
         }
 
         const reader = res.body.getReader();
@@ -318,13 +391,17 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
             }
           }
         }
-      } catch {
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Sorry, an error occurred while generating the answer. Please try again.";
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantMsgId
               ? {
                   ...msg,
-                  content: "Sorry, an error occurred while generating the answer. Please try again.",
+                  content: message,
                   isStreaming: false,
                 }
               : msg
@@ -371,8 +448,10 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
         documents,
         refreshDocuments,
         triggerReindex,
+        deleteDocument,
         evalComparison,
         runEvaluation,
+        evalError,
         isEvaluating,
         isStreaming,
       }}

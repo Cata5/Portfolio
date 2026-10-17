@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   ChevronUp,
   ChevronDown,
@@ -10,14 +11,10 @@ import {
   Trash2,
   Plus,
   Sliders,
-  Sparkles,
-  GripVertical,
   Check,
   X,
   ExternalLink,
   Layers,
-  ArrowRight,
-  Info,
 } from "lucide-react";
 import { useEditor } from "@/components/editor/editor-context";
 import {
@@ -26,11 +23,7 @@ import {
   SECTION_TYPE_META,
 } from "@/data/sections";
 
-interface SectionsManagerProps {
-  onNavigateTab?: (tab: string) => void;
-}
-
-export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
+export function SectionsManager() {
   const {
     content,
     moveSection,
@@ -110,14 +103,9 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
       {/* Top Banner & Stats */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-5">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-signal/15 text-signal ring-1 ring-signal/30">
-              <Layers className="size-4" />
-            </div>
-            <h2 className="text-base font-bold tracking-tight text-foreground">
-              Page Sections & Structure Builder
-            </h2>
-          </div>
+          <h2 className="text-base font-bold tracking-tight text-foreground">
+            Page Sections & Structure Builder
+          </h2>
           <p className="text-xs text-muted-foreground mt-1">
             Drag, reorder, toggle, duplicate, or customize any section on the homepage. Everything updates dynamically in real-time.
           </p>
@@ -125,7 +113,6 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
 
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 rounded-xl border border-border/50 bg-card/60 px-3 py-1.5 font-mono text-xs">
-            <span className="size-2 rounded-full bg-signal" />
             <span className="text-foreground font-semibold">{activeCount}</span>
             <span className="text-muted-foreground">Visible</span>
             <span className="text-border">|</span>
@@ -176,14 +163,13 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                 key={section.id}
                 className={`group flex flex-col md:flex-row md:items-center justify-between gap-3 rounded-xl border p-3.5 sm:p-4 backdrop-blur-md transition-all ${
                   section.enabled
-                    ? "border-border/60 bg-card/50 hover:border-signal/40 hover:bg-card/70 shadow-sm"
+                    ? "border-border/60 bg-card/40 hover:border-signal/40 hover:bg-card/60 shadow-sm"
                     : "border-border/30 bg-muted/10 opacity-60 hover:opacity-90"
                 }`}
               >
                 {/* Left side: Order number, Type pill, Section Title & ID */}
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex items-center gap-2 text-muted-foreground shrink-0">
-                    <GripVertical className="size-4 opacity-40 group-hover:opacity-100 transition-opacity" />
                     <span className="flex size-6 items-center justify-center rounded-md bg-muted/40 font-mono text-xs font-bold text-foreground">
                       {String(index + 1).padStart(2, "0")}
                     </span>
@@ -324,7 +310,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
           <div
             data-lenis-prevent
             onWheel={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl rounded-2xl border border-border/60 bg-neutral-950 p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-border ring-1 ring-white/10"
+            className="w-full max-w-2xl rounded-2xl border border-border/60 bg-popover p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-border"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border/40 pb-4">
@@ -422,9 +408,8 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
 
               {/* Layout & Styling Options */}
               <div className="rounded-xl border border-border/40 bg-card/30 p-4 space-y-3.5">
-                <h4 className="font-mono text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Sliders className="size-3.5 text-signal" />
-                  <span>Visual Layout & Styling</span>
+                <h4 className="font-mono text-xs font-bold text-foreground uppercase tracking-wider">
+                  Visual Layout & Styling
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -443,7 +428,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                           },
                         })
                       }
-                      className="w-full rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none cursor-pointer"
+                      className="w-full rounded-lg border border-border/60 bg-background px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none cursor-pointer"
                     >
                       <option value="default">Default (Seamless)</option>
                       <option value="glass">Frosted Glass</option>
@@ -467,7 +452,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                           },
                         })
                       }
-                      className="w-full rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none cursor-pointer"
+                      className="w-full rounded-lg border border-border/60 bg-background px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none cursor-pointer"
                     >
                       <option value="none">None (0px)</option>
                       <option value="sm">Small (Compact)</option>
@@ -491,7 +476,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                           },
                         })
                       }
-                      className="w-full rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none cursor-pointer"
+                      className="w-full rounded-lg border border-border/60 bg-background px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none cursor-pointer"
                     >
                       <option value="normal">Normal (1120px)</option>
                       <option value="wide">Wide (1440px)</option>
@@ -530,7 +515,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                             },
                           });
                         }}
-                        className="w-full rounded-lg border border-border/60 bg-neutral-900 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none"
+                        className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none"
                       />
                     </div>
 
@@ -549,7 +534,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                             },
                           })
                         }
-                        className="w-full rounded-lg border border-border/60 bg-neutral-900 px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none cursor-pointer"
+                        className="w-full rounded-lg border border-border/60 bg-background px-2.5 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none cursor-pointer"
                       >
                         <option value="true">Enabled (Show filter chips)</option>
                         <option value="false">Disabled (Show all items)</option>
@@ -583,7 +568,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                           })
                         }
                         placeholder="e.g. Highlights & Announcements"
-                        className="w-full rounded-lg border border-border/60 bg-neutral-900 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none"
+                        className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none"
                       />
                     </div>
 
@@ -604,7 +589,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                           })
                         }
                         placeholder="Write announcement, personal notice, or custom callout text..."
-                        className="w-full rounded-lg border border-border/60 bg-neutral-900 px-3 py-2 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none resize-y"
+                        className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none resize-y"
                       />
                     </div>
 
@@ -626,7 +611,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                             })
                           }
                           placeholder="e.g. Read Blog Post"
-                          className="w-full rounded-lg border border-border/60 bg-neutral-900 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none"
+                          className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none"
                         />
                       </div>
 
@@ -647,7 +632,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                             })
                           }
                           placeholder="https://... or #contact"
-                          className="w-full rounded-lg border border-border/60 bg-neutral-900 px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none"
+                          className="w-full rounded-lg border border-border/60 bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:border-signal/80 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -655,41 +640,21 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
                 </div>
               )}
 
-              {/* Quick Jump to Dedicated Content Tab */}
-              {onNavigateTab && (
-                <div className="rounded-xl border border-signal/30 bg-signal/5 p-3.5 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <Info className="size-4 text-signal shrink-0" />
-                    <p className="text-xs text-foreground font-medium">
-                      Need to add or edit data items for this section?
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const tabMap: Record<string, string> = {
-                        projects: "projects",
-                        "featured-projects": "projects",
-                        activities: "activities",
-                        certifications: "activities",
-                        stack: "skills",
-                        ml: "ml",
-                        journey: "journey",
-                        hero: "copy",
-                        about: "copy",
-                        contact: "profile",
-                      };
-                      const targetTab = tabMap[editingSection.type] || "overview";
-                      setEditingSection(null);
-                      onNavigateTab(targetTab);
-                    }}
-                    className="flex items-center gap-1 font-mono text-xs font-semibold text-signal hover:underline shrink-0 cursor-pointer"
-                  >
-                    <span>Jump to Content Tab</span>
-                    <ArrowRight className="size-3" />
-                  </button>
-                </div>
-              )}
+              {/* Content lives in the inline editor, not the console. */}
+              <div className="flex flex-col gap-3 rounded-xl border border-border/50 bg-card/40 p-3.5 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-foreground">
+                  Headings, items and data for this section are edited in place
+                  on the live page.
+                </p>
+                <Link
+                  href="/"
+                  onClick={() => setEditingSection(null)}
+                  className="flex shrink-0 items-center gap-1 font-mono text-xs font-semibold text-signal hover:underline"
+                >
+                  <span>Open the site</span>
+                  <ExternalLink className="size-3" />
+                </Link>
+              </div>
             </div>
 
             {/* Footer Actions */}
@@ -720,7 +685,7 @@ export function SectionsManager({ onNavigateTab }: SectionsManagerProps) {
           <div
             data-lenis-prevent
             onWheel={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl rounded-2xl border border-border/60 bg-neutral-950 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-border ring-1 ring-white/10"
+            className="w-full max-w-2xl rounded-2xl border border-border/60 bg-popover p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-border"
           >
             <div className="flex items-center justify-between border-b border-border/40 pb-3">
               <div>

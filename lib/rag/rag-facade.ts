@@ -82,37 +82,64 @@ export class RAGFacade {
     options: RAGQueryOptions = {}
   ): Promise<RAGQueryResponse> {
     await this.ensureInitialized();
+    // Bring the index in step with on-disk sources before answering. The
+    // scan is a cheap read+hash pass and unchanged documents are skipped,
+    // so editor / CMS / script edits made while the process has been running
+    // are picked up here. Cached answers are dropped once anything changed.
+    const syncResult = await ingestionPipeline.syncIfChanged(process.cwd());
+    if (syncResult && syncResult.indexedCount > 0) {
+      queryCache.clear();
+    }
     const config = getRAGConfig();
     const isDebug = options.debug ?? config.debug;
 
     const tStart = Date.now();
 
-    // Check query cache (only for isolated initial queries without conversation history)
-    if (!options.skipCache && !isDebug && (!options.history || options.history.length === 0)) {
+    // Check query cache (only for isolated initial queries without conversation history).
+    // Debug callers only accept hits that carry stored diagnostics so the
+    // pipeline view still has a trace to render.
+    if (!options.skipCache && (!options.history || options.history.length === 0)) {
       const cached = queryCache.get(userQuery);
-      if (cached) {
+      if (cached && (!isDebug || cached.diagnostics)) {
+        const diagnostics = isDebug && cached.diagnostics
+          ? { ...cached.diagnostics, cacheHit: true }
+          : cached.diagnostics;
+        const timings: PipelineTimings = {
+          queryUnderstandingMs: 0,
+          denseRetrievalMs: 0,
+          bm25RetrievalMs: 0,
+          fusionMs: 0,
+          rerankingMs: 0,
+          contextAssemblyMs: 0,
+          generationMs: 0,
+          citationValidationMs: 0,
+          totalMs: Date.now() - tStart,
+        };
+        // Stream consumers render from events, not the return value: replay
+        // the cached answer so a cache hit can't produce an empty stream.
+        options.onEvent?.({ type: "delta", content: cached.answer });
+        options.onEvent?.({ type: "citations", citations: cached.sources });
+        if (isDebug && diagnostics) {
+          options.onEvent?.({ type: "debug", diagnostics });
+        }
+        options.onEvent?.({ type: "done", timings });
         return {
           answer: cached.answer,
           citations: cached.citations,
           sources: cached.sources,
-          diagnostics: cached.diagnostics,
-          timings: {
-            queryUnderstandingMs: 0,
-            denseRetrievalMs: 0,
-            bm25RetrievalMs: 0,
-            fusionMs: 0,
-            rerankingMs: 0,
-            contextAssemblyMs: 0,
-            generationMs: 0,
-            citationValidationMs: 0,
-            totalMs: Date.now() - tStart,
-          },
+          diagnostics,
+          timings,
         };
       }
     }
 
     // 1. Prompt injection security check
     const injectionCheck = detectPromptInjection(userQuery);
+    if (injectionCheck.isSuspicious) {
+      console.warn(
+        `[RAG security] Suspicious query flagged (${injectionCheck.reason}): ${userQuery.slice(0, 200)}`
+      );
+    }
     options.onEvent?.({
       type: "status",
       stage: "query_understanding",
@@ -254,9 +281,12 @@ export class RAGFacade {
         tokenBudget: {
           maxTokens: contextRes.maxTokens,
           usedTokens: contextRes.totalTokens,
-          reservedForGeneration: contextRes.availableForGeneration,
+          availableForGeneration: contextRes.availableForGeneration,
         },
         cacheHit: false,
+        securityFlags: injectionCheck.isSuspicious
+          ? ["prompt-injection-pattern", "excluded-from-cache"]
+          : undefined,
       };
       options.onEvent?.({
         type: "debug",
@@ -291,11 +321,15 @@ export class RAGFacade {
   }
 
   public async syncPortfolio(forceReindex = false) {
-    return ingestionPipeline.syncPortfolio(process.cwd(), forceReindex);
+    const result = await ingestionPipeline.syncPortfolio(process.cwd(), forceReindex);
+    queryCache.clear();
+    return result;
   }
 
   public async deleteDocument(id: string) {
-    return ingestionPipeline.deleteDocument(id);
+    const deleted = await ingestionPipeline.deleteDocument(id);
+    queryCache.clear();
+    return deleted;
   }
 
   public getDocuments() {
@@ -308,19 +342,34 @@ export class RAGFacade {
     const vectorCount = await defaultVectorStore.count();
     const bm25Stats = lexicalIndex.getStats();
     const docEntries = documentRegistry.getAllEntries();
-    const isModelHealthy = await this.getGenerator().healthCheck();
+    const connection = await this.getGenerator().getConnectionInfo();
+    const embedding = hybridRetriever.getEmbeddingHealth();
+
+    const status = !connection.reachable
+      ? "offline"
+      : !connection.authorized
+        ? "auth-error"
+        : connection.modelLoaded === false
+          ? "model-unloaded"
+          : "healthy";
 
     return {
-      status: "healthy",
+      status,
       hardware: hw,
       models: {
         ...config.models,
-        isServerConnected: isModelHealthy,
+        isServerConnected: connection.reachable && connection.authorized,
+        modelLoaded: connection.modelLoaded,
+        connectionState: connection,
       },
+      embedding,
       counts: {
         documents: docEntries.length,
         chunks: vectorCount,
         lexicalChunks: bm25Stats.indexedChunks,
+      },
+      index: {
+        lastSyncedAt: ingestionPipeline.getLastSyncAt() || null,
       },
       cache: {
         queries: queryCache.getStats(),
@@ -339,6 +388,11 @@ export class RAGFacade {
   public async runEvaluation() {
     await this.ensureInitialized();
     return evaluationRunner.runFullComparison();
+  }
+
+  /** Connectivity/auth/model state of the generation server (for scripts & diagnostics). */
+  public async getGenerationConnection() {
+    return this.getGenerator().getConnectionInfo();
   }
 }
 

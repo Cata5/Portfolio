@@ -50,11 +50,6 @@ export function RAGChatModal() {
           {/* Frosted Glass Header Bar */}
           <div className="flex h-14 shrink-0 items-center justify-between border-b border-border/40 px-3.5 sm:px-4.5 bg-card/30 backdrop-blur-md">
             <div className="flex items-center gap-2.5">
-              <span
-                className={`size-2 rounded-full ${
-                  isGlitchActive ? "bg-amber-400" : "bg-signal"
-                }`}
-              />
               <div className="flex items-center gap-1.5 font-bold text-[13.5px] tracking-tight text-foreground">
                 <CLogo className={`size-4 ${isGlitchActive ? "text-amber-400" : "text-signal"}`} />
                 <span>{isGlitchActive ? "Catalin AI Guide (Standby)" : "Catalin AI Guide"}</span>

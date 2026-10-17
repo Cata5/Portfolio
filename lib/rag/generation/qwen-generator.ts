@@ -7,6 +7,31 @@ export interface OpenAIGeneratorOptions {
   timeoutMs?: number;
 }
 
+/**
+ * Generation failure carrying a safe-to-display `userMessage` (the raw
+ * `message` may include internal URLs / response bodies and stays server-side).
+ */
+export class RagLlmError extends Error {
+  public readonly statusCode: number;
+  public readonly userMessage: string;
+
+  constructor(statusCode: number, message: string, userMessage: string) {
+    super(message);
+    this.name = "RagLlmError";
+    this.statusCode = statusCode;
+    this.userMessage = userMessage;
+  }
+}
+
+/**
+ * Some OpenAI-compatible servers answer 400/503 when no model is loaded.
+ * Unsloth says "No model is loaded, and keyless API access cannot load one.",
+ * LM Studio says "No model loaded" and hints at POST /inference/load.
+ */
+function isModelUnavailableBody(body: string): boolean {
+  return /no model.{0,20}loaded/i.test(body) || body.includes("POST /inference/load");
+}
+
 export class OpenAIGenerationProvider implements IGenerationProvider {
   public readonly modelName: string;
   public readonly baseUrl: string;
@@ -34,6 +59,21 @@ export class OpenAIGenerationProvider implements IGenerationProvider {
    * Check if backend is alive and accessible
    */
   public async healthCheck(): Promise<boolean> {
+    const info = await this.getConnectionInfo();
+    return info.reachable && info.authorized;
+  }
+
+  /**
+   * Richer connectivity info for status reporting:
+   * - `reachable`: the server answered at all
+   * - `authorized`: it accepted our API key (or accepts keyless access)
+   * - `modelLoaded`: whether the configured model is present/loaded (`null` when unknowable)
+   */
+  public async getConnectionInfo(): Promise<{
+    reachable: boolean;
+    authorized: boolean;
+    modelLoaded: boolean | null;
+  }> {
     try {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), 3000);
@@ -42,9 +82,26 @@ export class OpenAIGenerationProvider implements IGenerationProvider {
         signal: controller.signal,
       });
       clearTimeout(id);
-      return res.ok;
+      if (res.status === 401 || res.status === 403) {
+        return { reachable: true, authorized: false, modelLoaded: null };
+      }
+      if (!res.ok) {
+        return { reachable: true, authorized: true, modelLoaded: null };
+      }
+      const data = await res.json().catch(() => null) as
+        | { data?: { id?: string; loaded?: boolean }[]; models?: { id?: string; loaded?: boolean }[] }
+        | null;
+      const list = data?.data ?? data?.models ?? [];
+      const entry = list.find((m) => m.id === this.modelName);
+      const modelLoaded =
+        entry === undefined
+          ? false
+          : typeof entry.loaded === "boolean"
+            ? entry.loaded
+            : null;
+      return { reachable: true, authorized: true, modelLoaded };
     } catch {
-      return false;
+      return { reachable: false, authorized: false, modelLoaded: null };
     }
   }
 
@@ -125,25 +182,58 @@ export class OpenAIGenerationProvider implements IGenerationProvider {
       throw new Error(`[RAG LLM] Could not connect to LLM at ${this.baseUrl}: ${msg}`);
     }
 
-    // If server returned 400 with model not loaded, attempt auto-load and retry once
-    if (res.status === 400) {
+    // If server returned 400/503 with "no model loaded", attempt auto-load and retry once
+    if (res.status === 400 || res.status === 503) {
       const errBody = await res.text();
-      if (errBody.includes("No model loaded") || errBody.includes("POST /inference/load")) {
+      if (isModelUnavailableBody(errBody)) {
         console.info(`[RAG LLM] Model not loaded on server. Attempting auto-load: ${this.modelName}...`);
         const loaded = await this.tryAutoLoadModel();
         if (loaded) {
           res = await makeRequest();
         } else {
-          throw new Error(`[RAG LLM] Model ${this.modelName} is not loaded on server: ${errBody}`);
+          throw new RagLlmError(
+            res.status,
+            `[RAG LLM] Model ${this.modelName} is not loaded on server: ${errBody}`,
+            "No model is loaded on the local inference server. Load a model in your server UI (or point the generation model at an available one) and retry."
+          );
         }
       } else {
-        throw new Error(`[RAG LLM] Request failed (${res.status}): ${errBody}`);
+        throw new RagLlmError(
+          res.status,
+          `[RAG LLM] Request failed (${res.status}): ${errBody}`,
+          `The local model server rejected the request (HTTP ${res.status}). Check the server logs for details.`
+        );
       }
+    }
+
+    if (res.status === 401 || res.status === 403) {
+      const errBody = await res.text().catch(() => "");
+      console.error(`[RAG LLM] Authentication failed (HTTP ${res.status}) for ${this.baseUrl}: ${errBody}`);
+      throw new RagLlmError(
+        res.status,
+        `[RAG LLM] ${this.baseUrl}/chat/completions returned HTTP ${res.status}: ${errBody}`,
+        `The local model server rejected the API key (HTTP ${res.status}). Update the key in Models & parameters or set LOCAL_LLM_API_KEY, then retry.`
+      );
+    }
+
+    if (res.status === 404) {
+      const errBody = await res.text().catch(() => "");
+      console.error(`[RAG LLM] Model not found (HTTP 404) for ${this.modelName}: ${errBody}`);
+      throw new RagLlmError(
+        res.status,
+        `[RAG LLM] ${this.baseUrl}/chat/completions returned HTTP 404 for ${this.modelName}: ${errBody}`,
+        `The configured model ("${this.modelName}") is not available on the local model server. Open Models & parameters to pick a downloaded model, then retry.`
+      );
     }
 
     if (!res.ok) {
       const errBody = await res.text().catch(() => "");
-      throw new Error(`[RAG LLM] ${this.baseUrl}/chat/completions returned HTTP ${res.status}: ${errBody}`);
+      console.error(`[RAG LLM] ${this.baseUrl}/chat/completions returned HTTP ${res.status}: ${errBody}`);
+      throw new RagLlmError(
+        res.status,
+        `[RAG LLM] ${this.baseUrl}/chat/completions returned HTTP ${res.status}: ${errBody}`,
+        `The local model server returned HTTP ${res.status}. Check the server status and model configuration.`
+      );
     }
 
     const data = await res.json();
@@ -201,24 +291,57 @@ export class OpenAIGenerationProvider implements IGenerationProvider {
     }
 
     // If model not loaded, try auto-load and retry stream once
-    if (res.status === 400) {
+    if (res.status === 400 || res.status === 503) {
       const errBody = await res.text();
-      if (errBody.includes("No model loaded") || errBody.includes("POST /inference/load")) {
+      if (isModelUnavailableBody(errBody)) {
         console.info(`[RAG LLM] Model not loaded on server. Attempting auto-load: ${this.modelName}...`);
         const loaded = await this.tryAutoLoadModel();
         if (loaded) {
           res = await makeStreamRequest();
         } else {
-          throw new Error(`[RAG LLM] Model ${this.modelName} is not loaded on server: ${errBody}`);
+          throw new RagLlmError(
+            res.status,
+            `[RAG LLM] Model ${this.modelName} is not loaded on server: ${errBody}`,
+            "No model is loaded on the local inference server. Load a model in your server UI (or point the generation model at an available one) and retry."
+          );
         }
       } else {
-        throw new Error(`[RAG LLM] Stream request failed (${res.status}): ${errBody}`);
+        throw new RagLlmError(
+          res.status,
+          `[RAG LLM] Stream request failed (${res.status}): ${errBody}`,
+          `The local model server rejected the request (HTTP ${res.status}). Check the server logs for details.`
+        );
       }
+    }
+
+    if (res.status === 401 || res.status === 403) {
+      const errBody = await res.text().catch(() => "");
+      console.error(`[RAG LLM] Stream authentication failed (HTTP ${res.status}) for ${this.baseUrl}: ${errBody}`);
+      throw new RagLlmError(
+        res.status,
+        `[RAG LLM] Stream returned HTTP ${res.status}: ${errBody}`,
+        `The local model server rejected the API key (HTTP ${res.status}). Update the key in Models & parameters or set LOCAL_LLM_API_KEY, then retry.`
+      );
+    }
+
+    if (res.status === 404) {
+      const errBody = await res.text().catch(() => "");
+      console.error(`[RAG LLM] Stream model not found (HTTP 404) for ${this.modelName}: ${errBody}`);
+      throw new RagLlmError(
+        res.status,
+        `[RAG LLM] Stream returned HTTP 404 for ${this.modelName}: ${errBody}`,
+        `The configured model ("${this.modelName}") is not available on the local model server. Open Models & parameters to pick a downloaded model, then retry.`
+      );
     }
 
     if (!res.ok || !res.body) {
       const errBody = await res.text().catch(() => "");
-      throw new Error(`[RAG LLM] Stream returned HTTP ${res.status}: ${errBody}`);
+      console.error(`[RAG LLM] Stream returned HTTP ${res.status}: ${errBody}`);
+      throw new RagLlmError(
+        res.status,
+        `[RAG LLM] Stream returned HTTP ${res.status}: ${errBody}`,
+        `The local model server returned HTTP ${res.status}. Check the server status and model configuration.`
+      );
     }
 
     const reader = res.body.getReader();

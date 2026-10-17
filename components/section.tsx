@@ -1,7 +1,6 @@
 "use client";
 
 import type { HTMLAttributes, ReactNode } from "react";
-import { Layers } from "lucide-react";
 
 import { Container } from "@/components/container";
 import { Eyebrow } from "@/components/motion/eyebrow";
@@ -77,7 +76,6 @@ export function Section({
       {/* Floating Section Status Badge when Selected in Edit Mode */}
       {isEditing && isSectionSelected && (
         <div className="pointer-events-none absolute right-4 top-4 z-40 inline-flex items-center gap-1.5 rounded-full bg-signal px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-signal-ink shadow-xl shadow-signal/30 animate-in fade-in zoom-in-95 duration-150">
-          <Layers className="size-3" />
           <span>Section: {eyebrow || id} (Editing All Text)</span>
         </div>
       )}

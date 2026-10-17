@@ -23,10 +23,6 @@ export function HeroTypography() {
             <Editable path="copy.hero.word1" label="Hero Word 1" inline>
               {copy.hero?.word1 ?? "SYSTEMS &"}
             </Editable>
-            <span
-              aria-hidden="true"
-              className="ml-[0.24em] inline-block size-[0.22em] translate-y-[-0.04em] bg-saffron"
-            />
           </span>
         </span>
         <span className="hero-line-mask block overflow-hidden pl-[0.18em] sm:pl-[0.24em] pb-[0.04em]">

@@ -1,4 +1,4 @@
-import type { IEmbeddingProvider } from "./interface";
+import type { IEmbeddingProvider, EmbeddingProviderHealth } from "./interface";
 import { embeddingCache } from "./cache";
 import { batchExecute } from "./batcher";
 
@@ -8,8 +8,9 @@ export interface OpenAICompatibleEmbeddingOptions {
   dimension?: number; // e.g. 768 or 1024 or 1536
   apiKey?: string;
   timeoutMs?: number;
+  /** Reuse/store embeddings in the in-memory cache (config: `indexing.enableEmbeddingCache`). */
+  cacheEnabled?: boolean;
 }
-
 export function l2Normalize(vector: number[]): number[] {
   let sumSq = 0;
   for (let i = 0; i < vector.length; i++) {
@@ -63,14 +64,25 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
   private baseUrl: string;
   private apiKey: string;
   private timeoutMs: number;
+  private cacheEnabled: boolean;
   private isServerHealthy: boolean | null = null;
+  private fallbackEmbeddings = 0;
+  private warnedFallback = false;
 
   constructor(options: OpenAICompatibleEmbeddingOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");
     this.modelName = options.modelName || "text-embedding-qwen3-0.6b";
     this.dimension = options.dimension || 768;
-    this.apiKey = options.apiKey || "lm-studio";
+    // No fake default key: keyless servers (Unsloth) must receive no auth header.
+    this.apiKey = options.apiKey || "";
     this.timeoutMs = options.timeoutMs || 4000;
+    this.cacheEnabled = options.cacheEnabled !== false;
+  }
+
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+    return headers;
   }
 
   public async healthCheck(): Promise<boolean> {
@@ -79,7 +91,7 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
       const id = setTimeout(() => controller.abort(), 2000);
       const res = await fetch(`${this.baseUrl}/models`, {
         method: "GET",
-        headers: { Authorization: `Bearer ${this.apiKey}` },
+        headers: this.getHeaders(),
         signal: controller.signal,
       });
       clearTimeout(id);
@@ -91,10 +103,40 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
     }
   }
 
+  public getHealth(): EmbeddingProviderHealth {
+    const mode: EmbeddingProviderHealth["mode"] =
+      this.isServerHealthy === true && this.fallbackEmbeddings === 0
+        ? "server"
+        : this.isServerHealthy === false || this.fallbackEmbeddings > 0
+          ? "hash-fallback"
+          : "unknown";
+    return {
+      mode,
+      serverOk: this.isServerHealthy,
+      fallbackEmbeddings: this.fallbackEmbeddings,
+      cacheEnabled: this.cacheEnabled,
+    };
+  }
+
+  /** Fallback vectors are never cached, so a recovered server replaces them. */
+  private makeFallbackVec(text: string): number[] {
+    this.fallbackEmbeddings++;
+    if (!this.warnedFallback) {
+      this.warnedFallback = true;
+      console.warn(
+        `[RAG embeddings] Embedding server unavailable at ${this.baseUrl} — using deterministic hash fallback ` +
+          `(degraded retrieval quality). Fix the server/model, then re-index to replace fallback vectors.`
+      );
+    }
+    return generateDeterministicEmbedding(text, this.dimension);
+  }
+
   public async embedText(text: string): Promise<number[]> {
     // 1. Check cache
-    const cached = embeddingCache.get(text, this.modelName, this.dimension);
-    if (cached) return cached;
+    if (this.cacheEnabled) {
+      const cached = embeddingCache.get(text, this.modelName, this.dimension);
+      if (cached) return cached;
+    }
 
     // 2. Try remote OpenAI-compatible server (LM Studio / Unsloth)
     try {
@@ -103,10 +145,7 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
 
       const res = await fetch(`${this.baseUrl}/embeddings`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           model: this.modelName,
           input: text,
@@ -120,30 +159,33 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
         if (data.data && data.data[0] && Array.isArray(data.data[0].embedding)) {
           const rawVec = data.data[0].embedding;
           const normalized = l2Normalize(rawVec);
-          embeddingCache.set(text, this.modelName, this.dimension, normalized);
+          if (this.cacheEnabled) {
+            embeddingCache.set(text, this.modelName, this.dimension, normalized);
+          }
           this.isServerHealthy = true;
           return normalized;
         }
       }
+      this.isServerHealthy = false;
     } catch {
       this.isServerHealthy = false;
     }
 
-    // 3. Fallback to high-entropy deterministic embedding
-    const fallbackVec = generateDeterministicEmbedding(text, this.dimension);
-    embeddingCache.set(text, this.modelName, this.dimension, fallbackVec);
-    return fallbackVec;
+    // 3. Fallback to deterministic embedding (never cached)
+    return this.makeFallbackVec(text);
   }
 
-  public async embedBatch(texts: string[]): Promise<number[][]> {
-    return batchExecute(texts, 16, async (batch) => {
+  public async embedBatch(texts: string[], batchSize = 16): Promise<number[][]> {
+    return batchExecute(texts, batchSize, async (batch) => {
       // Check which texts are already cached
       const results: number[][] = new Array(batch.length);
       const uncachedIndices: number[] = [];
       const uncachedTexts: string[] = [];
 
       for (let i = 0; i < batch.length; i++) {
-        const cached = embeddingCache.get(batch[i], this.modelName, this.dimension);
+        const cached = this.cacheEnabled
+          ? embeddingCache.get(batch[i], this.modelName, this.dimension)
+          : null;
         if (cached) {
           results[i] = cached;
         } else {
@@ -161,10 +203,7 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
 
         const res = await fetch(`${this.baseUrl}/embeddings`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${this.apiKey}`,
-          },
+          headers: this.getHeaders(),
           body: JSON.stringify({
             model: this.modelName,
             input: uncachedTexts,
@@ -175,26 +214,45 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
 
         if (res.ok) {
           const data = await res.json();
-          if (data.data && Array.isArray(data.data)) {
-            for (let j = 0; j < data.data.length; j++) {
-              const origIdx = uncachedIndices[j];
-              const normalized = l2Normalize(data.data[j].embedding);
+          const items: { index?: number; embedding?: number[] }[] = Array.isArray(data?.data) ? data.data : [];
+          let complete = items.length === uncachedTexts.length;
+          if (complete) {
+            for (let j = 0; j < items.length; j++) {
+              const item = items[j];
+              if (!Array.isArray(item.embedding)) {
+                complete = false;
+                break;
+              }
+              // OpenAI-compatible servers may return items out of order (via `index`)
+              const localIdx =
+                typeof item.index === "number" && item.index >= 0 && item.index < uncachedTexts.length
+                  ? item.index
+                  : j;
+              const origIdx = uncachedIndices[localIdx];
+              const normalized = l2Normalize(item.embedding);
               results[origIdx] = normalized;
-              embeddingCache.set(uncachedTexts[j], this.modelName, this.dimension, normalized);
+              if (this.cacheEnabled) {
+                embeddingCache.set(uncachedTexts[localIdx], this.modelName, this.dimension, normalized);
+              }
             }
+          }
+          if (complete) {
+            this.isServerHealthy = true;
             return results;
           }
+          this.isServerHealthy = false;
+        } else {
+          this.isServerHealthy = false;
         }
       } catch {
-        // Fallback
+        this.isServerHealthy = false;
       }
 
-      // Fallback individually for uncached
+      // Fallback individually for anything the server did not provide (never cached)
       for (let j = 0; j < uncachedTexts.length; j++) {
         const origIdx = uncachedIndices[j];
-        const vec = generateDeterministicEmbedding(uncachedTexts[j], this.dimension);
-        results[origIdx] = vec;
-        embeddingCache.set(uncachedTexts[j], this.modelName, this.dimension, vec);
+        if (results[origIdx]) continue;
+        results[origIdx] = this.makeFallbackVec(uncachedTexts[j]);
       }
 
       return results;

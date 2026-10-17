@@ -85,6 +85,6 @@ export function assembleContext(
     formattedContext: formattedBlocks,
     totalTokens: currentTokens,
     maxTokens,
-    availableForGeneration: Math.max(512, config.context.reservedGenerationTokens),
+    availableForGeneration: Math.max(0, maxTokens - currentTokens),
   };
 }

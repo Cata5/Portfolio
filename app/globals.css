@@ -172,21 +172,6 @@
    */
 }
 
-/* Status dot pulse — the one ambient motion on the page */
-@keyframes signal-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
-
-.animate-signal-pulse {
-  animation: signal-pulse 2.4s ease-in-out infinite;
-}
-
 /* Hero — faint technical grid, masked to fade at the edges */
 .hero-grid {
   background-image:

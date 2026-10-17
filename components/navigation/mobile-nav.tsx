@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Menu, Sparkles } from "lucide-react";
+import { ArrowUpRight, Menu } from "lucide-react";
 
 import { scrollToId } from "@/components/motion/lenis";
 import { useRAG } from "@/components/rag/rag-context";
@@ -77,11 +77,7 @@ export function MobileNav({ activeSection }: MobileNavProps) {
       >
         <div className="flex flex-col">
           <SheetHeader className="border-b border-border/50 dark:border-white/10 p-5">
-            <SheetTitle className="flex items-center gap-2.5 font-sans text-sm font-semibold">
-              <span
-                className="size-2 rounded-full bg-signal shadow-[0_0_8px_var(--color-signal)]"
-                aria-hidden="true"
-              />
+            <SheetTitle className="font-sans text-sm font-semibold">
               {site.name}
             </SheetTitle>
           </SheetHeader>
@@ -120,20 +116,11 @@ export function MobileNav({ activeSection }: MobileNavProps) {
                 >
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2.5">
-                      <span
-                        className={cn(
-                          "size-1.5 rounded-full transition-all",
-                          isActive
-                            ? "bg-signal scale-125"
-                            : "bg-muted-foreground/40 group-hover:bg-foreground/60",
-                        )}
-                        aria-hidden="true"
-                      />
                       <span className="text-[14px] font-medium tracking-tight text-foreground">
                         {link.label}
                       </span>
                     </div>
-                    <span className="pl-4 text-[11px] text-muted-foreground font-mono">
+                    <span className="text-[11px] text-muted-foreground font-mono">
                       {link.desc}
                     </span>
                   </div>
@@ -164,7 +151,6 @@ export function MobileNav({ activeSection }: MobileNavProps) {
               />
             }
           >
-            <Sparkles className="size-3.5 text-signal" />
             <span>Ask AI Assistant</span>
           </SheetClose>
 

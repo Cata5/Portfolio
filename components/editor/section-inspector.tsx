@@ -2,21 +2,10 @@
 
 import { useState } from "react";
 import {
-  Award,
-  BookOpen,
-  Brain,
-  Check,
   ChevronDown,
   ChevronRight,
-  Cpu,
-  FolderGit2,
-  Layers,
-  Milestone,
   Plus,
-  Radio,
-  Sparkles,
   Trash2,
-  User,
 } from "lucide-react";
 
 import { useEditor } from "./editor-context";
@@ -56,12 +45,9 @@ export function SectionInspector({ sectionId, label }: SectionInspectorProps) {
   return (
     <div className="dark text-neutral-100 space-y-6 animate-in fade-in duration-150">
       <div className="rounded-xl border border-signal/30 bg-signal/10 p-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-signal">
-          <Layers className="size-4 shrink-0" />
-          <span className="font-mono text-xs font-semibold uppercase tracking-wider">
-            Whole Section Selected
-          </span>
-        </div>
+        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-signal">
+          Whole Section Selected
+        </span>
         <span className="rounded bg-signal/20 px-2 py-0.5 font-mono text-[10px] text-signal font-bold uppercase">
           {id}
         </span>

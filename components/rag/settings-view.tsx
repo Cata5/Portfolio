@@ -1,17 +1,16 @@
 "use client";
 
 import { useRAG } from "./rag-context";
+import { useEditor } from "@/components/editor/editor-context";
 import { withBasePath } from "@/lib/base-path";
 import {
   Save,
   CheckCircle2,
   XCircle,
+  AlertTriangle,
   RefreshCw,
   Server,
   ChevronDown,
-  Sliders,
-  Cpu,
-  Layers,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -24,6 +23,7 @@ interface AvailableModel {
 
 export function SettingsView() {
   const { config, updateConfig, fetchStatus, fetchConfig } = useRAG();
+  const { authToken } = useEditor();
 
   const [baseUrl, setBaseUrl] = useState(
     config?.models?.generationBaseUrl || "http://127.0.0.1:8888/v1"
@@ -48,7 +48,7 @@ export function SettingsView() {
   const [maxContextTokens, setMaxContextTokens] = useState(
     config?.context?.maxContextTokens ?? 3072
   );
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [savePhase, setSavePhase] = useState<"idle" | "success" | "warning" | "error">("idle");
   const [isReloading, setIsReloading] = useState(false);
   const [reloadMessage, setReloadMessage] = useState<string | null>(null);
 
@@ -59,15 +59,26 @@ export function SettingsView() {
     message?: string;
   }>({ status: "idle" });
 
+  const adminHeaders = (): Record<string, string> => ({
+    "Content-Type": "application/json",
+    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+  });
+
   const fetchModels = async (targetUrl = baseUrl, targetKey = apiKey) => {
     setIsLoadingModels(true);
     try {
-      const res = await fetch(withBasePath("/api/rag/models"), {
+      const res = await fetch(withBasePath("/api/rag/models/reload"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminHeaders(),
         body: JSON.stringify({ baseUrl: targetUrl, apiKey: targetKey }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return {
+          ok: false,
+          error: data?.error || `Admin session required (HTTP ${res.status})`,
+        };
+      }
       if (data.success && Array.isArray(data.models) && data.models.length > 0) {
         setAvailableModels(data.models);
         // If current modelName isn't in models and there is a loaded model, default to it
@@ -121,22 +132,44 @@ export function SettingsView() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsReloading(true);
-    setReloadMessage(`Applying hyperparameters & restarting model instance with Temperature: ${temperature}, MaxTokens: ${maxTokens}, Top-P: ${topP}...`);
+    setSavePhase("idle");
+    setReloadMessage(`Applying hyperparameters (Temperature: ${temperature}, MaxTokens: ${maxTokens}, Top-P: ${topP})...`);
 
     try {
-      await updateConfig({
-        models: {
-          generationBaseUrl: baseUrl,
-          embeddingBaseUrl: baseUrl,
-          rerankerBaseUrl: baseUrl,
-          generationModel: modelName,
-          apiKey,
-          temperature,
-          maxTokens,
-          topP,
-          frequencyPenalty,
-          presencePenalty,
-        },
+      const current = config?.models;
+      const modelsPatch: {
+        generationBaseUrl: string;
+        generationModel: string;
+        apiKey: string;
+        temperature: number;
+        maxTokens: number;
+        topP: number;
+        frequencyPenalty: number;
+        presencePenalty: number;
+        embeddingBaseUrl?: string;
+        rerankerBaseUrl?: string;
+      } = {
+        generationBaseUrl: baseUrl,
+        generationModel: modelName,
+        apiKey,
+        temperature,
+        maxTokens,
+        topP,
+        frequencyPenalty,
+        presencePenalty,
+      };
+      // The console exposes one inference server; move embeddings/reranker with
+      // it only while they still point at the same place. Separately configured
+      // servers (env) are never silently overwritten.
+      if (!current || current.embeddingBaseUrl === current.generationBaseUrl) {
+        modelsPatch.embeddingBaseUrl = baseUrl;
+      }
+      if (!current || current.rerankerBaseUrl === current.generationBaseUrl) {
+        modelsPatch.rerankerBaseUrl = baseUrl;
+      }
+
+      const outcome = await updateConfig({
+        models: modelsPatch,
         retrieval: {
           denseTopK,
           bm25TopK,
@@ -149,10 +182,16 @@ export function SettingsView() {
         },
       });
 
+      if (!outcome.ok) {
+        setSavePhase("error");
+        setReloadMessage(outcome.error || "Failed to save configuration.");
+        return;
+      }
+
       // Explicitly trigger model reload / re-prime in Unsloth / LM Studio
-      const reloadRes = await fetch(withBasePath("/api/rag/models"), {
+      const reloadRes = await fetch(withBasePath("/api/rag/models/reload"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminHeaders(),
         body: JSON.stringify({
           baseUrl,
           apiKey,
@@ -165,18 +204,37 @@ export function SettingsView() {
       await fetchConfig?.();
       await fetchStatus?.();
 
-      setSavedSuccess(true);
-      setReloadMessage(
-        reloadData?.reload?.message ||
-          `Model ${modelName.split("/").pop()} successfully restarted & online with updated hyperparameters (Temp: ${temperature}, MaxTokens: ${maxTokens}, Top-P: ${topP})`
-      );
+      if (!reloadRes.ok) {
+        setSavePhase("error");
+        setReloadMessage(
+          reloadData?.error || `Settings saved, but the reload request failed (HTTP ${reloadRes.status}).`
+        );
+        return;
+      }
+
+      const reload = reloadData?.reload as { status?: string; message?: string } | null | undefined;
+      if (reload?.status === "success") {
+        setSavePhase("success");
+        setReloadMessage(
+          reload.message ||
+            `Model ${modelName.split("/").pop()} reloaded with updated hyperparameters (Temp: ${temperature}, MaxTokens: ${maxTokens}, Top-P: ${topP})`
+        );
+      } else {
+        setSavePhase("warning");
+        setReloadMessage(
+          reload?.message
+            ? `Settings saved, but the model reload was not confirmed: ${reload.message}`
+            : "Settings saved. The server did not confirm a model reload — verify the model is loaded before relying on the new hyperparameters."
+        );
+      }
     } catch (err) {
       console.error("Failed to save and reload model:", err);
-      setReloadMessage("Failed to reload model instance. Check server endpoint.");
+      setSavePhase("error");
+      setReloadMessage("Failed to save settings or reach the model server.");
     } finally {
       setIsReloading(false);
       setTimeout(() => {
-        setSavedSuccess(false);
+        setSavePhase("idle");
         setReloadMessage(null);
       }, 6000);
     }
@@ -225,7 +283,7 @@ export function SettingsView() {
           ) : (
             <Save className="size-3.5" />
           )}
-          {isReloading ? "Restarting Model..." : savedSuccess ? "Saved & Restarted!" : "Save & Apply Hyperparams"}
+          {isReloading ? "Applying..." : savePhase === "success" ? "Saved & Applied!" : "Save & Apply Hyperparams"}
         </button>
       </div>
 
@@ -235,15 +293,19 @@ export function SettingsView() {
           className={`flex items-center gap-2.5 rounded-xl border p-3.5 font-mono text-xs shadow-lg transition-all ${
             isReloading
               ? "border-signal/50 bg-signal/15 text-signal animate-pulse"
-              : savedSuccess
+              : savePhase === "success"
               ? "border-green-500/50 bg-green-950/40 text-green-300"
+              : savePhase === "warning"
+              ? "border-saffron/50 bg-saffron/10 text-saffron"
               : "border-destructive/50 bg-destructive/15 text-destructive"
           }`}
         >
           {isReloading ? (
             <RefreshCw className="size-4 animate-spin shrink-0" />
-          ) : savedSuccess ? (
+          ) : savePhase === "success" ? (
             <CheckCircle2 className="size-4 shrink-0 text-green-400" />
+          ) : savePhase === "warning" ? (
+            <AlertTriangle className="size-4 shrink-0 text-saffron" />
           ) : (
             <XCircle className="size-4 shrink-0 text-destructive" />
           )}
@@ -254,10 +316,9 @@ export function SettingsView() {
       {/* Connection & Model Selection Card */}
       <div className="rounded-xl border border-border/50 bg-card/60 p-5 space-y-4 font-mono text-[12px]">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Server className="size-4 text-signal" />
-            <span className="font-semibold text-foreground">Local Inference Server Endpoint</span>
-          </div>
+          <span className="font-semibold text-foreground">
+            Local Inference Server Endpoint
+          </span>
 
           <div className="flex items-center gap-2">
             {testResult.status === "success" && (
@@ -361,7 +422,7 @@ export function SettingsView() {
               className="mt-1 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-[13px] text-foreground focus:border-signal focus:outline-none font-mono"
             />
             <span className="text-[10px] text-muted-foreground">
-              sk-unsloth-... or empty for LM Studio
+              sk-... (leave empty for keyless local servers)
             </span>
           </div>
         </div>
@@ -369,12 +430,9 @@ export function SettingsView() {
 
       {/* Local LLM Generation Hyperparameters Card */}
       <div className="rounded-xl border border-border/50 bg-card/60 p-5 space-y-4 font-mono text-[12px]">
-        <div className="flex items-center gap-2">
-          <Cpu className="size-4 text-signal" />
-          <h3 className="font-semibold text-foreground uppercase tracking-wider text-[11px] text-saffron">
-            Inference Generation Hyperparameters (Transmitted to Unsloth / LM Studio)
-          </h3>
-        </div>
+        <h3 className="font-semibold text-foreground uppercase tracking-wider text-[11px] text-saffron">
+          Inference Generation Hyperparameters (Transmitted to Unsloth / LM Studio)
+        </h3>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 pt-2">
           {/* Temperature */}
@@ -525,12 +583,9 @@ export function SettingsView() {
 
       {/* Retrieval & Fusion Tuning Parameters Card */}
       <div className="rounded-xl border border-border/50 bg-card/60 p-5 space-y-4 font-mono text-[12px]">
-        <div className="flex items-center gap-2">
-          <Layers className="size-4 text-signal" />
-          <h3 className="font-semibold text-foreground uppercase tracking-wider text-[11px] text-saffron">
-            Hybrid Retrieval & Fusion Hyperparameters
-          </h3>
-        </div>
+        <h3 className="font-semibold text-foreground uppercase tracking-wider text-[11px] text-saffron">
+          Hybrid Retrieval & Fusion Hyperparameters
+        </h3>
 
         <div className="grid gap-4 sm:grid-cols-3 pt-2">
           <div className="rounded-lg border border-border/40 bg-background/50 p-3 space-y-2">

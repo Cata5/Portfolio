@@ -1,10 +1,21 @@
 "use client";
 
 import { useRAG } from "./rag-context";
-import { Play, BarChart3 } from "lucide-react";
+import { Play, BarChart3, AlertTriangle } from "lucide-react";
 
 export function EvalView() {
-  const { evalComparison, runEvaluation, isEvaluating } = useRAG();
+  const { evalComparison, runEvaluation, isEvaluating, evalError } = useRAG();
+
+  const configs = evalComparison ? Object.values(evalComparison.configurations) : [];
+  const bestMrr = configs.length > 0 ? Math.max(...configs.map((c) => c.retrieval.mrr)) : 0;
+  const bestMrrName =
+    configs.find((c) => c.retrieval.mrr === bestMrr)?.configurationName ?? "—";
+  const bestRecallAt5 =
+    configs.length > 0 ? Math.max(...configs.map((c) => c.retrieval.recallAtK[5] ?? 0)) : 0;
+  const citationAccuracy =
+    evalComparison?.configurations.hybridRerankerQueryExpansion.generation.citationAccuracy;
+  const pct = (v: number | undefined, digits = 1) =>
+    v === undefined || Number.isNaN(v) ? "—" : `${(v * 100).toFixed(digits)}%`;
 
   return (
     <div data-lenis-prevent className="h-full overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-6">
@@ -28,6 +39,13 @@ export function EvalView() {
           {isEvaluating ? "Running Benchmark..." : "Run Evaluation"}
         </button>
       </div>
+
+      {evalError && !isEvaluating && (
+        <div className="flex items-center gap-2.5 rounded-xl border border-destructive/50 bg-destructive/10 p-3.5 font-mono text-xs text-destructive">
+          <AlertTriangle className="size-4 shrink-0" />
+          <span className="leading-snug">{evalError}</span>
+        </div>
+      )}
 
       {!evalComparison && !isEvaluating ? (
         <div className="rounded-2xl border border-dashed border-border/60 p-8 text-center space-y-3">
@@ -53,25 +71,25 @@ export function EvalView() {
               <div className="rounded-xl border border-border/50 bg-card/60 p-4">
                 <span className="font-mono text-[10px] uppercase text-muted-foreground">Highest MRR</span>
                 <p className="mt-1 font-mono text-lg font-semibold text-signal">
-                  {evalComparison.configurations.hybridRRF.retrieval.mrr.toFixed(3)}
+                  {bestMrr.toFixed(3)}
                 </p>
-                <span className="font-mono text-[10px] text-muted-foreground">Hybrid + RRF</span>
+                <span className="font-mono text-[10px] text-muted-foreground">{bestMrrName}</span>
               </div>
 
               <div className="rounded-xl border border-border/50 bg-card/60 p-4">
                 <span className="font-mono text-[10px] uppercase text-muted-foreground">Top Recall@5</span>
                 <p className="mt-1 font-mono text-lg font-semibold text-saffron">
-                  {(evalComparison.configurations.bm25Only.retrieval.recallAtK[5] * 100).toFixed(1)}%
+                  {pct(bestRecallAt5)}
                 </p>
-                <span className="font-mono text-[10px] text-muted-foreground">BM25 / Hybrid</span>
+                <span className="font-mono text-[10px] text-muted-foreground">Best configuration</span>
               </div>
 
               <div className="rounded-xl border border-border/50 bg-card/60 p-4">
                 <span className="font-mono text-[10px] uppercase text-muted-foreground">Citation Accuracy</span>
                 <p className="mt-1 font-mono text-lg font-semibold text-signal">
-                  100%
+                  {pct(citationAccuracy, 0)}
                 </p>
-                <span className="font-mono text-[10px] text-muted-foreground">Zero Hallucinations</span>
+                <span className="font-mono text-[10px] text-muted-foreground">Full pipeline generation</span>
               </div>
 
               <div className="rounded-xl border border-border/50 bg-card/60 p-4">

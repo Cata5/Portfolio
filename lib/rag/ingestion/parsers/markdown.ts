@@ -1,4 +1,5 @@
 import { chunkMarkdownDocument } from "../../chunking/markdown-chunker";
+import type { MarkdownChunkerOptions } from "../../chunking/markdown-chunker";
 import type { Chunk, Document } from "../../types/document";
 
 export function parseMarkdownFile(
@@ -6,7 +7,8 @@ export function parseMarkdownFile(
   filePath: string,
   rawContent: string,
   hash: string,
-  customTitle?: string
+  customTitle?: string,
+  options?: MarkdownChunkerOptions
 ): { document: Document; chunks: Chunk[] } {
   // Extract title from first # heading or filename
   const titleMatch = rawContent.match(/^#\s+(.+)$/m);
@@ -19,7 +21,8 @@ export function parseMarkdownFile(
     title,
     filePath,
     rawContent,
-    hash
+    hash,
+    options
   );
 
   const document: Document = {

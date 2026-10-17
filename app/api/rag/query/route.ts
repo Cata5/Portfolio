@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { rag } from "@/lib/rag/rag-facade";
+import { RagLlmError } from "@/lib/rag/generation/qwen-generator";
 import type { RAGStreamEvent } from "@/lib/rag/types/events";
+
+/** Never leak internal URLs / upstream bodies to clients. */
+function toClientError(err: unknown): { status: number; message: string } {
+  if (err instanceof RagLlmError) {
+    console.error(`[RAG query] Generation failure: ${err.message}`);
+    return { status: 502, message: err.userMessage };
+  }
+  const message = err instanceof Error ? err.message : "Internal server error";
+  return { status: 500, message };
+}
 
 export async function POST(request: Request) {
   try {
@@ -41,10 +52,9 @@ export async function POST(request: Request) {
               onEvent: sendEvent,
             });
           } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : "Error processing RAG query";
             sendEvent({
               type: "error",
-              message,
+              message: toClientError(err).message,
             });
           } finally {
             controller.close();
@@ -72,10 +82,10 @@ export async function POST(request: Request) {
       return NextResponse.json(result);
     }
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Internal server error";
+    const { status, message } = toClientError(err);
     return NextResponse.json(
       { error: message },
-      { status: 500 }
+      { status }
     );
   }
 }

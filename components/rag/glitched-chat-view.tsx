@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Terminal,
   Send,
   ArrowUpRight,
   AlertTriangle,
@@ -172,7 +171,6 @@ export function GlitchedChatView() {
       {/* Glitch Status Banner Bar */}
       <div className="relative z-30 flex items-center justify-between border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-amber-400" />
           <span className="text-[11px] font-bold tracking-wider text-amber-300">
             [ NEURAL LINK // OFFLINE ]
           </span>
@@ -188,7 +186,6 @@ export function GlitchedChatView() {
         <div className="rounded-xl border border-border/50 bg-card/40 p-3.5 backdrop-blur-xl ring-1 ring-white/5 space-y-2">
           <div className="flex items-center justify-between border-b border-border/40 pb-2 text-[10.5px] text-muted-foreground">
             <span className="flex items-center gap-1.5 font-bold text-signal">
-              <Terminal className="size-3.5" />
               <GlitchText text="SYSTEM TELEMETRY // GH-PAGES" speed={15} periodicTwitch />
             </span>
             <span className="text-amber-400 font-semibold">STATIC RUNTIME</span>
@@ -221,7 +218,6 @@ export function GlitchedChatView() {
               <div className="max-w-[92%] rounded-xl border border-border/50 bg-card/40 p-3.5 text-[13px] text-foreground backdrop-blur-xl ring-1 ring-white/5 space-y-2.5">
                 {msg.title && (
                   <div className="flex items-center gap-1.5 border-b border-border/40 pb-1.5 text-[10.5px] font-bold tracking-wide text-signal">
-                    <Terminal className="size-3 text-signal" />
                     <span className="glitch-text-active">
                       <GlitchText text={msg.title} speed={15} />
                     </span>

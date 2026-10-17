@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Terminal as TerminalIcon,
   Send,
   ArrowUpRight,
   Radio,
@@ -170,7 +169,6 @@ export function CyberdeckCliView() {
       {/* Top CLI Header in Frosted Glass */}
       <div className="flex items-center justify-between border-b border-border/40 bg-card/30 px-4 py-2 text-xs backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <TerminalIcon className="size-3.5 text-signal" />
           <span className="font-bold text-signal tracking-wide glitch-text-active">
             <GlitchText text="NEURAL_CLI // OFFLINE_ARCHIVE" speed={20} periodicTwitch />
           </span>

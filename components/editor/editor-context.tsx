@@ -86,6 +86,8 @@ export type SelectedField = {
 
 interface EditorContextValue {
   isAuthenticated: boolean;
+  /** Bearer secret for admin APIs (kept in sync with the unlocked session). */
+  authToken: string;
   isEditing: boolean;
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;
@@ -707,6 +709,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       isAuthenticated,
+      authToken: authSecret,
       isEditing,
       isAuthModalOpen,
       setIsAuthModalOpen,
@@ -744,6 +747,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     }),
     [
       isAuthenticated,
+      authSecret,
       isEditing,
       isAuthModalOpen,
       selectedField,

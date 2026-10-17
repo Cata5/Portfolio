@@ -9,7 +9,8 @@ const ALLOWED_MIME_TYPES = new Set([
   "image/webp",
   "image/avif",
   "image/gif",
-  "image/svg+xml",
+  // NOTE: image/svg+xml is deliberately rejected — SVGs can carry scripts and
+  // these files are served same-origin from /public.
   "application/pdf",
 ]);
 

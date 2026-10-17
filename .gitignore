@@ -23,6 +23,9 @@
 /.next/
 /out/
 
+# RAG runtime state (persisted engine config written by the admin console)
+/.rag/
+
 # production
 /build
 

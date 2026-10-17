@@ -82,7 +82,10 @@ export interface RetrievalDiagnostics {
   tokenBudget: {
     maxTokens: number;
     usedTokens: number;
-    reservedForGeneration: number;
+    /** Context budget still unused after evidence assembly. */
+    availableForGeneration: number;
   };
   cacheHit: boolean;
+  /** Set when the query tripped the prompt-injection heuristic (evidence treated as suspect). */
+  securityFlags?: string[];
 }

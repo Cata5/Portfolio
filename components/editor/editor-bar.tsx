@@ -2,18 +2,13 @@
 
 import { useEffect, useState } from "react";
 import {
-  Award,
   Check,
   ChevronUp,
-  Cpu,
   Edit2,
   Eye,
-  FolderPlus,
   Lock,
-  Milestone,
   Plus,
   Save,
-  Trophy,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -131,7 +126,6 @@ export function EditorBar() {
                     }}
                     className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left font-mono text-[12px] text-foreground/90 transition-colors hover:bg-neutral-900 hover:text-signal"
                   >
-                    <FolderPlus className="size-3.5 text-signal" />
                     <span>Project</span>
                   </button>
                   <button
@@ -142,7 +136,6 @@ export function EditorBar() {
                     }}
                     className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left font-mono text-[12px] text-foreground/90 transition-colors hover:bg-neutral-900 hover:text-saffron"
                   >
-                    <Milestone className="size-3.5 text-saffron" />
                     <span>Timeline Milestone</span>
                   </button>
                   <button
@@ -153,7 +146,6 @@ export function EditorBar() {
                     }}
                     className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left font-mono text-[12px] text-foreground/90 transition-colors hover:bg-neutral-900 hover:text-foreground"
                   >
-                    <Trophy className="size-3.5 text-foreground/70" />
                     <span>Activity / Event</span>
                   </button>
                   <button
@@ -164,7 +156,6 @@ export function EditorBar() {
                     }}
                     className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left font-mono text-[12px] text-foreground/90 transition-colors hover:bg-neutral-900 hover:text-signal"
                   >
-                    <Award className="size-3.5 text-signal/80" />
                     <span>Certification</span>
                   </button>
                   <button
@@ -175,7 +166,6 @@ export function EditorBar() {
                     }}
                     className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left font-mono text-[12px] text-foreground/90 transition-colors hover:bg-neutral-900 hover:text-saffron"
                   >
-                    <Cpu className="size-3.5 text-saffron" />
                     <span>ML Log Run</span>
                   </button>
                 </motion.div>
@@ -221,11 +211,10 @@ export function EditorBar() {
         {/* Main Admin Console Link */}
         <Link
           href="/admin"
-          title="Open Portfolio Control Center"
+          title="Open the portfolio console"
           className="flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-neutral-900 hover:text-signal"
         >
-          <Cpu className="size-3 text-signal" />
-          <span className="hidden sm:inline">Admin Panel</span>
+          <span className="hidden sm:inline">Console</span>
         </Link>
 
         {/* Lock button */}

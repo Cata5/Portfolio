@@ -106,13 +106,9 @@ export function SiteHeader() {
                 scrollToId("top");
               }
             }}
-            className="group flex items-center gap-2 sm:gap-2.5"
+            className="flex items-center"
             aria-label={`${site.name} - back to top`}
           >
-            <span
-              className="size-2 rounded-full bg-signal shadow-[0_0_8px_var(--color-signal)] transition-transform duration-200 group-hover:scale-125"
-              aria-hidden="true"
-            />
             <span className="text-[14px] md:text-[15px] font-semibold tracking-[-0.01em] whitespace-nowrap">
               {site.name}
             </span>
@@ -124,7 +120,6 @@ export function SiteHeader() {
               className="hidden min-[420px]:inline-flex md:hidden items-center gap-1 font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground bg-accent/60 px-2 py-0.5 rounded-full border border-border/40"
               aria-label={`Current section: ${currentActive}`}
             >
-              <span className="size-1 rounded-full bg-signal" />
               {currentActive === "work" ? "projects" : currentActive}
             </span>
           )}

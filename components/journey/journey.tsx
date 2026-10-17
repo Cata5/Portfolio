@@ -3,20 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Bot,
-  Calendar,
-  Cpu,
-  GitBranch,
-  Layers,
-  MapPin,
-  Sparkles,
-  Terminal,
-  Trophy,
-  Users,
-  Zap,
-} from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 import { Editable } from "@/components/editor/editable";
 import { useEditor } from "@/components/editor/editor-context";
@@ -24,7 +11,7 @@ import { GlassCard } from "@/components/glass-card";
 import { gsap } from "@/components/motion/gsap";
 import { Section } from "@/components/section";
 import { TextReveal } from "@/components/motion/text-reveal";
-import type { JourneyCategory, JourneyEntry } from "@/data/journey";
+import type { JourneyCategory } from "@/data/journey";
 import { cn } from "@/lib/utils";
 import { prefersReducedMotion, useIsomorphicLayoutEffect } from "@/lib/motion";
 
@@ -32,7 +19,6 @@ interface CategoryMeta {
   label: string;
   shortLabel: string;
   description: string;
-  icon: typeof Sparkles;
   badgeClass: string;
   dotClass: string;
   glowClass: string;
@@ -46,7 +32,6 @@ const CATEGORY_META: Record<JourneyCategory, CategoryMeta> = {
     label: "Core & AI Systems",
     shortLabel: "Projects",
     description: "Autonomous agents, neural pipelines & platform architecture",
-    icon: Cpu,
     badgeClass: "text-signal bg-signal/10 border-signal/30",
     dotClass: "bg-signal",
     glowClass: "shadow-[0_0_16px_var(--color-signal)]",
@@ -58,7 +43,6 @@ const CATEGORY_META: Record<JourneyCategory, CategoryMeta> = {
     label: "Hackathons & Competitions",
     shortLabel: "Hackathons & Contests",
     description: "UniHack 1st place, InfoEducație silver medals & FIRST Tech Challenge",
-    icon: Trophy,
     badgeClass: "text-saffron bg-saffron/10 border-saffron/30",
     dotClass: "bg-saffron",
     glowClass: "shadow-[0_0_16px_var(--color-saffron)]",
@@ -70,7 +54,6 @@ const CATEGORY_META: Record<JourneyCategory, CategoryMeta> = {
     label: "Community & Mentorship",
     shortLabel: "Community",
     description: "FTC robotics team mentoring & open-source knowledge sharing",
-    icon: Users,
     badgeClass: "text-rose-400 bg-rose-500/10 border-rose-500/30",
     dotClass: "bg-rose-400",
     glowClass: "shadow-[0_0_16px_rgba(251,113,133,0.7)]",
@@ -82,7 +65,6 @@ const CATEGORY_META: Record<JourneyCategory, CategoryMeta> = {
     label: "Developer Tools & GitHub",
     shortLabel: "Developer Tools",
     description: "Desktop utilities, developer tools & ecosystem contributions",
-    icon: Terminal,
     badgeClass: "text-signal bg-signal/10 border-signal/30",
     dotClass: "bg-signal",
     glowClass: "shadow-[0_0_16px_var(--color-signal)]",
@@ -257,8 +239,7 @@ export function Journey() {
 
               {/* Status Indicator */}
               <Editable path="copy.journey.status" label="Timeline Status Badge">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-signal/10 border border-signal/30 font-mono text-xs text-signal shrink-0">
-                  <span className="size-2 rounded-full bg-signal shadow-[0_0_8px_var(--color-signal)] animate-pulse" />
+                <div className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-signal/10 border border-signal/30 font-mono text-xs text-signal shrink-0">
                   <span>{statusText}</span>
                 </div>
               </Editable>
@@ -348,7 +329,6 @@ export function Journey() {
 
               {(Object.keys(CATEGORY_META) as JourneyCategory[]).map((cat) => {
                 const meta = CATEGORY_META[cat];
-                const Icon = meta.icon;
                 const count = indexedJourney.filter((i) => i.entry.category === cat).length;
                 if (count === 0) return null;
                 const isSelected = activeCategory === cat;
@@ -365,7 +345,6 @@ export function Journey() {
                         : "bg-accent/40 text-muted-foreground hover:text-foreground hover:bg-accent border-border/60",
                     )}
                   >
-                    <Icon className="size-3.5" />
                     <span>{meta.shortLabel}</span>
                     <span className="text-[11px] opacity-75">({count})</span>
                   </button>
@@ -398,10 +377,6 @@ export function Journey() {
                 {/* Year Relay Hub Marker (Centered on Desktop) */}
                 <div className="sticky top-20 z-20 flex items-center justify-start md:justify-center mb-12 pl-1.5 md:pl-0">
                   <div className="flex items-center gap-3 rounded-2xl border border-signal/40 bg-background/95 backdrop-blur-xl px-5 py-2 shadow-[0_0_30px_rgba(128,82,255,0.18)]">
-                    <span
-                      className="size-3 rounded-full bg-signal shadow-[0_0_12px_var(--color-signal)] animate-pulse"
-                      aria-hidden="true"
-                    />
                     <div className="flex items-baseline gap-2">
                       <span className="font-mono text-lg font-bold text-foreground">
                         {group.year}
@@ -420,7 +395,6 @@ export function Journey() {
                 <div className="space-y-10 md:space-y-12">
                   {group.items.map(({ entry, originalIndex }, idx) => {
                     const meta = CATEGORY_META[entry.category] || CATEGORY_META.main;
-                    const Icon = meta.icon;
                     // Alternates left and right on desktop
                     const isEven = idx % 2 === 0;
                     const isHovered = hoveredIdx === originalIndex;
@@ -512,12 +486,10 @@ export function Journey() {
                                         meta.badgeClass,
                                       )}
                                     >
-                                      <Icon className="size-3.5" />
                                       {meta.shortLabel}
                                     </span>
                                     {entry.location && (
                                       <span className="inline-flex items-center gap-1 font-mono text-xs text-white/95 bg-black/65 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/15">
-                                        <MapPin className="size-3 text-saffron" />
                                         {entry.location}
                                       </span>
                                     )}
@@ -537,7 +509,6 @@ export function Journey() {
                                           meta.badgeClass,
                                         )}
                                       >
-                                        <Icon className="size-3.5" />
                                         {meta.shortLabel}
                                       </span>
                                       <span className="font-mono text-xs font-medium text-muted-foreground">
@@ -546,7 +517,6 @@ export function Journey() {
                                     </div>
                                     {entry.location && (
                                       <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground">
-                                        <MapPin className="size-3 text-saffron/80" />
                                         {entry.location}
                                       </span>
                                     )}
