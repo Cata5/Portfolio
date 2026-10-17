@@ -3,7 +3,6 @@
 import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 
 import { Editable } from "@/components/editor/editable";
 import { useEditor } from "@/components/editor/editor-context";
@@ -248,7 +247,7 @@ export function Journey() {
             {/* Quick Career Telemetry Metrics */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               <Editable path="copy.journey.statSpanValue" label="Span Metric">
-                <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
+                <div className="rounded-xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
                   <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                     {statSpanLabel}
                   </span>
@@ -259,7 +258,7 @@ export function Journey() {
                 </div>
               </Editable>
 
-              <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between">
+              <div className="rounded-xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                   {statMilestonesLabel}
                 </span>
@@ -272,7 +271,7 @@ export function Journey() {
               </div>
 
               <Editable path="copy.journey.statHackathonsValue" label="Hackathons Metric">
-                <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
+                <div className="rounded-xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
                   <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                     {statHackathonsLabel}
                   </span>
@@ -284,7 +283,7 @@ export function Journey() {
               </Editable>
 
               <Editable path="copy.journey.statRoboticsValue" label="Robotics Metric">
-                <div className="rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
+                <div className="rounded-xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
                   <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                     {statRoboticsLabel}
                   </span>
@@ -296,7 +295,7 @@ export function Journey() {
               </Editable>
 
               <Editable path="copy.journey.statOpenSourceValue" label="Open Source Metric">
-                <div className="col-span-2 sm:col-span-1 rounded-2xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
+                <div className="col-span-2 sm:col-span-1 rounded-xl border border-border/60 bg-accent/20 p-3.5 flex flex-col justify-between h-full">
                   <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                     {statOpenSourceLabel}
                   </span>
@@ -462,7 +461,7 @@ export function Journey() {
                           >
                             <div
                               className={cn(
-                                "overflow-hidden rounded-3xl border border-border/50 bg-card/40 backdrop-blur-md transition-all duration-300",
+                                "overflow-hidden rounded-xl border border-border/50 bg-card/40 backdrop-blur-md transition-all duration-300",
                                 "hover:bg-card/80 hover:shadow-2xl hover:-translate-y-1",
                                 meta.borderHoverClass,
                                 meta.bgGlowClass,
@@ -482,14 +481,14 @@ export function Journey() {
                                   <div className="absolute bottom-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2">
                                     <span
                                       className={cn(
-                                        "inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 font-mono text-xs uppercase tracking-wider font-semibold backdrop-blur-md bg-background/85",
+                                        "inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 font-mono text-xs uppercase tracking-wider font-semibold bg-background/95",
                                         meta.badgeClass,
                                       )}
                                     >
                                       {meta.shortLabel}
                                     </span>
                                     {entry.location && (
-                                      <span className="inline-flex items-center gap-1 font-mono text-xs text-white/95 bg-black/65 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/15">
+                                      <span className="inline-flex items-center gap-1 font-mono text-xs text-white/95 bg-black/80 px-2.5 py-0.5 rounded-full border border-white/15">
                                         {entry.location}
                                       </span>
                                     )}
@@ -543,19 +542,17 @@ export function Journey() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         aria-label={`Link for ${entry.title}`}
-                                        className="inline-flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-signal transition-colors shrink-0 pt-1"
+                                        className="inline-flex items-center text-xs font-mono text-muted-foreground hover:text-signal underline decoration-border hover:decoration-signal transition-colors shrink-0 pt-1"
                                       >
                                         <span>Link</span>
-                                        <ArrowUpRight className="size-3.5" />
                                       </a>
                                     ) : (
                                       <Link
                                         href={entry.link}
                                         aria-label={`Project link for ${entry.title}`}
-                                        className="inline-flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-signal transition-colors shrink-0 pt-1"
+                                        className="inline-flex items-center text-xs font-mono text-muted-foreground hover:text-signal underline decoration-border hover:decoration-signal transition-colors shrink-0 pt-1"
                                       >
                                         <span>Project</span>
-                                        <ArrowUpRight className="size-3.5" />
                                       </Link>
                                     )
                                   )}

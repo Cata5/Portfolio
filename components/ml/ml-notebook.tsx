@@ -1,7 +1,5 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
-
 import { Editable } from "@/components/editor/editable";
 import { useEditor } from "@/components/editor/editor-context";
 import { GlassCard } from "@/components/glass-card";
@@ -70,10 +68,6 @@ export function MLNotebook() {
                             <span className="underline decoration-signal/40 underline-offset-4 transition-colors group-hover/ds:decoration-signal">
                               {run.dataset}
                             </span>
-                            <ArrowUpRight
-                              className="size-3 shrink-0 transition-transform duration-200 group-hover/ds:translate-x-0.5 group-hover/ds:-translate-y-0.5"
-                              aria-hidden="true"
-                            />
                           </a>
                         ) : run ? (
                           run[field as keyof typeof run]

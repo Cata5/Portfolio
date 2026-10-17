@@ -3,7 +3,6 @@
 import { useCallback, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  ArrowUpRight,
   ChevronLeft,
   ChevronRight,
   Layers,
@@ -98,8 +97,8 @@ export function FeaturedProjects() {
       className={cn(
         "relative scroll-mt-16 transition-all duration-200",
         isEditing && "cursor-pointer group/section",
-        isEditing && !isSectionSelected && "hover:ring-1 hover:ring-signal/40 hover:ring-offset-4 hover:ring-offset-background rounded-3xl",
-        isSectionSelected && "ring-2 ring-signal ring-offset-6 ring-offset-background rounded-3xl bg-signal/[0.015]",
+        isEditing && !isSectionSelected && "hover:ring-1 hover:ring-signal/40 hover:ring-offset-4 hover:ring-offset-background rounded-xl",
+        isSectionSelected && "ring-2 ring-signal ring-offset-6 ring-offset-background rounded-xl bg-signal/[0.015]",
       )}
     >
       {/* Floating Section Status Badge when Selected in Edit Mode */}
@@ -117,7 +116,7 @@ export function FeaturedProjects() {
         <div
           role="tablist"
           aria-label="Featured systems"
-          className="mb-2 -mt-2 inline-flex max-w-full flex-wrap items-center gap-1 rounded-2xl border border-border/50 bg-card/40 p-1 backdrop-blur-md"
+          className="mb-2 -mt-2 inline-flex max-w-full flex-wrap items-center gap-1 rounded-xl border border-border/50 bg-card/40 p-1 backdrop-blur-md"
         >
           {FLAGSHIPS.map((f, i) => {
             const selected = f.id === flagship;
@@ -276,10 +275,9 @@ export function FeaturedProjects() {
                 <ProjectLink
                   href={`/projects/${vortex.id}`}
                   src={vortex.image ?? undefined}
-                  className="group mt-5 inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-signal"
+                  className="group mt-5 inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground underline decoration-signal/40 underline-offset-4 transition-colors hover:text-signal hover:decoration-signal"
                 >
                   View full project page &amp; GitHub
-                  <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </ProjectLink>
               </div>
 
@@ -311,7 +309,7 @@ export function FeaturedProjects() {
               type="button"
               aria-label="Previous runtime"
               onClick={() => go(index - 1)}
-              className="grid size-9 place-items-center rounded-full border border-border/60 bg-card/70 text-muted-foreground backdrop-blur-sm transition-all duration-200 hover:border-signal/50 hover:text-signal active:scale-95 cursor-pointer"
+              className="grid size-9 place-items-center rounded-full border border-border/60 bg-card/90 text-muted-foreground transition-all duration-200 hover:border-signal/50 hover:text-signal active:scale-95 cursor-pointer"
             >
               <ChevronLeft className="size-4" />
             </button>
@@ -338,7 +336,7 @@ export function FeaturedProjects() {
               type="button"
               aria-label="Next runtime"
               onClick={() => go(index + 1)}
-              className="grid size-9 place-items-center rounded-full border border-border/60 bg-card/70 text-muted-foreground backdrop-blur-sm transition-all duration-200 hover:border-signal/50 hover:text-signal active:scale-95 cursor-pointer"
+              className="grid size-9 place-items-center rounded-full border border-border/60 bg-card/90 text-muted-foreground transition-all duration-200 hover:border-signal/50 hover:text-signal active:scale-95 cursor-pointer"
             >
               <ChevronRight className="size-4" />
             </button>

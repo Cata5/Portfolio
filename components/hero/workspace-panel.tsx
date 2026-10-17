@@ -26,7 +26,7 @@ export function WorkspacePanel() {
     <div
       role="region"
       aria-label={currently.label}
-      className="hero-workspace w-full max-w-[300px] border border-border/50 bg-card/85 p-4 backdrop-blur-sm"
+      className="hero-workspace w-full max-w-[300px] border border-border/70 bg-card/95 p-4 shadow-xl"
     >
       <div className="flex items-center justify-between gap-4 pb-3">
         <Editable path="site.currently.label" label="Widget Label" inline>

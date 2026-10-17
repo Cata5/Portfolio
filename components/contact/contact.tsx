@@ -1,7 +1,5 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
-
 import { Editable } from "@/components/editor/editable";
 import { useEditor } from "@/components/editor/editor-context";
 import { GlassCard } from "@/components/glass-card";
@@ -53,7 +51,6 @@ export function Contact() {
                         className="group inline-flex items-baseline gap-2 font-mono text-lg tracking-tight text-saffron transition-colors hover:text-foreground md:text-2xl"
                       >
                         {site.email}
-                        <ArrowUpRight className="size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                       </a>
                     </Editable>
                   </Magnetic>
@@ -67,7 +64,7 @@ export function Contact() {
                       rel="noreferrer"
                       className="transition-colors hover:text-foreground"
                     >
-                      GitHub ↗
+                      GitHub
                     </a>
                   </Editable>
                   <span aria-hidden="true">·</span>
@@ -78,7 +75,7 @@ export function Contact() {
                       rel="noreferrer"
                       className="transition-colors hover:text-foreground"
                     >
-                      LinkedIn ↗
+                      LinkedIn
                     </a>
                   </Editable>
                   <span aria-hidden="true">·</span>
@@ -89,7 +86,7 @@ export function Contact() {
                       rel="noreferrer"
                       className="transition-colors hover:text-foreground"
                     >
-                      Instagram ↗
+                      Instagram
                     </a>
                   </Editable>
                 </div>

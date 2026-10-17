@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 
-import { ChevronDown } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useReducedMotion } from "motion/react";
 
@@ -1379,7 +1378,7 @@ export function TriangleWorld() {
       >
         <span className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
           keep scrolling
-          <ChevronDown className="size-3.5 animate-bounce text-signal" />
+          <span className="size-1.5 rounded-full bg-signal animate-pulse" />
         </span>
       </div>
     </>

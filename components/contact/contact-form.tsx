@@ -201,7 +201,7 @@ export function ContactForm({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="flex flex-col items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center backdrop-blur-md"
+            className="flex flex-col items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center backdrop-blur-md"
           >
             <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40 shadow-[0_0_20px_rgba(52,211,153,0.3)]">
               <CheckCircle2 className="size-7" />
@@ -310,7 +310,7 @@ export function ContactForm({
                   name="message"
                   required
                   rows={4}
-                  placeholder="Tell me about your project, idea, or role..."
+                  placeholder="What are you building, or how can I help?"
                   value={formData.message}
                   onChange={handleChange}
                   disabled={status === "submitting"}

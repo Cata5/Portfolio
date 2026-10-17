@@ -41,7 +41,7 @@ export function Certifications() {
             return (
               <li
                 key={cert.id || idx}
-                className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-muted/20 transition-all duration-300 hover:-translate-y-0.5 hover:border-signal/40 hover:bg-muted/30 hover:shadow-[0_18px_50px_-24px_rgba(128,82,255,0.4)]"
+                className="group relative flex flex-col overflow-hidden rounded-xl border border-border/50 bg-muted/20 transition-all duration-300 hover:-translate-y-0.5 hover:border-signal/40 hover:bg-muted/30 hover:shadow-[0_18px_50px_-24px_rgba(128,82,255,0.4)]"
               >
                 <Editable
                   path={`certifications.${idx}`}

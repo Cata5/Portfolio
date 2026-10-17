@@ -526,9 +526,9 @@ export function ChatView() {
                     }`}
                 >
                   <div
-                    className={`max-w-[94%] sm:max-w-[92%] 2xl:max-w-[88%] rounded-2xl p-4 sm:p-4.5 2xl:p-5 text-[13.5px] 2xl:text-[14.5px] leading-relaxed backdrop-blur-md shadow-lg ${msg.role === "user"
-                      ? "bg-signal/15 border border-signal/30 text-foreground font-medium rounded-tr-none shadow-signal/5"
-                      : "border border-border/40 bg-card/40 text-foreground/90 rounded-tl-none ring-1 ring-white/5"
+                    className={`max-w-[94%] sm:max-w-[92%] 2xl:max-w-[88%] rounded-xl p-4 sm:p-4.5 2xl:p-5 text-[13.5px] 2xl:text-[14.5px] leading-relaxed shadow-lg ${msg.role === "user"
+                      ? "bg-signal/20 border border-signal/40 text-foreground font-medium rounded-tr-none shadow-signal/5"
+                      : "border border-border/50 bg-card/70 text-foreground/90 rounded-tl-none ring-1 ring-white/5"
                       }`}
                   >
                     {/* Thinking trace: live while streaming, expandable after */}
@@ -625,17 +625,17 @@ export function ChatView() {
             type="button"
             onClick={scrollToBottom}
             title="Scroll to the newest message"
-            className="absolute bottom-2 right-3 z-10 inline-flex size-7 items-center justify-center rounded-full border border-signal/40 bg-neutral-950/80 text-signal shadow-lg backdrop-blur-md transition-all hover:bg-signal hover:text-signal-ink animate-in fade-in slide-in-from-bottom-1 cursor-pointer"
+            className="absolute bottom-2 right-3 z-10 inline-flex size-7 items-center justify-center rounded-full border border-signal/40 bg-neutral-950/90 text-signal shadow-lg transition-all hover:bg-signal hover:text-signal-ink animate-in fade-in slide-in-from-bottom-1 cursor-pointer"
           >
             <ArrowDown className="size-3.5" />
           </button>
         )}
       </div>
 
-      {/* Frosted Glass Input Container */}
+      {/* Input Container */}
       <form
         onSubmit={handleSubmit}
-        className="border-t border-border/40 bg-card/30 p-3 sm:p-4 backdrop-blur-md"
+        className="border-t border-border/40 bg-card/60 p-3 sm:p-4"
       >
         {/* Auto-navigate control: lets the page follow the assistant's jumps */}
         <div className="mb-2.5 flex items-center justify-between gap-2 px-0.5">

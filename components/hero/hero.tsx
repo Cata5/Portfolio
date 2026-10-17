@@ -2,8 +2,6 @@
 
 import { useRef } from "react";
 
-import { ArrowDown, ArrowUpRight } from "lucide-react";
-
 import { Container } from "@/components/container";
 import { CurrentYear } from "@/components/current-year";
 import { GlassCard } from "@/components/glass-card";
@@ -226,16 +224,16 @@ export function Hero() {
 
             {/* Verified proof strip — quick technical signals */}
             <div className="hero-proof-strip mt-5 sm:mt-6 flex flex-wrap items-center gap-2 font-mono text-[11px]">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-secondary/80 px-2.5 py-1 text-foreground/90">
                 UniHack 1st
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-secondary/80 px-2.5 py-1 text-foreground/90">
                 2× InfoEducație Silver
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-secondary/80 px-2.5 py-1 text-foreground/90">
                 FTC Nationals
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/60 px-2.5 py-1 text-foreground/90 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-secondary/80 px-2.5 py-1 text-foreground/90">
                 40+ Repos
               </span>
             </div>
@@ -244,7 +242,6 @@ export function Hero() {
               <Magnetic>
                 <Button nativeButton={false} render={<a href="#work" />}>
                   View work
-                  <ArrowDown className="size-4 transition-transform duration-200 group-hover/button:translate-y-0.5" />
                 </Button>
               </Magnetic>
               <Magnetic strength={0.2}>
@@ -252,10 +249,9 @@ export function Hero() {
                   href={site.github}
                   target="_blank"
                   rel="noreferrer"
-                  className="group inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.03em] text-muted-foreground transition-colors hover:text-foreground"
+                  className="group inline-flex items-center text-[13px] font-semibold uppercase tracking-[0.03em] text-muted-foreground transition-colors hover:text-foreground"
                 >
                   GitHub
-                  <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </a>
               </Magnetic>
             </div>

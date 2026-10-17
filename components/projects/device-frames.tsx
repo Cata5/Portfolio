@@ -59,7 +59,7 @@ export function PhoneFrame({
         className,
       )}
     >
-      <div className="relative aspect-[9/19] rounded-[1.6rem] border border-border/80 bg-neutral-900/95 p-1.5 shadow-xl shadow-black/50 ring-1 ring-white/10 backdrop-blur-md">
+      <div className="relative aspect-[9/19] rounded-[1.6rem] border border-border/80 bg-neutral-900/95 p-1.5 shadow-xl shadow-black/50 ring-1 ring-white/10">
         <div className="relative h-full w-full overflow-hidden rounded-[1.3rem] bg-black">
           <FrameScreen src={src} alt={alt} sizes="260px" />
           {/* Punch-hole camera */}
@@ -96,7 +96,7 @@ export function TVFrame({
       )}
     >
       {/* OLED TV Panel */}
-      <div className="relative w-full rounded-xl border border-border/80 bg-neutral-900/95 p-1.5 shadow-2xl shadow-black/50 ring-1 ring-white/10 backdrop-blur-md">
+      <div className="relative w-full rounded-xl border border-border/80 bg-neutral-900/95 p-1.5 shadow-2xl shadow-black/50 ring-1 ring-white/10">
         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg bg-black">
           <FrameScreen src={src} alt={alt} sizes="640px" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent" />
@@ -134,7 +134,7 @@ export function DesktopFrame({
       <div className="flex w-full items-end gap-2.5 sm:gap-3.5">
         {/* Pro Studio Monitor */}
         <div className="flex flex-1 flex-col items-center">
-          <div className="relative w-full rounded-lg border border-border/80 bg-neutral-900/95 p-1.5 shadow-xl shadow-black/40 ring-1 ring-white/10 backdrop-blur-md">
+          <div className="relative w-full rounded-lg border border-border/80 bg-neutral-900/95 p-1.5 shadow-xl shadow-black/40 ring-1 ring-white/10">
             <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[0.35rem] bg-black">
               <FrameScreen src={src} alt={alt} sizes="540px" />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.04] to-transparent" />

@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 
 import { Editable } from "@/components/editor/editable";
@@ -74,13 +73,9 @@ function ActivityCard({
             target="_blank"
             rel="noreferrer"
             aria-label={`View more about ${activity.title}`}
-            className="group/link mt-5 inline-flex w-fit items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-signal"
+            className="group/link mt-5 inline-flex w-fit items-center text-xs font-medium text-muted-foreground underline decoration-border hover:decoration-signal transition-colors hover:text-signal"
           >
             View more
-            <ArrowUpRight
-              className="size-3.5 transition-transform duration-200 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5"
-              aria-hidden="true"
-            />
           </a>
         )}
       </div>

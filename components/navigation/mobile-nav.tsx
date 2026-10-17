@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Menu } from "lucide-react";
 
 import { scrollToId } from "@/components/motion/lenis";
 import { useRAG } from "@/components/rag/rag-context";
@@ -69,7 +68,10 @@ export function MobileNav({ activeSection }: MobileNavProps) {
           />
         }
       >
-        <Menu className="size-4" />
+        <span className="flex flex-col items-center justify-center gap-1 size-4" aria-hidden="true">
+          <span className="h-0.5 w-3.5 rounded-full bg-current" />
+          <span className="h-0.5 w-3.5 rounded-full bg-current" />
+        </span>
       </SheetTrigger>
       <SheetContent
         side="right"
@@ -162,9 +164,9 @@ export function MobileNav({ activeSection }: MobileNavProps) {
               href={site.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors"
             >
-              GitHub <ArrowUpRight className="size-3" />
+              GitHub
             </Link>
           </div>
         </div>
