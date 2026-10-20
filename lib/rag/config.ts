@@ -22,7 +22,8 @@ export function getDefaultRAGConfig(): RAGConfig {
       embeddingProvider: (process.env.RAG_EMBEDDING_PROVIDER as ModelConfig["embeddingProvider"]) || "openai-compatible",
       embeddingBaseUrl,
       embeddingModel: process.env.LOCAL_EMBEDDING_MODEL || "text-embedding-nomic-embed-text-v1.5",
-      embeddingDimension: parseInt(process.env.LOCAL_EMBEDDING_DIM || "768", 10),
+      embeddingDimension: parseInt(process.env.LOCAL_EMBEDDING_DIM || "384", 10),
+      embeddingMaxInputTokens: parseInt(process.env.LOCAL_EMBEDDING_MAX_TOKENS || "400", 10),
 
       rerankerProvider: (process.env.RAG_RERANKER_PROVIDER as ModelConfig["rerankerProvider"]) || "local-cross-encoder",
       rerankerBaseUrl,
@@ -30,12 +31,12 @@ export function getDefaultRAGConfig(): RAGConfig {
 
       generationProvider: (process.env.RAG_GENERATION_PROVIDER as ModelConfig["generationProvider"]) || "openai-compatible",
       generationBaseUrl: llmBaseUrl,
-      generationModel: process.env.LOCAL_LLM_MODEL || "unsloth/gemma-4-E2B-it-qat-GGUF",
+      generationModel: process.env.LOCAL_LLM_MODEL || "unsloth/Qwen3.5-0.8B-MTP-GGUF",
       apiKey: process.env.LOCAL_LLM_API_KEY || "",
       temperature: parseFloat(process.env.LOCAL_LLM_TEMPERATURE || "0.2"),
-      maxTokens: parseInt(process.env.LOCAL_LLM_MAX_TOKENS || "2048", 10),
+      maxTokens: parseInt(process.env.LOCAL_LLM_MAX_TOKENS || "900", 10),
       topP: parseFloat(process.env.LOCAL_LLM_TOP_P || "0.95"),
-      frequencyPenalty: parseFloat(process.env.LOCAL_LLM_FREQUENCY_PENALTY || "0.0"),
+      frequencyPenalty: parseFloat(process.env.LOCAL_LLM_FREQUENCY_PENALTY || "0.3"),
       presencePenalty: parseFloat(process.env.LOCAL_LLM_PRESENCE_PENALTY || "0.0"),
     },
     retrieval: {
@@ -60,7 +61,7 @@ export function getDefaultRAGConfig(): RAGConfig {
       batchSize: parseInt(process.env.RAG_RERANKER_BATCH_SIZE || "16", 10),
     },
     context: {
-      maxContextTokens: parseInt(process.env.RAG_MAX_CONTEXT_TOKENS || "3072", 10),
+      maxContextTokens: parseInt(process.env.RAG_MAX_CONTEXT_TOKENS || "8192", 10),
       targetChunkTokens: parseInt(process.env.RAG_TARGET_CHUNK_TOKENS || "250", 10),
       chunkOverlapTokens: parseInt(process.env.RAG_CHUNK_OVERLAP_TOKENS || "40", 10),
       enableParentContextExpansion: process.env.RAG_PARENT_EXPANSION !== "false",

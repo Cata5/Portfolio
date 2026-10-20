@@ -1,0 +1,2268 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-19T11:06:42.264Z",
+  "model": "unsloth/Qwen3.5-4B-MTP-GGUF",
+  "entries": [
+    {
+      "id": "eval_01_vortex_stream",
+      "question": "How does Vortex handle video streaming and playback on desktop?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Vortex handles desktop video streaming and playback using mpv (mediamp) as its primary engine, which is integrated directly into the app rather than relying on an external browser or webview [2][5].\nThe playback architecture on desktop operates as follows:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Primary Engine: The desktop client uses the `mpv` library for playback, leveraging its high performance and hardware acceleration capabilities [2][5].",
+            "Authentication Handling: Since mpv cannot natively handle OAuth credentials for services like Google Drive, Vortex implements a loopback `DriveStreamProxy`. This proxy injects the necessary OAuth credentials into mpv's stream URLs, allowing authenticated access to remote sources like Google Drive [4][5].",
+            "Source Aggregation: The desktop app aggregates content from five working protocols: Google Drive (via OAuth), SMB, SFTP, FTP/FTPS, and WebDAV [2][4].",
+            "Metadata: It enriches the stream with TMDB metadata (posters, cast, etc.) which is fetched and cached locally to improve the user experience [4][6].",
+            "Fallbacks: While FFmpeg is used as a software-decoder fallback on mobile and TV devices, the desktop build relies on mpv's native capabilities [2]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Note: NFS and UPnP are currently listed as unimplemented placeholders in the project documentation and are not yet functional [4][7]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "Vortex",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Documentation Status",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 6,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Confirmed Features (re-verified 2026-08-17 against the source)",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 7,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Vortex",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/vortex",
+          "label": "Open Vortex",
+          "type": "route",
+          "target": "/projects/vortex"
+        }
+      ],
+      "recordedMs": 11284
+    },
+    {
+      "id": "eval_02_vortex_downloads",
+      "question": "Does Vortex support offline downloads and how are they managed?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Yes, Vortex supports offline downloads for all five working storage providers (Google Drive, SMB, SFTP, FTP/FTPS, and WebDAV) [1][3]. The download management system is built using WorkManager to handle the queue, which includes features for pausing/resuming downloads, retrying failed tasks, and selecting a specific storage location [5][6].\nThe system enforces several management constraints and safeguards:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Wi-Fi Only Mode: Downloads are restricted to Wi-Fi connections to prevent data usage on cellular networks [5][6].",
+            "Free-Space Guard: The app checks available storage before initiating downloads to prevent failures due to lack of space [5][6].",
+            "Quota-Based Auto-Cleanup: Unused downloads are automatically removed based on configured storage quotas [5][6]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Additionally, Vortex includes a YouTube-powered music library that supports real offline audio downloads with playlist management via M3U import/export [5][6]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Vortex",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "Vortex",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Confirmed Features (re-verified 2026-08-17 against the source)",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 6,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Confirmed Features (re-verified 2026-08-17 against the source)",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/vortex",
+          "label": "Open Vortex",
+          "type": "route",
+          "target": "/projects/vortex"
+        }
+      ],
+      "recordedMs": 8911
+    },
+    {
+      "id": "eval_03_vortex_tech_stack",
+      "question": "What technologies and libraries are used to build Vortex?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Vortex is built using Kotlin 2.2 as the primary language, with Jetpack Compose for UI on Android and Compose Multiplatform for the Windows desktop client [1][4]. The application leverages Media3 / ExoPlayer 1.10 for playback on mobile and TV, supplemented by an FFmpeg fallback (via nextlib) for software decoding on phones and tablets [1][4]. On the Windows desktop, it utilizes an in-app mpv / mediamp player with external fallback capabilities [1][4].\nData persistence is handled by Room (Android) and Room KMP + bundled SQLite for the desktop client [1][4]. For network storage integration, the app implements direct support for Google Drive API (using OAuth 2.0 via WebView/device loopback), SMB, SFTP, FTP/FTPS, and WebDAV [1][4]. It also integrates the TMDB API for metadata enrichment and the Google Cast SDK with a custom NanoHTTPD proxy for casting [1][4]. Additional libraries include Paging 3, Coil for image loading, WorkManager for background downloads, Android Keystore for secure secret storage, and JNA for desktop window hooks [1][4].\nNote: While NFS and UPnP are present in the source code, they are currently unimplemented placeholders and not yet functional providers [6][8]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Vortex",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Portfolio Projects Directory",
+          "heading": "Vortex",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 6,
+          "title": "Portfolio Projects Directory",
+          "heading": "Architecture",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 8,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Confirmed Features (re-verified 2026-08-17 against the source)",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-stack",
+          "label": "View Tech Stack & Skills",
+          "type": "scroll",
+          "target": "stack"
+        }
+      ],
+      "recordedMs": 11132
+    },
+    {
+      "id": "eval_04_vortex_cloud_storage",
+      "question": "Which remote storage protocols does Vortex support for streaming?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Vortex supports five fully implemented remote storage protocols for streaming: Google Drive (via OAuth 2.0), SMB, SFTP, FTP/FTPS, and WebDAV [1][5].\nThe following protocols are listed in the project documentation but are explicitly marked as unimplemented placeholders and are not currently functional: NFS and UPnP [2][7]."
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Implemented: Google Drive, SMB, SFTP, FTP/FTPS, WebDAV [1][5]",
+            "Unimplemented (Placeholders): NFS, UPnP [2][7]"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Vortex",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Portfolio Projects Directory",
+          "heading": "Vortex",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Vortex",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-work",
+          "label": "View Featured Project (Vortex)",
+          "type": "scroll",
+          "target": "work"
+        }
+      ],
+      "recordedMs": 5084
+    },
+    {
+      "id": "eval_05_teka_machine",
+      "question": "What is Aplicatie Teka and what was the main challenge in building it?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Aplicatie Teka (also known as Auto Oferta) is a local, offline-first tool designed for Teka that centralizes six Excel workbooks containing product data, client conditions, and promotional brochures. It matches clients with products, applies tiered commercial discounts and configurable TVA/promo formulas, and exports the final offer to Excel [3][5]. The application functions as a Windows desktop app built with Python and PyInstaller, and it also wraps an offline web interface for Android via Capacitor [3][5].\nThe main challenges in building it included:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Complex Data Normalization: Handling six distinct Excel workbooks (sinks, kitchen taps, appliances, accessories, client conditions, and promos) with varying structures to ensure accurate matching [5].",
+            "Dynamic Pricing Logic: Implementing specific tiered-discount formulas and promo calculations that are tightly coupled to Teka's internal commercial conditions, which cannot be easily generalized [5].",
+            "OCR Dependency: The tool requires a local Tesseract installation for image OCR, meaning it lacks universal image recognition capabilities and accuracy varies based on supplier data [3].",
+            "Platform Portability: Delivering a single-file Windows executable via PyInstaller while simultaneously maintaining a responsive offline web UI for Android [3]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "Auto Oferta · Teka",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/aplicatie-teka",
+          "label": "Open Auto Oferta · Teka",
+          "type": "route",
+          "target": "/projects/aplicatie-teka"
+        }
+      ],
+      "recordedMs": 8248
+    },
+    {
+      "id": "eval_06_coral_tech",
+      "question": "What is Coral Tech and what technologies were used?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Coral Tech is the website for an FTC robotics team (#28260) with the theme \"fusing nature with technology.\" It serves as a bilingual (English/Romanian) hub for seasons, activities, members, sponsors, and outreach, featuring a photo album, two arcade games (a procedural maze and a trivia game), and a 10-module admin CMS protected by passkeys and TOTP [1].\nThe technologies used include:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Frameworks: Next.js 16, React 19 [1]",
+            "Languages: TypeScript, Python [1][7]",
+            "Styling: Tailwind CSS v3 [1]",
+            "AI/ML: node-llama-cpp, Ollama, RAG / vector search [1][2]",
+            "Security/Auth: WebAuthn (SimpleWebAuthn), TOTP 2FA (otplib) [1][3]",
+            "Tools: gray-matter, react-markdown, framer-motion [1]",
+            "Deployment: GitHub Pages (static export) [1]"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Coral Tech · FTC team site",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Documentation Status",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "Features",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Technical Skills & Competencies",
+          "heading": "Mobile & Desktop",
+          "filePath": "content/skills.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-projects",
+          "label": "View All Projects Explorer",
+          "type": "scroll",
+          "target": "projects"
+        }
+      ],
+      "recordedMs": 8789
+    },
+    {
+      "id": "eval_07_site_auto",
+      "question": "Tell me about Site Auto and its features.",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Site Auto is a web-based car-parts shop platform built with Next.js 15 and React 19 that integrates AI-powered part detection to streamline the shopping experience [5]. Its core features include:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "AI Part Detection: Users upload photos of car parts, which are processed using a custom YOLOv8 model (Ultralytics) to detect components and match them to products in the catalog [5].",
+            "E-commerce Functionality: The platform supports a full shopping cart managed by Redis, checkout processes, and user authentication via JWT [5].",
+            "3D Product Models: It integrates Three.js (via react-three-fiber) to display interactive 3D models of car parts [5].",
+            "Appointment & Dashboard System: Includes features for scheduling appointments and a dashboard for managing cars and messages [5].",
+            "Floating Chat: A persistent chat interface is available across the site [5]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The project is currently in development without a public GitHub repository, and its documentation consists primarily of the Vite template [1][5]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Confirmed Features",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 5,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Portfolio Recommendation",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/siteauto",
+          "label": "Open Siteauto",
+          "type": "route",
+          "target": "/projects/siteauto"
+        }
+      ],
+      "recordedMs": 7110
+    },
+    {
+      "id": "eval_08_ml_experiments",
+      "question": "What machine learning models and experiments has Catalin worked on?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin has conducted several machine learning experiments and built projects focused on computer vision and language model fine-tuning. His work includes:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "YOLOv8 Fine-tuning: He fine-tuned a Llama 3.2 1B model using QLoRA (4-bit) with the Unsloth library for local inference [1].",
+            "Object Detection & OCR: He developed a license plate recognition pipeline combining YOLO for detection and GLM-OCR for text recognition, streaming results to an ESP32 client [2].",
+            "Custom Architecture Experiments: He explored building custom transformer architectures from scratch, testing configurations such as embedding layers with linear heads, causal masks, and varying block counts (e.g., 4 x Pre-LN blocks) [3].",
+            "YOLO Trainer Tool: He built a desktop application using PySide6 to manage the training, fine-tuning, and testing of YOLO models (v8/11/26), featuring live metric charts and GPU checks [8].",
+            "AI Interface: He created a Flask web application that loads TensorFlow/Keras models for image classification and includes a helper script to index image datasets [7]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Machine Learning Experiments & Notebook",
+          "heading": "QLoRA fine-tune - Llama 3.2 1B (Unsloth 4-bit)",
+          "filePath": "content/ml.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Machine Learning Experiments & Notebook",
+          "heading": "YOLO (plates) + GLM-OCR",
+          "filePath": "content/ml.json"
+        },
+        {
+          "citationId": 3,
+          "title": "Learning Roadmap & Goals",
+          "heading": "4 x Pre-LN block, same as run 05",
+          "filePath": "content/roadmap.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Portfolio Projects Directory",
+          "heading": "AI Interface",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 8,
+          "title": "Portfolio Projects Directory",
+          "heading": "YOLO Trainer",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-ml",
+          "label": "View ML Experiments Notebook",
+          "type": "scroll",
+          "target": "ml"
+        }
+      ],
+      "recordedMs": 10461
+    },
+    {
+      "id": "eval_09_yolo_train",
+      "question": "Which object detection models has Catalin trained?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin has trained and utilized the following object detection models across his projects:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Ultralytics YOLO (specifically YOLOv8): Used in the Detectie project for license-plate detection and in Siteauto for car-part identification. The models were trained using a custom PySide6 training application and fine-tuned on specific datasets (e.g., car-part photos with/without side mirrors) [2][5][7].",
+            "TensorFlow / Keras models: Used in the AI Interface project, where a Flask app loads and runs inference with locally registered Keras models for image classification [6]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "While Catalin has trained these models, the portfolio documentation notes that the SAM (Segment Anything Model) mask generation requires specific weights and a GPU for practical use, though it is part of the data pipeline in the Detectie project [2]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "Detectie",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Portfolio Projects Directory",
+          "heading": "Siteauto",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 6,
+          "title": "Portfolio Projects Directory",
+          "heading": "AI Interface",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Machine Learning Experiments & Notebook",
+          "heading": "QLoRA fine-tune - Llama 3.2 1B (Unsloth 4-bit)",
+          "filePath": "content/ml.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-ml",
+          "label": "View ML Experiments Notebook",
+          "type": "scroll",
+          "target": "ml"
+        }
+      ],
+      "recordedMs": 20409
+    },
+    {
+      "id": "eval_10_skills_languages",
+      "question": "What programming languages does Catalin specialize in?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin's primary programming languages are TypeScript, Python, and Kotlin, which he uses most frequently for mobile and desktop development [1]. For web interfaces and full-stack applications, his primary stack includes Next.js, React, Tailwind CSS, Vite, HTML, and CSS [1]. In backend services, he primarily utilizes Node.js, Flask, and FastAPI [1]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Technical Skills & Competencies",
+          "heading": "Mobile & Desktop",
+          "filePath": "content/skills.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-stack",
+          "label": "View Tech Stack & Skills",
+          "type": "scroll",
+          "target": "stack"
+        }
+      ],
+      "recordedMs": 4240
+    },
+    {
+      "id": "eval_11_android_stack",
+      "question": "What Android and mobile frameworks are listed in the portfolio?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Based on the portfolio documentation, Catalin lists Kotlin as his primary mobile programming language and Jetpack Compose (including Compose Multiplatform for desktop) as the primary UI framework for his Android and mobile projects [4][7].\nThe portfolio does not explicitly list other specific Android SDK libraries or frameworks beyond those used within the Vortex project, which includes:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Jetpack Compose (UI toolkit) [7]",
+            "Navigation3 (navigation library) [7]",
+            "Media3 / ExoPlayer (media playback library) [7]",
+            "Room (database library) [7]",
+            "Google Cast SDK (casting framework) [7]",
+            "WorkManager (background task framework) [7]"
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "These are the specific frameworks and libraries associated with Catalin's mobile work, primarily centered around the Vortex project."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 4,
+          "title": "Technical Skills & Competencies",
+          "heading": "Mobile & Desktop",
+          "filePath": "content/skills.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Portfolio Projects Directory",
+          "heading": "Vortex",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-stack",
+          "label": "View Tech Stack & Skills",
+          "type": "scroll",
+          "target": "stack"
+        }
+      ],
+      "recordedMs": 7813
+    },
+    {
+      "id": "eval_12_backend_tools",
+      "question": "What backend and systems tools does Catalin use?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Based on the portfolio documentation, Catalin's backend and systems tools are primarily centered around his NeuroShell terminal-based AI assistant and Jarvis OS helper, which utilize specific Python libraries and frameworks."
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Terminal & CLI Frameworks: Catalin uses `prompt_toolkit` to drive an interactive REPL for NeuroShell [5].",
+            "AI Model Management: The system manages models across five providers using a custom manager module (`models/manager.py`), supporting Ollama, local GGUF files, Transformers, Hugging Face Cloud, and OpenAI-compatible endpoints [5].",
+            "GPU Abstraction: A dedicated GPU device layer (`gpu/device.py`) maps tensors to CUDA devices or CPU fallbacks [5].",
+            "Execution & Sandboxing: Tools are routed through a sandboxed executor system that restricts filesystem and terminal access to the workspace, blocking dangerous commands [3][5].",
+            "Media Tools: The architecture integrates `rclone` and `qBittorrent` for media management, requiring bundled binaries to function [4].",
+            "State Management: System state (config, registry, history) is stored locally under `~/.neuroshell/` with isolated caches [5].",
+            "Deployment: Projects are packaged using `PyInstaller` with support for `pip-subprocess` to handle dependencies [6]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "While the portfolio defines a \"Backend\" and \"Systems\" project category in its data model [1], the specific backend and systems tools listed in the content are detailed under the NeuroShell and Jarvis projects."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Projects Data Model & Helpers",
+          "heading": "class: Project",
+          "filePath": "data/projects.ts"
+        },
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "Features",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 6,
+          "title": "Portfolio Projects Directory",
+          "heading": "Features",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-stack",
+          "label": "View Tech Stack & Skills",
+          "type": "scroll",
+          "target": "stack"
+        }
+      ],
+      "recordedMs": 11089
+    },
+    {
+      "id": "eval_13_education",
+      "question": "Where does Catalin study and what is his degree?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin studies at ETTI CTI Bucharest (part of POLITEHNICA University) as a Computer & Information Technology (CTI) student [4][7][8]. His degree program is in Computer and Information Technology, and he is currently seeking software engineering roles and internships [7][8]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 4,
+          "title": "Site Profile & Contact Information",
+          "heading": "Currently Building",
+          "filePath": "content/site.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Portfolio Copy & Text Content",
+          "heading": "certifications",
+          "filePath": "content/copy.json"
+        },
+        {
+          "citationId": 8,
+          "title": "Portfolio Sections Content",
+          "heading": "About / Bio",
+          "filePath": "content/sections.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-about",
+          "label": "View About & Education",
+          "type": "scroll",
+          "target": "about"
+        }
+      ],
+      "recordedMs": 3990
+    },
+    {
+      "id": "eval_14_contact_info",
+      "question": "How can I contact Catalin or find his GitHub and LinkedIn?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "You can contact Catalin directly via email at cata.manu06@gmail.com [1]. His GitHub profile is available at https://github.com/Cata5 [1], and his LinkedIn profile is at https://www.linkedin.com/in/cata5 [1]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Site Profile & Contact Information",
+          "heading": "Currently Building",
+          "filePath": "content/site.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-contact",
+          "label": "View Contact & Reach Channels",
+          "type": "scroll",
+          "target": "contact"
+        }
+      ],
+      "recordedMs": 3475
+    },
+    {
+      "id": "eval_15_current_focus",
+      "question": "What is Catalin currently building right now?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin is currently building CataAI, a generative language model built from first principles using Python and PyTorch [2]. This project is explicitly marked as \"in progress\" and is identified as his most recent development effort [2]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 2,
+          "title": "Site Profile & Contact Information",
+          "heading": "Currently Building",
+          "filePath": "content/site.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/cataai",
+          "label": "Open /projects/cataai",
+          "type": "route",
+          "target": "/projects/cataai"
+        }
+      ],
+      "recordedMs": 3540
+    },
+    {
+      "id": "curated-tell-me-about-the-vortex-project-and-what-makes-",
+      "question": "Tell me about the Vortex project and what makes it technically impressive.",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Vortex is Catalin's flagship, client-side media streaming application designed for Android, Android TV, and Windows, requiring no backend or subscription to stream content from sources the user already owns [1][6]. Its technical impressiveness stems from several complex architectural and implementation challenges:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Multi-Protocol Storage Abstraction: It implements a unified provider interface aggregating five distinct remote storage protocols: Google Drive (via OAuth 2.0 with device/web/loopback flows), SMB, SFTP, FTP/FTPS, and WebDAV [1][3].",
+            "Advanced Discovery: The app automatically discovers Local Area Network (LAN) servers using NSD/mDNS to pre-fill connection forms, reducing manual setup friction [1][6].",
+            "Dual Playback Engines: It supports two distinct playback backends: Media3/ExoPlayer for Android devices (with an FFmpeg software-decoder fallback) and mpv/mediamp for the Windows desktop client, allowing for optimized performance across different hardware [1][5].",
+            "Cross-Platform Architecture: Built with Kotlin 2.2 and Jetpack Compose, it utilizes Compose Multiplatform to share domain logic (MediaRepository, TMDBService) between the native Android app and the desktop application [1][5].",
+            "Offline Capabilities: It features a WorkManager-driven download queue with quota cleanup and a YouTube-powered music library that supports real offline downloads [1][6].",
+            "Security: Secrets are stored in an Android Keystore-backed encrypted store rather than the database, ensuring sensitive credentials are never persisted in plain text [1][6]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Note on Unimplemented Features: While NFS and UPnP providers exist in the source code, they are currently unimplemented placeholders and are not offered in the connection UI [7]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Vortex",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 3,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Vortex",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 5,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Documentation Status",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 6,
+          "title": "Portfolio Projects Directory",
+          "heading": "Vortex",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Portfolio Projects Directory",
+          "heading": "Architecture",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-work",
+          "label": "View Featured Project (Vortex)",
+          "type": "scroll",
+          "target": "work"
+        }
+      ],
+      "recordedMs": 11469
+    },
+    {
+      "id": "curated-what-are-the-limitations-of-vortex-and-what-is-p",
+      "question": "What are the limitations of Vortex and what is planned next?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Based on the portfolio documentation, Vortex has several known limitations and planned improvements:\nKnown Limitations [1][2]"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Credential Management: Requires TMDB and Google OAuth credentials in `local.properties`; while the build succeeds without them, metadata and Drive features remain disabled. Client secrets are compiled into `BuildConfig` and can be extracted from release APKs [1].",
+            "Platform Divergence: The Android app and desktop app are separate Gradle builds with duplicated domain logic, creating a risk of feature divergence between platforms [1][2].",
+            "iOS Support: There is no iOS build; the project uses Kotlin/Compose only, and the desktop artifact is currently Windows-x64 only [1].",
+            "Android TV Backup: Backup & restore functionality is gated off on Android TV, and there is no SAF (Storage Access Framework) picker for choosing a backup location [1].",
+            "Database Migration: Room database falls back to a destructive migration, wiping all tables on an unknown-version upgrade [1].",
+            "Demo Environment: The public demo is a static export; the download queue and provider setup require a real device to function [1].",
+            "Unimplemented Protocols: NFS and UPnP are present as placeholders but are not implemented as working providers [2]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Planned Future Work & Improvements [1][2][8]"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Unified Architecture: Consolidate the two separate builds (Android and Desktop) into a single shared core to eliminate duplicated domain logic and reduce divergence risks [2].",
+            "Cross-Platform Support: Add an iOS build to extend support beyond Android and Windows [1].",
+            "Android TV Features: Implement backup & restore functionality on Android TV and add a SAF picker for selecting backup locations [1].",
+            "Safe Database Migrations: Replace the destructive Room migration fallback with a safer versioning strategy to prevent data loss on upgrades [1].",
+            "Live Demo: Transition the public demo from a static export to a live environment that supports the download queue and provider setup [1]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 8,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Vortex",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/vortex",
+          "label": "Open Vortex",
+          "type": "route",
+          "target": "/projects/vortex"
+        }
+      ],
+      "recordedMs": 15893
+    },
+    {
+      "id": "curated-what-is-cataai-and-how-was-it-built",
+      "question": "What is CataAI and how was it built?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "CataAI is a generative language model built from first principles without relying on any existing model library, allowing every step to be explained and defended [1]. It was constructed using Python 3.14, PyTorch, CUDA, NumPy, and custom implementations of BPE tokenization and multi-head self-attention [2].\nThe project follows this specific construction pipeline:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Tokenizer: Catalin implemented a character-level tokenizer (65 symbols) and a Byte Pair Encoding (BPE) tokenizer (384 tokens) trained from scratch on the corpus [4].",
+            "Data Layer: The raw corpus (Shakespeare, ~1.1 MB) is encoded into a single long tensor, split 90/10, and cut into fixed-length context windows where targets are shifted one token ahead [5].",
+            "Model Architecture: The model consists of token and position embeddings followed by four Pre-LayerNorm Transformer blocks. Each block applies residual connections in the order: `x + Attention(LayerNorm(x))` then `x + FeedForward(LayerNorm(x))`, ending with a final LayerNorm and a linear head [4].",
+            "Training: The system uses an AdamW optimizer running a standard `zero_grad → backward → step` loop, logging loss every 500 iterations [4].",
+            "Experiments: An `experiments.py` script sweeps through a matrix of tokenizer and architecture configurations, logging results to JSON for comparison [5]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The project is currently in development as of 2026 [1]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "CataAI",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "CataAI",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Portfolio Projects Directory",
+          "heading": "Features",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Portfolio Projects Directory",
+          "heading": "Architecture",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/cataai",
+          "label": "Open /projects/cataai",
+          "type": "route",
+          "target": "/projects/cataai"
+        }
+      ],
+      "recordedMs": 12580
+    },
+    {
+      "id": "curated-what-is-the-llm-from-scratch-build-roadmap-and-w",
+      "question": "What is the LLM from Scratch build roadmap and what training runs are recorded?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Based on the retrieved evidence, the LLM from Scratch project's roadmap and training runs are managed via a JSON configuration file (`content/roadmap.json`) loaded by the TypeScript code in `data/roadmap.ts`.\nRoadmap Structure\nThe roadmap consists of stages defined in `RoadmapStage` objects, each containing a title, summary, work items, and a status (`done`, `current`, or `planned`) [2]. The specific stages listed in the documentation include:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Embedding + linear head, no attention [3]",
+            "1 head, head_size = 64, causal mask [3]",
+            "4 heads x 16, concat + output projection [3]",
+            "4 heads + MLP 64 -> 256 -> 64 [3]",
+            "4 x Pre-LN block, residual + LayerNorm [3]",
+            "4 x Pre-LN block, same as run 05 [3]"
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Recorded Training Runs\nThe project records specific training runs in `RoadmapRun` objects, which store metadata such as the model architecture, tokenizer type (char or BPE), configuration parameters (window, batch, steps, device), loss metrics (`lossStart`, `lossEnd`), and a generated text sample [2]. The evidence confirms that these runs are stored in `content/roadmap.json` and displayed on the project detail page if the project ID matches `\"llm-from-scratch\"` [4]. While the specific values for each run (e.g., exact loss numbers or model names) are not detailed in the provided text snippets, the system is designed to capture these terminal facts and screenshots [2]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 2,
+          "title": "Roadmap Data & Milestones",
+          "heading": "class: RoadmapRun",
+          "filePath": "data/roadmap.ts"
+        },
+        {
+          "citationId": 3,
+          "title": "Learning Roadmap & Goals",
+          "heading": "4 x Pre-LN block, same as run 05",
+          "filePath": "content/roadmap.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Project Detail Dynamic Route",
+          "heading": "class: detail",
+          "filePath": "app/projects/[slug]/page.tsx"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-ml",
+          "label": "View ML Experiments Notebook",
+          "type": "scroll",
+          "target": "ml"
+        }
+      ],
+      "recordedMs": 12462
+    },
+    {
+      "id": "curated-tell-me-about-the-cheltuieli-expense-tracker",
+      "question": "Tell me about the Cheltuieli expense tracker.",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Cheltuieli is a PyQt6 desktop expense tracker designed to automate the collection of financial data by scanning email inboxes for invoices [1]. It connects to IMAP mailboxes with presets for Gmail, Outlook, Yahoo, and iCloud [3]. The application extracts text from HTML emails, PDFs, and images using Tesseract OCR to identify invoice amounts based on configurable keywords [1][3]. Once extracted, the data is written to a formatted Excel workbook with automatic backup functionality [1].\nKey technical details include:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Architecture: A PyQt6 UI drives background QThread workers to ensure the interface remains responsive during scanning [3].",
+            "Technologies: Python, PyQt6, IMAP, Tesseract OCR (pytesseract), PyMuPDF, openpyxl, Pillow, and PyInstaller [1].",
+            "Status: Completed (listed as 2026) [1], though some analysis notes it as \"In Development\" without a public git repo [2].",
+            "Security: The IMAP password is stored in a `settings.json` file; it is recommended to use an OS keychain instead [5].",
+            "Availability: The source code is not public as it is a real client project, but private walkthroughs can be arranged [6]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Cheltuieli",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Confirmed Features",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Security Summary (verified 2026-08-10)",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 6,
+          "title": "Extended Project Details & Case Studies",
+          "heading": "Source Code",
+          "filePath": "data/project-extras.ts"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/cheltuieli",
+          "label": "Open Cheltuieli",
+          "type": "route",
+          "target": "/projects/cheltuieli"
+        }
+      ],
+      "recordedMs": 9759
+    },
+    {
+      "id": "curated-what-is-apps-manager-and-what-does-it-do",
+      "question": "What is Apps Manager and what does it do?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "The retrieved evidence describes two distinct projects that might be confused with \"Apps Manager,\" but neither matches that exact name:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "NeuroShell: A terminal-based AI assistant with a slash-command palette and model hot-swapping capabilities [1].",
+            "Apps Manager (Desktop): A Windows game/app launcher and winget installer built with Electron, React, and TypeScript [2]. This project handles game scanning, launch tracking, and app installation but does not appear to be a general \"Apps Manager\" for managing installed software in the traditional sense.",
+            "Teka: A client/product pricing calculator tool that loads Excel sources and generates offers [3][6]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "If you are referring to the Desktop Apps Manager, it is a Windows-based launcher that scans configured paths for games, allows manual management (add/remove/rename), tracks playtime, and installs apps via winget with progress visualization [2]. It is currently in development without a public GitHub repository [2]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Features",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Portfolio Recommendation",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 3,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Apps Manager",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 6,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-projects",
+          "label": "View All Projects Explorer",
+          "type": "scroll",
+          "target": "projects"
+        }
+      ],
+      "recordedMs": 7314
+    },
+    {
+      "id": "curated-what-is-the-dataset-generator-project-used-for",
+      "question": "What is the Dataset Generator project used for?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "The Dataset Generator project is a desktop tool designed to build image datasets from multiple sources (Bing, Google, and iCrawler) and generate SAM-based masks along with annotation files for training purposes [2]. It utilizes user-agent spoofing for scraping, organizes output by class, and includes two CustomTkinter front-ends to drive the pipeline [3]. The project also ships with CUDA-toolchain requirements to support on-machine training using PyTorch [2]."
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Purpose: Assembles image datasets from scraping backends and generates Segment Anything (SAM) masks and JSON annotation files for training [2].",
+            "Technologies: Python, CustomTkinter, Selenium, BeautifulSoup, icrawler, bing-image-downloader, Pillow, OpenCV, Ultralytics, Segment Anything (SAM), and PyTorch (CUDA) [2].",
+            "Status: Completed (though documentation is noted as being in a basic template state) [2].",
+            "Limitations: The source code is not publicly available; it can be shown privately or discussed during interviews [4]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "Dataset Generator",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 3,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Documentation Status",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 4,
+          "title": "Extended Project Details & Case Studies",
+          "heading": "Source Code",
+          "filePath": "data/project-extras.ts"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/dataset-generator",
+          "label": "Open Dataset Generator",
+          "type": "route",
+          "target": "/projects/dataset-generator"
+        }
+      ],
+      "recordedMs": 8812
+    },
+    {
+      "id": "curated-how-does-detectie-detect-and-read-license-plates",
+      "question": "How does Detectie detect and read license plates?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Detectie detects and reads license plates using a two-stage pipeline: Ultralytics YOLO identifies the license plate region within an image, and EasyOCR performs Optical Character Recognition (OCR) on the cropped plate area [3][4].\nThe system architecture operates as follows:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Detection: A Python server (`server.py`) runs YOLO inference to locate plates and filters results by confidence score [4].",
+            "Recognition: The same server crops the detected plate region and passes it to EasyOCR for text extraction [4].",
+            "Streaming: Detection results (including bounding box coordinates and recognized text) are streamed in real-time via WebSockets to a client device [3][5].",
+            "Client Execution: The results are rendered on an ESP32 microcontroller firmware (written in C++/Arduino) or a phone browser client, which receives the JSON messages containing the plate data [3][5].",
+            "Training: A separate desktop application built with PySide6 allows users to train and fine-tune the YOLO models locally before deployment [3][5]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "Detectie",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Portfolio Recommendation",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-projects",
+          "label": "View All Projects Explorer",
+          "type": "scroll",
+          "target": "projects"
+        }
+      ],
+      "recordedMs": 9035
+    },
+    {
+      "id": "curated-what-is-the-primarie-e-services-portal",
+      "question": "What is the Primarie E-Services Portal?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "The Primarie E-Services Portal is a municipal e-services platform designed to consolidate declarations, tax certificates, and fine payments into a single account [1]. It is currently in development as a Next.js application built with React 19, TypeScript, and Tailwind CSS v4, utilizing SQLite for data storage and server actions for validation and session management [2]. Key security features include scrypt password hashing with an optional pepper, brute-force login throttling (5 attempts per 15 minutes), and role-based dashboards that adhere to OWASP A01 access control standards [3]. The system also implements audit logging for sensitive actions and includes a guided declaration wizard for user interaction [2]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Primarie (E-Services Portal)",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "Architecture",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "Primarie (E-Services Portal)",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/primarie",
+          "label": "Open Primarie (E-Services Portal)",
+          "type": "route",
+          "target": "/projects/primarie"
+        }
+      ],
+      "recordedMs": 5729
+    },
+    {
+      "id": "curated-what-is-the-liceul-teoretic-ion-cantacuzino-webs",
+      "question": "What is the Liceul Teoretic Ion Cantacuzino website?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "The website for Liceul Teoretic Ion Cantacuzino is a complete school website built on Next.js 16 and SQLite (better-sqlite3) that serves as a project by Catalin Manu [1][2]. It includes public pages for news, classes, teachers, documents, results, gallery, a school magazine, case-study projects, FAQs, e-learning, timetables across 28 public routes, and a contact section [3]. The site also features a distinguishing ~2,700-line timetable PDF parser that extracts schedules and resolves shift conflicts automatically [2]. Content is managed via an admin panel protected by JWT, TOTP two-factor authentication, and CSRF tokens [2]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Liceul Teoretic Ion Cantacuzino",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "Liceul Teoretic Ion Cantacuzino",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 3,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Documentation Status",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/vortex",
+          "label": "Open Vortex",
+          "type": "route",
+          "target": "/projects/vortex"
+        }
+      ],
+      "recordedMs": 6709
+    },
+    {
+      "id": "curated-what-is-yolo-trainer-and-how-does-its-training-i",
+      "question": "What is YOLO Trainer and how does its training interface work?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "YOLO Trainer is a PySide6 desktop application designed for training, fine-tuning, and testing Ultralytics YOLO models (versions 8, 11, and 26) [3]. Its training interface operates through a split workflow divided into three main tabs: Train, Fine-tune, and Test [3].\nThe interface works as follows:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Background Execution: Training runs in a `QThread` to keep the user interface responsive while processing occurs [3].",
+            "Live Monitoring: It provides real-time logs and plots training metrics using `pyqtgraph` and `matplotlib` [3].",
+            "Validation & Presets: The tool validates datasets and supports various training presets [3].",
+            "Inference: It supports inference on images, videos, or folders, with optional WebSocket-based remote inference capabilities [3]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Technologies: Python, PySide6, Ultralytics YOLO (v8 · 11 · 26), pyqtgraph, matplotlib, EasyOCR, PyTorch, PyInstaller, Inno Setup, WebSockets [3]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "YOLO Trainer",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/vortex",
+          "label": "Open Vortex",
+          "type": "route",
+          "target": "/projects/vortex"
+        }
+      ],
+      "recordedMs": 8611
+    },
+    {
+      "id": "curated-what-is-jarvis-the-os-helper",
+      "question": "What is Jarvis, the OS Helper?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Jarvis is a local-first AI operating assistant built on the `@earendil-works/pi` framework, designed to function without a central model server by utilizing an offline keyword router [3]. Its architecture consists of three distinct layers: Ornith (a 9B planner that never calls tools), Needle (a 26M executor that selects tools and arguments), and a Runtime layer that validates permissions, executes tasks, and logs results [6].\nThe system integrates 56 tools across 14 categories (filesystem, shell, Windows, Excel, browser, media, AI, automation, and more) to handle tasks ranging from file management to media syncing [4]. Key capabilities include:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Media Management: Syncing a Google Drive/local library and interfacing with qBittorrent and rclone [4].",
+            "Offline Correction: A `correction.ts` layer that fixes typos, handles Unix aliases, and routes intents via a prioritized keyword scorer to ensure tools remain reachable even when the model is offline [4].",
+            "Development Tools: Features for training/fine-tuning/testing models using Ultralytics YOLO with live logs and metric plots [2]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Known Limitations:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Training and fine-tuning require the PyTorch/CUDA toolchain [6].",
+            "WebSocket inference requires a running receiver [6].",
+            "The system relies on bundled binaries (ffmpeg, rclone) and optional qBittorrent for media tools [6]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 2,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Confirmed Features",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "Jarvis · OS Helper",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Documentation Status",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 6,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/jarvis",
+          "label": "Open Jarvis · OS Helper",
+          "type": "route",
+          "target": "/projects/jarvis"
+        }
+      ],
+      "recordedMs": 11350
+    },
+    {
+      "id": "curated-what-is-the-ai-interface-project",
+      "question": "What is the AI Interface project?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "The AI Interface is a completed web-based image classification demo built with Python, Flask, and TensorFlow/Keras [2]. It allows users to upload an image and select a model from a registry defined in `models.json` for inference [1]. The application includes a companion tkinter script that indexes a directory of images to generate a dataset manifest (`top_level_folders.json`) [2].\nKey technical details include:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Architecture: A single Flask process handling requests, loading `.h5` model files, and performing inference via `tf.keras` [1].",
+            "Features: Lists available models via `GET /models` and supports a helper script for dataset assembly [1].",
+            "Limitations: Requires a locally running Redis instance for cart functionality and runs a Python subprocess per request, making it suitable for demos but not high-scale production [2].",
+            "Status: Completed in 2024 with 2 commits [1]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Documentation Status",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "AI Interface",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/vortex",
+          "label": "Open Vortex",
+          "type": "route",
+          "target": "/projects/vortex"
+        }
+      ],
+      "recordedMs": 8410
+    },
+    {
+      "id": "curated-what-is-llm-finetuner-and-how-does-it-fine-tune-",
+      "question": "What is LLM Finetuner and how does it fine-tune models locally?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "LLM Finetuner is a Flask-based web interface designed to perform local LLM fine-tuning using the Unsloth library with LoRA (Low-Rank Adaptation) parameters [1]. It allows users to fine-tune models like Llama 3.2 1B or Mistral 7B without needing a complex command-line setup, providing a graphical user experience for configuration and monitoring [1].\nThe tool fine-tunes models locally by executing the following process:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Backend Execution: A background Python process runs Unsloth's `FastLanguageModel` combined with the `TRL SFTTrainer` on a separate thread while the Flask server handles the UI [8].",
+            "Configuration: Users select from preset models (e.g., Llama 3.2 1B Instruct, Mistral 7B v0.3) and configure training hyperparameters such as LoRA rank, alpha, dropout, learning rate, and batch size via JSON config files [2][7].",
+            "Hardware Monitoring: The system streams live GPU (via `nvidia-smi`), CPU, and system metrics to the UI, allowing real-time monitoring of the training job [2].",
+            "Resume Capability: It supports resuming interrupted training sessions by loading saved model states [2].",
+            "Local Execution: All training runs entirely on the user's local machine using their own hardware (e.g., an RTX 3060 or similar), with heavy ML imports loaded lazily to maintain UI responsiveness [1][5]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "LLM Finetuner",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "Architecture",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Machine Learning Experiments & Notebook",
+          "heading": "QLoRA fine-tune - Llama 3.2 1B (Unsloth 4-bit)",
+          "filePath": "content/ml.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Machine Learning Experiments & Notebook",
+          "heading": "YOLO (plates) + GLM-OCR",
+          "filePath": "content/ml.json"
+        },
+        {
+          "citationId": 8,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Confirmed Features",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/vortex",
+          "label": "Open Vortex",
+          "type": "route",
+          "target": "/projects/vortex"
+        }
+      ],
+      "recordedMs": 10942
+    },
+    {
+      "id": "curated-what-is-neuroshell-and-what-is-it-used-for",
+      "question": "What is NeuroShell and what is it used for?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "NeuroShell is an interactive terminal shell and autonomous tool-using AI agent designed to provide a Claude Code-like command interface with slash-command palettes, real-time tab autocompletion, and instant model hot-swapping across five backends: Ollama, local GGUF files, PyTorch Transformers, Hugging Face cloud, and OpenAI-compatible endpoints [1]. It operates as a sandboxed tool-execution loop that restricts filesystem and terminal actions to a configured workspace to ensure safety [3].\nKey capabilities include:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Autonomous Tool-Use: A planning loop with intent classification, task state management, and reflection modules that allows the agent to execute tools autonomously [3].",
+            "GPU Abstraction: A device layer that maps tensors to CUDA or CPU with automatic fallback and diagnostic commands [6].",
+            "Sandboxing: Dangerous commands are blocked, and Safe Mode requires confirmation before modifying the workspace [3].",
+            "Voice Support: Optional speech-to-text and text-to-speech with wake-word detection and auto language detection [3]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "The project is currently in development (V1) and runs on Windows, Linux, and macOS using Python, prompt_toolkit, PyTorch (CUDA), llama-cpp-python, and PyInstaller [2][4]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "NeuroShell",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Confirmed Features",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "Features",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Portfolio Projects Directory",
+          "heading": "NeuroShell",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 6,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "How It Works",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/neuroshell",
+          "label": "Open NeuroShell",
+          "type": "route",
+          "target": "/projects/neuroshell"
+        }
+      ],
+      "recordedMs": 8660
+    },
+    {
+      "id": "curated-which-projects-involve-computer-vision-or-yolo",
+      "question": "Which projects involve computer vision or YOLO?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Based on the portfolio documentation, two projects explicitly involve computer vision and YOLO:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Detectie: This is an end-to-end license-plate detection system utilizing YOLO for detection and EasyOCR for text recognition. It features a Python WebSocket server running inference, a PySide6 desktop app for training/testing, and an ESP32 firmware client for real-time rendering [5].",
+            "YOLO Trainer: This is a PySide6 desktop application designed specifically for training, fine-tuning, and testing Ultralytics YOLO models (versions 8, 11, and 26). It includes live metric charts, GPU checks, and supports inference on images, videos, or folders [3]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Other projects like Jarvis utilize local AI frameworks but do not explicitly list YOLO as a core technology in the provided evidence [6]. AI Interface uses TensorFlow/Keras for image classification but does not mention YOLO [7]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 3,
+          "title": "Portfolio Projects Directory",
+          "heading": "YOLO Trainer",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Portfolio Projects Directory",
+          "heading": "Detectie",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 6,
+          "title": "Portfolio Projects Directory",
+          "heading": "Jarvis · OS Helper",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Portfolio Projects Directory",
+          "heading": "AI Interface",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-projects",
+          "label": "View All Projects Explorer",
+          "type": "scroll",
+          "target": "projects"
+        }
+      ],
+      "recordedMs": 7461
+    },
+    {
+      "id": "curated-which-of-catalin-s-projects-are-android-or-andro",
+      "question": "Which of Catalin's projects are Android or Android TV apps?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Based on the portfolio documentation, Catalin has developed two projects specifically for Android or Android TV:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Vortex: This is Catalin's flagship media player application designed for Android phones, tablets, and Android TV. It utilizes Kotlin and Compose Multiplatform to provide a touch UI for mobile devices and a Leanback launcher with remote control support for Android TV [6]. The project includes offline background download queues, multiple storage providers (Google Drive OAuth, SMB, SFTP, FTP/FTPS, WebDAV), and custom playback engines like Media3/ExoPlayer and mpv [7].",
+            "Teka: This is a commercial client tool that includes an Android wrapper built using Capacitor to wrap a local web dashboard. It is designed for tablets and runs offline, allowing users to manage Excel-based pricing, discounts, and product matching [4]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Other projects like CataAI (a Python-based language model), NeuroShell (a terminal-based AI shell), and Apps Manager (an Excel client with an Android wrapper) are primarily terminal or desktop applications, though Apps Manager also mentions an Android wrapper [3]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 3,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Apps Manager",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 4,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 6,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Portfolio Projects Directory",
+          "heading": "Known Limitations",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-work",
+          "label": "View Featured Project (Vortex)",
+          "type": "scroll",
+          "target": "work"
+        }
+      ],
+      "recordedMs": 8232
+    },
+    {
+      "id": "curated-what-desktop-applications-has-catalin-built",
+      "question": "What desktop applications has Catalin built?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Based on the portfolio documentation, Catalin has built Jarvis, a desktop application (specifically a terminal-based AI assistant) that features an interactive REPL, real-time autocompletion, and support for multiple model backends including Ollama, local GGUF files, Transformers, Hugging Face Cloud, and OpenAI-compatible endpoints [4].\nWhile Catalin's bio states he engineers software across \"desktop\" platforms [1], the specific desktop application detailed in the project list is Jarvis. Other projects like Vortex are primarily mobile (Android/TV) and web-focused, though they may have a \"Compose Multiplatform desktop client\" mentioned in general descriptions not detailed in the current evidence [8]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Sections Content",
+          "heading": "About / Bio",
+          "filePath": "content/sections.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Portfolio Projects Directory",
+          "heading": "Features",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 8,
+          "title": "Product Strategy & Brand Commitments",
+          "heading": "Capabilities and Constraints",
+          "filePath": "PRODUCT.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "route-/projects/jarvis",
+          "label": "Open Jarvis · OS Helper",
+          "type": "route",
+          "target": "/projects/jarvis"
+        }
+      ],
+      "recordedMs": 5830
+    },
+    {
+      "id": "curated-does-catalin-have-experience-with-embedded-syste",
+      "question": "Does Catalin have experience with embedded systems or ESP32?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Yes, Catalin has experience with embedded systems, specifically ESP32 development using PlatformIO. He explicitly lists \"ESP32 / PlatformIO\" under his focus areas for embedded systems and includes it in his \"Systems\" stack group which covers technologies closer to the metal [1][8]. Additionally, his structured data confirms he has knowledge about \"Embedded Systems\" [4]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Technical Skills & Competencies",
+          "heading": "Focus Areas",
+          "filePath": "content/skills.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Root Layout & Schema.org Metadata",
+          "heading": "Source Code",
+          "filePath": "app/layout.tsx"
+        },
+        {
+          "citationId": 8,
+          "title": "Technical Skills & Competencies",
+          "heading": "Focus Areas",
+          "filePath": "content/skills.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-stack",
+          "label": "View Tech Stack & Skills",
+          "type": "scroll",
+          "target": "stack"
+        }
+      ],
+      "recordedMs": 3964
+    },
+    {
+      "id": "curated-what-experience-does-catalin-have-with-docker-an",
+      "question": "What experience does Catalin have with Docker and Linux?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin lists Docker and Linux as core competencies within his \"Systems\" focus area, specifically alongside ESP32/PlatformIO and Git [4].\nIn his project portfolio, he has applied Docker in the following contexts:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "E-Services Portal: Implemented multi-stage Docker deployment running as a non-root user, which contributed to a performance audit score of 84/100 [6].",
+            "Jarvis (Agetic OS Helper): Utilized GPU Docker containers (CUDA Jupyter) for media management and execution tasks [8].",
+            "Teka: Deployed using Docker with specific Python and OpenCV system dependencies [7]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 4,
+          "title": "Technical Skills & Competencies",
+          "heading": "Focus Areas",
+          "filePath": "content/skills.json"
+        },
+        {
+          "citationId": 6,
+          "title": "Portfolio Projects Directory",
+          "heading": "Architecture",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 7,
+          "title": "Portfolio Projects Directory",
+          "heading": "Architecture",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 8,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Documentation Status",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-stack",
+          "label": "View Tech Stack & Skills",
+          "type": "scroll",
+          "target": "stack"
+        }
+      ],
+      "recordedMs": 5363
+    },
+    {
+      "id": "curated-which-of-catalin-s-projects-is-the-most-technica",
+      "question": "Which of Catalin's projects is the most technically complex, and why?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Based on the portfolio documentation, CataAI is identified as Catalin's most recent and technically complex project. It is a generative language model built entirely from first principles without relying on any existing model libraries [2].\nThe complexity stems from the fact that every component was implemented manually, including:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "A custom character-level tokenizer and a Byte Pair Encoding (BPE) tokenizer trained from scratch [5].",
+            "A custom multi-head causal attention mechanism with Pre-LayerNorm Transformer blocks and residual connections [5].",
+            "An end-to-end training loop using PyTorch and CUDA, including a baseline Bigram model to validate the architecture [5].",
+            "A systematic experimental framework (`experiments.py`) that sweeps through tokenizer and architecture matrices to log and compare results [5]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "While Catalin's flagship project Vortex is noted as the most technically challenging in terms of system architecture (handling 5 storage protocols, custom playback engines, and offline downloads), the documentation explicitly identifies CataAI as the project currently \"In Development\" and focuses on the deep technical challenge of building an LLM from scratch [2]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 2,
+          "title": "Portfolio Projects Directory",
+          "heading": "CataAI",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Portfolio Projects Directory",
+          "heading": "Features",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-ml",
+          "label": "View ML Experiments Notebook",
+          "type": "scroll",
+          "target": "ml"
+        }
+      ],
+      "recordedMs": 8331
+    },
+    {
+      "id": "curated-what-is-catalin-s-latest-or-most-recent-project",
+      "question": "What is Catalin's latest or most recent project?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin's most recent project is CataAI, a generative language model built from first principles in Python and PyTorch, which is currently in development [5].\nThe portfolio structure indicates that \"currently building\" projects are managed via the `data/site.ts` file within the content directory, where CataAI would be listed alongside other active development items [1]. While Vortex is identified as his flagship and most technically challenging project [3], CataAI represents the latest initiative in his portfolio timeline."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Repository Overview",
+          "heading": "Content",
+          "filePath": "README.md"
+        },
+        {
+          "citationId": 3,
+          "title": "Portfolio Repository Overview",
+          "heading": "Content",
+          "filePath": "README.md"
+        },
+        {
+          "citationId": 5,
+          "title": "Portfolio Projects Directory",
+          "heading": "Features",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-ml",
+          "label": "View ML Experiments Notebook",
+          "type": "scroll",
+          "target": "ml"
+        }
+      ],
+      "recordedMs": 4580
+    },
+    {
+      "id": "curated-summarize-catalin-s-portfolio-for-a-recruiter",
+      "question": "Summarize Catalin's portfolio for a recruiter.",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin Manu-Gabriel is a Computer and Information Technology (CTI) student at ETTI Bucharest (POLITEHNICA University) who engineers software across web, mobile, desktop, and machine learning [4]. His portfolio highlights his ability to design and ship multi-platform systems, ranging from high-performance media streaming on Android, Android TV, and desktop to full-stack web applications and ML experiments [4]. He focuses on clean architecture, local-first data pipelines, and responsive performance [4].\nHis technical stack includes Kotlin for Android development, Python for machine learning and scripting, and a broad range of web technologies including React, Next.js, TypeScript, Node.js, and various frontend frameworks like Vue.js and Tailwind CSS [8].\nKey projects include:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Vortex: A flagship media player application for Android phones/tablets, Android TV, and a Compose Multiplatform desktop client. It features a storage-provider layer supporting 5 protocols (Google Drive OAuth, SMB, SFTP, FTP/FTPS, WebDAV) plus LAN share discovery, custom playback engines (Media3/ExoPlayer and mpv), a YouTube music engine, and offline background download queues [8].",
+            "CataAI: A generative language model built from first principles in Python/PyTorch, currently in development [8].",
+            "Jarvis: An interactive REPL with slash-command palette, real-time autocompletion, instant model hot-swapping across Ollama, GGUF, Transformers, HF Cloud, and OpenAI-compatible endpoints, autonomous tool-use loops, sandboxed execution, and GPU device abstraction [8]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "He is actively seeking software engineering roles and internships where he can contribute to high-impact production systems [4]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 4,
+          "title": "Portfolio Copy & Text Content",
+          "heading": "certifications",
+          "filePath": "content/copy.json"
+        },
+        {
+          "citationId": 8,
+          "title": "Portfolio Projects Directory",
+          "heading": "Features",
+          "filePath": "content/projects.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-about",
+          "label": "View About & Education",
+          "type": "scroll",
+          "target": "about"
+        }
+      ],
+      "recordedMs": 11459
+    },
+    {
+      "id": "curated-what-are-catalin-s-strongest-technical-skills",
+      "question": "What are Catalin's strongest technical skills?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin's strongest technical skills are defined by his primary proficiency in TypeScript, Python, and Kotlin, which he writes most frequently [1]. His core competencies span full-stack web development using Next.js, React, Tailwind CSS, and Vite [1], alongside backend services built with Node.js, Flask, and FastAPI [1].\nIn mobile and desktop development, he specializes in Jetpack Compose, custom playback engines like ExoPlayer/Media3, and cross-platform frameworks such as Electron and PySide6/PyQt [2]. His work in AI involves training models with PyTorch, utilizing Ultralytics YOLO, and deploying local models via llama.cpp and RAG/Ollama [2]. Finally, his systems-level expertise includes embedded development with ESP32/PlatformIO, containerization with Docker, and system administration on Linux [2]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Technical Skills & Competencies",
+          "heading": "Mobile & Desktop",
+          "filePath": "content/skills.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Technical Skills & Competencies",
+          "heading": "Focus Areas",
+          "filePath": "content/skills.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-stack",
+          "label": "View Tech Stack & Skills",
+          "type": "scroll",
+          "target": "stack"
+        }
+      ],
+      "recordedMs": 7209
+    },
+    {
+      "id": "curated-what-did-catalin-win-at-unihack",
+      "question": "What did Catalin win at UniHack?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin won 1st Place at UniHack during his second participation in 2024 [1]. He also participated in his first UniHack in 2023, where he did not win but gained valuable experience [2]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Activities & Extracurriculars",
+          "heading": "UniHack - First Participation",
+          "filePath": "content/activities.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Activities & Extracurriculars",
+          "heading": "InfoEducatie 2024",
+          "filePath": "content/activities.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-about",
+          "label": "View About & Education",
+          "type": "scroll",
+          "target": "about"
+        }
+      ],
+      "recordedMs": 3960
+    },
+    {
+      "id": "curated-what-is-catalin-s-first-tech-challenge-robotics-",
+      "question": "What is Catalin's FIRST Tech Challenge robotics experience?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin's FIRST Tech Challenge (FTC) robotics experience began in 2024, where he competed in the FIRST Tech Challenge National Championship in Iasi, Romania [2]. During this competition, he built both autonomous and tele-operated systems for the competition robot [2].\nPrior to competing at Nationals, he participated in FTC Regionals in January 2025 as a mentor for the Coral Tech team (#28260), where he shared technical knowledge in web development, code organization, and Git workflows [3]. His first direct participation in a robotics competition was at the National Championship in March 2024 [4]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 2,
+          "title": "Professional Journey & Milestones",
+          "heading": "FTC Robotics - National Championship",
+          "filePath": "content/journey.json"
+        },
+        {
+          "citationId": 3,
+          "title": "Professional Journey & Milestones",
+          "heading": "FTC Robotics - Regionals (Mentor)",
+          "filePath": "content/journey.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Professional Journey & Milestones",
+          "heading": "InfoEducatie 2023",
+          "filePath": "content/journey.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-about",
+          "label": "View About & Education",
+          "type": "scroll",
+          "target": "about"
+        }
+      ],
+      "recordedMs": 6161
+    },
+    {
+      "id": "curated-what-certifications-does-catalin-hold",
+      "question": "What certifications does Catalin hold?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Based on the portfolio documentation, Catalin holds two specific certifications:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "CCNA 1 (Introduction to Networks) issued by Cisco Networking Academy in 2024, covering Networking, TCP/IP, Routing, and Switching [2].",
+            "IC3 GS6 (Digital Literacy Certification) issued by Certiport in 2025, covering Computing Fundamentals, Key Applications, and Living Online [2]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 2,
+          "title": "Certifications & Credentials",
+          "heading": "IC3 GS6",
+          "filePath": "content/certifications.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-certs",
+          "label": "View #certs",
+          "type": "scroll",
+          "target": "certs"
+        }
+      ],
+      "recordedMs": 4546
+    },
+    {
+      "id": "curated-what-is-catalin-s-engineering-timeline-from-2023",
+      "question": "What is Catalin's engineering timeline from 2023 to 2026?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Catalin's engineering timeline from 2023 to 2026 is defined by a continuous trajectory of building core software platforms, competing in hackathons, mentoring robotics teams, and contributing to open-source infrastructure [1].\n2023"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "UniHack: Catalin participated in UniHack for the first time in November 2023, gaining experience in rapid prototyping and teamwork under pressure [4].",
+            "InfoEducatie 2023: He competed in the Romanian national IT competition, where he learned how to present projects to a jury and improve his work for future events [8]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "2024"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "FTC Robotics (National Championship): Catalin competed in the FIRST Tech Challenge robotics competition, qualifying for the National Championship in March 2024 where he built autonomous and tele-operated systems [4].",
+            "InfoEducatie 2024: He returned to the competition in 2024, achieving 2nd place with a functional real-world application called Ezy-Aid (an EasyBox-like donation app) [7]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "2025"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "FTC Robotics (Mentorship): Catalin served as a mentor for a robotics team at the Regionals in Pitesti, Romania, in 2025 [7]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "2026 (Ongoing)"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Continuous Development: Catalin maintains an \"Always building\" status, focusing on core software platforms and open-source work [1].",
+            "Current Projects: His recent technical focus includes developing Vortex, a media player with a storage-provider layer supporting 5 working protocols (Google Drive OAuth, SMB, SFTP, FTP/FTPS, WebDAV) plus LAN discovery, and CataAI, an LLM built from scratch in Python/PyTorch [5]."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Copy & Text Content",
+          "heading": "journey",
+          "filePath": "content/copy.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Professional Journey & Milestones",
+          "heading": "InfoEducatie 2023",
+          "filePath": "content/journey.json"
+        },
+        {
+          "citationId": 5,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Confirmed Features (re-verified 2026-08-17 against the source)",
+          "filePath": "PROJECT_ANALYSIS.md"
+        },
+        {
+          "citationId": 7,
+          "title": "Activities & Extracurriculars",
+          "heading": "InfoEducatie 2023",
+          "filePath": "content/activities.json"
+        },
+        {
+          "citationId": 8,
+          "title": "Activities & Extracurriculars",
+          "heading": "InfoEducatie 2023",
+          "filePath": "content/activities.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-work",
+          "label": "View Featured Project (Vortex)",
+          "type": "scroll",
+          "target": "work"
+        }
+      ],
+      "recordedMs": 14563
+    },
+    {
+      "id": "curated-is-catalin-available-for-internships-or-software",
+      "question": "Is Catalin available for internships or software engineering roles?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Yes, Catalin is actively seeking software engineering roles and internships [1][2]. He explicitly states in his bio that he is \"Looking for software engineering roles and internships where I can contribute to high-impact production systems\" [2].\nYou can contact him directly via the following channels:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "Email: cata.manu06@gmail.com [3]",
+            "GitHub: https://github.com/Cata5 [3]",
+            "LinkedIn: https://www.linkedin.com/in/cata5 [3]"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Sections Content",
+          "heading": "About / Bio",
+          "filePath": "content/sections.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Portfolio Copy & Text Content",
+          "heading": "certifications",
+          "filePath": "content/copy.json"
+        },
+        {
+          "citationId": 3,
+          "title": "Site Profile & Contact Information",
+          "heading": "Currently Building",
+          "filePath": "content/site.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-contact",
+          "label": "View Contact & Reach Channels",
+          "type": "scroll",
+          "target": "contact"
+        }
+      ],
+      "recordedMs": 5174
+    },
+    {
+      "id": "curated-how-many-machine-learning-models-did-catalin-tra",
+      "question": "How many machine learning models did Catalin train and on what hardware?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Based on the retrieved evidence, Catalin has trained three distinct machine learning models on his local hardware:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "YOLOv8 Model (Car Parts): Trained on a custom dataset of car-part photos to detect specific parts (with and without side mirrors) [1].",
+            "YOLOv8 Model (License Plates): Trained on the Roboflow Universe dataset for license plate detection, integrated with GLM-OCR for text recognition [2].",
+            "Llama 3.2 1B Model: Fine-tuned using QLoRA (Unsloth 4-bit) on chat pairs (e.g., car-diagnostics data) [1][2]."
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Training Hardware:\nAll models were trained and inferred on the following local setup:"
+        },
+        {
+          "kind": "bullets",
+          "items": [
+            "CPU: AMD Ryzen 9 5900Hs",
+            "RAM: 40GB",
+            "GPU: NVIDIA RTX 3060 (6GB) [1]"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Machine Learning Experiments & Notebook",
+          "heading": "QLoRA fine-tune - Llama 3.2 1B (Unsloth 4-bit)",
+          "filePath": "content/ml.json"
+        },
+        {
+          "citationId": 2,
+          "title": "Machine Learning Experiments & Notebook",
+          "heading": "YOLO (plates) + GLM-OCR",
+          "filePath": "content/ml.json"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-ml",
+          "label": "View ML Experiments Notebook",
+          "type": "scroll",
+          "target": "ml"
+        }
+      ],
+      "recordedMs": 7433
+    },
+    {
+      "id": "curated-what-is-the-tech-stack-of-this-portfolio-website",
+      "question": "What is the tech stack of this portfolio website itself?",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "The portfolio website itself is built using Next.js 16, React 19, TypeScript, and Tailwind CSS v3 (or v4 in some contexts), deployed as a static site via GitHub Pages. It also integrates local AI capabilities using node-llama-cpp and Ollama for a RAG assistant, along with framer-motion for animations [1][4]."
+        }
+      ],
+      "sources": [
+        {
+          "citationId": 1,
+          "title": "Portfolio Projects Directory",
+          "heading": "Coral Tech · FTC team site",
+          "filePath": "content/projects.json"
+        },
+        {
+          "citationId": 4,
+          "title": "Project Analysis (Verified Claims)",
+          "heading": "Documentation Status",
+          "filePath": "PROJECT_ANALYSIS.md"
+        }
+      ],
+      "actions": [
+        {
+          "id": "scroll-stack",
+          "label": "View Tech Stack & Skills",
+          "type": "scroll",
+          "target": "stack"
+        }
+      ],
+      "recordedMs": 5021
+    }
+  ]
+}

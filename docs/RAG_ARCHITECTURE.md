@@ -31,7 +31,7 @@ User Query
     │
     ▼
 [2. Parallel Hybrid Retrieval]
-    ├── Dense Vector Search: Cosine similarity over 768-dim embeddings (Top-30)
+    ├── Dense Vector Search: Cosine similarity over 384-dim embeddings (Top-30)
     └── Lexical BM25 Search: Okapi BM25 with title(3x), symbols(2.5x), heading(2x) (Top-30)
     │
     ▼
@@ -45,11 +45,11 @@ User Query
     ▼
 [5. Context Budget & Delimited Assembly]
     ├── Heading-based parent-child context expansion (sections are collected per heading during chunking)
-    └── Token budget packing (3072 tokens max) with isolated <retrieved_evidence> tags
+    └── Token budget packing (8192 tokens max) with isolated <retrieved_evidence> tags
     │
     ▼
 [6. Local LLM Generation & Streaming]
-    └── OpenAI-compatible SSE streaming (Gemma 4 / Qwen2.5-Coder / local models) with verified citations
+    └── OpenAI-compatible SSE streaming (Qwen3.5 / Gemma 4 / Qwen2.5-Coder / local models) with verified citations
     │
     ▼
 [7. Citation Validation & Source Attribution]
@@ -64,6 +64,7 @@ The engine works out-of-the-box with any OpenAI-compatible local inference serve
 
 | Server | Default Endpoint | Recommended Models |
 | :--- | :--- | :--- |
+| **Unsloth Studio** | `http://127.0.0.1:8888/v1` | `unsloth/Qwen3.5-0.8B-MTP-GGUF` (Q4_K_M, the calibrated default), `unsloth/Qwen3.5-4B-MTP-GGUF` |
 | **LM Studio** | `http://127.0.0.1:1234/v1` | `qwen2.5-coder-1.5b-instruct`, `qwen3-1.7b` |
 | **Unsloth / vLLM** | `http://127.0.0.1:8000/v1` | `qwen2.5-coder-7b-instruct`, `qwen3-embedding-0.6b` |
 | **Ollama** | `http://127.0.0.1:11434/v1` | `qwen2.5-coder:1.5b`, `nomic-embed-text` |
@@ -72,22 +73,23 @@ The engine works out-of-the-box with any OpenAI-compatible local inference serve
 ```env
 ADMIN_PASSWORD=choose-a-strong-passphrase   # required for admin APIs; unset = no admin sessions in production
 
-LOCAL_LLM_BASE_URL=http://127.0.0.1:1234/v1
-LOCAL_LLM_MODEL=qwen2.5-coder-1.5b-instruct
+LOCAL_LLM_BASE_URL=http://127.0.0.1:8888/v1
+LOCAL_LLM_MODEL=unsloth/Qwen3.5-0.8B-MTP-GGUF
 LOCAL_LLM_TEMPERATURE=0.2
-LOCAL_LLM_MAX_TOKENS=1024
+LOCAL_LLM_MAX_TOKENS=900
+LOCAL_LLM_FREQUENCY_PENALTY=0.3
 LOCAL_LLM_API_KEY=                          # only if your server requires a key
 
-LOCAL_EMBEDDING_BASE_URL=http://127.0.0.1:1234/v1
+LOCAL_EMBEDDING_BASE_URL=http://127.0.0.1:8888/v1
 LOCAL_EMBEDDING_MODEL=text-embedding-nomic-embed-text-v1.5
-LOCAL_EMBEDDING_DIM=768
+LOCAL_EMBEDDING_DIM=384
 
 RAG_ENABLE_MULTI_QUERY=true
 RAG_DENSE_TOP_K=30
 RAG_BM25_TOP_K=30
 RAG_RRF_K=60
 RAG_FINAL_TOP_K=8
-RAG_MAX_CONTEXT_TOKENS=3072
+RAG_MAX_CONTEXT_TOKENS=8192
 RAG_INDEX_BATCH_SIZE=32
 RAG_ENABLE_EMBEDDING_CACHE=true
 RAG_INCREMENTAL=true
@@ -143,6 +145,11 @@ npm run rag:index
 
 # Run benchmark across Configurations A through E
 npm run rag:eval
+
+# Compile the static (GitHub Pages) answer archive from the live pipeline
+# --model <name> selects the generating model; --only=<text> / --limit=<n> /
+# --dry-run are available for partial runs.
+npm run rag:archive
 ```
 
 ---
@@ -167,3 +174,21 @@ npm run rag:eval
 ### GitHub Pages static export
 - With `NEXT_PUBLIC_DEPLOY_TARGET=gh-pages`, the four public GET routes (`status`, `config`, `documents`, `models`) are baked at build time by `lib/rag/gh-pages-stubs.ts` into neutral offline payloads — no hardware details, no keys, `isServerConnected: false`. Mutating routes do not exist on the static site.
 - Static export requires `export const dynamic = "force-static"` on **every route module that exports a GET handler**; Next then blanks request headers for that module on any build. That is why mutations live on separate POST/DELETE-only modules (`config/update`, `documents/delete`, `models/reload`, `eval`, `index`, `reindex`), which the export skips: they stay dynamic and header auth works. The frozen-GET limitation only applies to a `next start` server build; `next dev` (the local admin console's native mode) is fully live.
+
+---
+
+## 8. Static Assistant (GitHub Pages "Archive Mode")
+
+The static export has no server and no model, so the live pipeline cannot run there. The chat instead answers in the browser from three tiers, in order:
+
+| Tier | Evidence | What the visitor sees |
+| :--- | :--- | :--- |
+| 1. Archive | `content/rag-archive.json` — answers pre-compiled by the real pipeline at build time | The model's own answer, its validated citations, a navigation action and the recorded run time |
+| 2. Corpus | BM25 over the CMS content already in the bundle | The matching record's lead line as prose, its most relevant lines as bullets, and the source files |
+| 3. Fallback | — | Starter questions and direct links instead of a dead end |
+
+- **Resolution** (`lib/rag/offline/assistant.ts`): the archive tier matches on question-token coverage (≥50%, and at least two matching words), so "tell me about Vortex" cannot replay an unrelated narrow answer; the corpus tier requires ≥25% token coverage, so out-of-domain questions ("does he know Rust") reach the fallback instead of confidently answering from noise.
+- **Corpus index** (`lib/rag/offline/corpus.ts`): the same pure-TS `BM25Engine` the live retriever uses, over `Chunk` records built from `content/*.json` (~62 records, no extra payload, no network). Single-word slice names ("projects", "journey") resolve structurally to the directory record; a project name resolves to the project record and its `/projects/<id>` route; a project's `:detail` record never leads over its overview.
+- **Generation**: `npm run rag:archive` runs the live pipeline over the curated and evaluation question sets and writes `content/rag-archive.json`, recording the generating model and a timestamp. Refusals and answers without a validated citation are dropped — the corpus tier answers those questions. The file is **committed**, because the GitHub Pages CI build has no model server. A run that compiles nothing, that hits errors, or that would shrink the file leaves the existing archive untouched (`--resume` keeps finished answers and fills the gaps after an interrupted run; partial runs merge into the file).
+- **Tuning**: `npx tsx scripts/probe-offline-corpus.ts "vortex" "projects"` prints the BM25 ranking and the offline answer for any question with no model running.
+- **Rendering**: all three standby themes (`holographic`, `cyberpunk`, `cyberdeck`) render the same answer shape through `components/rag/offline-answer-body.tsx` and always show sources plus an honest resolution trace (`VERIFIED ARCHIVE` / `CORPUS RECORDS` / `ARCHIVE MISS`).

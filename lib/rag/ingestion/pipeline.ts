@@ -27,6 +27,8 @@ export class IngestionPipeline {
   private lastSyncAt = 0;
   /** Shared in-flight auto re-sync so concurrent queries trigger only one. */
   private autoSyncPromise: Promise<IngestionResult | null> | null = null;
+  /** The embedding server has been probed once for this provider instance. */
+  private embeddingWarmedUp = false;
 
   constructor(
     vectorStore?: IVectorStore,
@@ -44,6 +46,7 @@ export class IngestionPipeline {
       config.models.embeddingBaseUrl,
       config.models.embeddingModel,
       config.models.embeddingDimension,
+      String(config.models.embeddingMaxInputTokens ?? 500),
       config.indexing.enableEmbeddingCache ? "cache" : "nocache",
     ].join("|");
     if (!this.embeddingProvider || this.embeddingProviderKey !== key) {
@@ -51,11 +54,24 @@ export class IngestionPipeline {
         baseUrl: config.models.embeddingBaseUrl,
         modelName: config.models.embeddingModel,
         dimension: config.models.embeddingDimension,
+        maxInputTokens: config.models.embeddingMaxInputTokens,
         cacheEnabled: config.indexing.enableEmbeddingCache,
       });
       this.embeddingProviderKey = key;
+      this.embeddingWarmedUp = false;
     }
     return this.embeddingProvider;
+  }
+
+  /**
+   * Gives a lazily-loaded local embedding model time to come up before bulk
+   * embedding. Cheap (one short request, once per provider) and silent on
+   * failure — the per-batch fallback still covers a genuinely dead server.
+   */
+  private async warmUpEmbeddingProvider(): Promise<void> {
+    if (this.embeddingWarmedUp) return;
+    this.embeddingWarmedUp = true;
+    await this.resolveEmbeddingProvider().warmUp?.();
   }
 
   public async indexDocument(
@@ -137,6 +153,8 @@ export class IngestionPipeline {
     // Recorded from the sync's start time so edits landing *during* this
     // sync still trip the next staleness probe.
     this.lastSyncAt = startTime;
+
+    await this.warmUpEmbeddingProvider();
 
     let indexedCount = 0;
     let skippedCount = 0;

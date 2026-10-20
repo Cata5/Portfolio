@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 import type { ValidatedCitation } from "@/lib/rag/citations/validator";
 import {
-  detectNavigationActions,
   getDynamicStarterPrompts,
   getSectionLabel,
+  resolveNavigationActions,
   type NavigationAction,
 } from "@/lib/rag/navigation-helpers";
 import {
@@ -26,14 +26,14 @@ import {
 } from "./navigation-highlighter";
 import { CLogo } from "./c-logo";
 import { ThinkingIndicator } from "./thinking-indicator";
-import { parseHeadingLine, sanitizeAssistantContent } from "@/lib/rag/chat-format";
+import { normalizeAssistantStructure, parseHeadingLine, sanitizeAssistantContent } from "@/lib/rag/chat-format";
 
 /** Visitor preference: should the page follow the assistant's navigation? */
 const AUTO_NAVIGATE_STORAGE_KEY = "portfolio.rag.auto-navigate";
 
-/** Detector labels read "View X" because they double as button text. */
+/** Detector labels read "View X" / "Open X" because they double as button text. */
 function noticeLabel(label: string): string {
-  return label.replace(/^view\s+/i, "");
+  return label.replace(/^(?:view|open)\s+/i, "");
 }
 
 export function ChatView() {
@@ -106,7 +106,7 @@ export function ChatView() {
 
     const prevUserMsg = messages[messages.length - 2]?.content || "";
     let action: NavigationAction | undefined =
-      detectNavigationActions(prevUserMsg, lastMsg.content)[0];
+      resolveNavigationActions(prevUserMsg, lastMsg.content)[0];
 
     if (!action && isExplicitNavigationQuery(prevUserMsg)) {
       const target = resolveQueryTarget(prevUserMsg);
@@ -211,12 +211,27 @@ export function ChatView() {
                 activeCitationPreview?.msgId === msgId &&
                 activeCitationPreview.citation.citationId === id;
 
+              // A marker the citation validator rejected has no evidence behind
+              // it. Rendering it as a badge would imply a source that does not
+              // exist (and the click would do nothing), so it stays muted text.
+              if (!cit) {
+                return (
+                  <span
+                    key={id}
+                    title={`[${id}] is not backed by any retrieved evidence`}
+                    className="font-mono text-[10.5px] text-muted-foreground/50 align-baseline"
+                  >
+                    [{id}]
+                  </span>
+                );
+              }
+
               return (
                 <button
                   key={id}
                   type="button"
-                  onClick={() => cit && handleCitationClick(msgId, cit)}
-                  title={cit ? `${cit.title} (${cit.filePath})` : `Evidence [${id}]`}
+                  onClick={() => handleCitationClick(msgId, cit)}
+                  title={`${cit.title} (${cit.filePath})`}
                   className={`group inline-flex items-center justify-center rounded border px-1.5 py-0.2 font-mono text-[10.5px] font-semibold transition-all cursor-pointer align-baseline ${isSelected
                     ? "border-signal bg-signal text-signal-ink shadow-sm shadow-signal/30"
                     : "border-signal/40 bg-signal/15 text-signal hover:bg-signal hover:text-signal-ink"
@@ -314,19 +329,8 @@ export function ChatView() {
     // 1. Strip action tags, prompt scaffolding and pseudo-header artifacts
     let text = sanitizeAssistantContent(content);
 
-    // 2. Fix orphan punctuation on separate lines caused by citation spacing (e.g. "[1]\n," or "\n,")
-    text = text.replace(/(\[\d+(?:\s*,\s*\d+)*\])\s*\n+\s*([,.;:!?])/g, "$1$2 ");
-    text = text.replace(/([^\n])\s*\n+\s*([,.;:!?])/g, "$1$2 ");
-    text = text.replace(/\n\s*([,.;:!?])\s*/g, "$1 ");
-
-    // 3. Separate inline list bullets attached to bold headers (e.g. "**Languages:** * TypeScript")
-    text = text.replace(/(\*\*[^*]+:\*\*)\s*([*-]|\d+\.)\s*/g, "$1\n$2 ");
-
-    // 4. Separate multiple bullets concatenated on one line (e.g. "* item 1. * item 2.")
-    text = text.replace(/([^\n])\s+([*-]|\d+\.)\s+/g, "$1\n$2 ");
-
-    // 5. Ensure category headers ending in a colon are isolated as structural blocks
-    text = text.replace(/([^\n])\n+([A-Za-z\s()/-]{2,35}:)\s*\n+/g, "$1\n\n$2\n");
+    // 2. Put prose, bullets and section labels into renderable structure.
+    text = normalizeAssistantStructure(text);
 
     // "**Label:**" / "Label:" / "### Label:" all render as section headers.
     const isLabelLine = (line: string) =>
@@ -348,7 +352,8 @@ export function ChatView() {
           const isHeaderWithItems =
             lines.length > 1 && (!!firstParsed.heading || isLabelLine(firstLine));
 
-          const isListBlock = lines.some((l) => /^[-*•]|\d+\.\s/.test(l)) || isHeaderWithItems;
+          const isListBlock =
+            lines.some((l) => /^[-*•]\s|\d+\.\s/.test(l)) || isHeaderWithItems;
 
           if (isListBlock) {
             return (
@@ -375,7 +380,7 @@ export function ChatView() {
                     );
                   }
 
-                  const listMatch = line.match(/^([-*•]|\d+\.)\s*(.*)$/);
+                  const listMatch = line.match(/^([-*•]|\d+\.)\s+(.*)$/);
                   if (listMatch) {
                     return (
                       <div
@@ -516,7 +521,7 @@ export function ChatView() {
               const lastUserQuery = messages[msgIdx - 1]?.content || "";
               const detectedActions =
                 msg.role === "assistant" && !msg.isStreaming
-                  ? detectNavigationActions(lastUserQuery, msg.content)
+                  ? resolveNavigationActions(lastUserQuery, msg.content)
                   : [];
 
               return (
@@ -531,9 +536,11 @@ export function ChatView() {
                       : "border border-border/50 bg-card/70 text-foreground/90 rounded-tl-none ring-1 ring-white/5"
                       }`}
                   >
-                    {/* Thinking trace: live while streaming, expandable after */}
+                    {/* Thinking trace: live while streaming, expandable after.
+                        Failed runs have no valid timings and no trace to show. */}
                     {msg.role === "assistant" &&
-                      (msg.isStreaming || msg.stage || msg.timings) && (
+                      (msg.isStreaming ||
+                        (msg.timings && Number.isFinite(msg.timings.totalMs))) && (
                         <ThinkingIndicator
                           stage={msg.stage}
                           stageMessage={msg.stageMessage}

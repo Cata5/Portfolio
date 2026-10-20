@@ -1,42 +1,42 @@
 {
   "common": {
-    "badge": "ERROR 0x503: LOCAL LLM UNREACHABLE // READING OFFLINE ARCHIVE",
-    "status": "STANDBY",
-    "assistantTitle": "Catalin AI Guide // [OFFLINE ARCHIVE]",
-    "welcomeDescription": "Local workstation neural weights (Gemma 4 via Unsloth) are in standby on this static deployment. Select a topic or type any question below to decrypt the verified portfolio archive.",
-    "inputPlaceholder": "Ask offline archive (e.g. hardest project, stack, contact)...",
+    "badge": "ARCHIVE MODE // STATIC MIRROR OF A LOCAL-FIRST ASSISTANT",
+    "status": "ARCHIVE",
+    "assistantTitle": "Catalin AI Guide // [STATIC ARCHIVE]",
+    "welcomeDescription": "The live assistant runs local neural weights on Catalin's workstation, retrieving across the whole portfolio. This is its static mirror: answers come from a pre-compiled archive of real pipeline answers plus a lexical search over the portfolio records - instant, offline, and every claim is cited.",
+    "inputPlaceholder": "Ask about a project, the stack, ML runs, contact...",
     "footerHost": "HOST: STATIC GITHUB PAGES",
-    "footerAction": "ENTER TO QUERY ARCHIVE"
+    "footerAction": "ENTER TO QUERY ARCHIVE",
+    "disclosureLabel": "Why is the live model offline here?",
+    "processingLabel": "Searching archive records"
   },
   "glitchedAssistant": {
-    "bannerText": "[ ERROR 0x503: LOCAL LLM UNREACHABLE // READING OFFLINE ARCHIVE ]",
+    "bannerText": "[ ARCHIVE MODE // PRE-COMPILED ANSWERS + CORPUS SEARCH ]",
     "handshakeLog": [
-      "POST http://127.0.0.1:8000/v1/chat/completions (Local Workstation)",
-      "STATUS 503 SERVICE UNAVAILABLE (ERR_CONNECTION_REFUSED)",
-      "HOST SANDBOX: cata5.github.io/Portfolio (Static Cloud Target)",
-      "PROTOCOL: Auto-switched to Pre-Compiled Verified Knowledge Archive"
-    ],
-    "vortexSummary": "Vortex is Catalin's flagship and most technically challenging project: a client-side media player across Android (phones & tablets), Android TV, and Windows desktop built with a unified Kotlin Multiplatform codebase.",
-    "stackSummary": "Core languages, web architectures, backend engines, and machine learning stacks actively used across projects: TypeScript, Python, Kotlin, Next.js 16, React 19, FastAPI, PyTorch.",
-    "contactSummary": "Catalin is open for full-time software engineering roles and high-impact internships. Reachable directly via email: cata.manu06@gmail.com, GitHub, and LinkedIn."
+      "LIVE ENGINE: llama.cpp + Qwen3.5 on Catalin's workstation (not reachable from a static host)",
+      "STATIC MIRROR: pre-compiled pipeline answers + BM25 search over the portfolio records",
+      "PRIVACY: no request leaves this page - every answer is already in the bundle",
+      "SOURCE: cata5.github.io/Portfolio static export"
+    ]
   },
   "cyberpunk": {
     "telemetryTitle": "SYSTEM TELEMETRY // GH-PAGES",
     "host": "cata5.github.io",
-    "status": "STANDALONE DEPLOY",
-    "inference": "Local (Unsloth)",
-    "fallback": "Grounded Offline Index"
+    "status": "ARCHIVE MODE",
+    "inference": "Local workstation (offline here)",
+    "fallback": "Pre-compiled answers + corpus search"
   },
   "cyberdeck": {
     "headerTitle": "NEURAL_CLI // OFFLINE_ARCHIVE",
     "bootBanner": [
-      "CATALIN MANU // NEURAL_OS v2.4 [OFFLINE STANDBY]",
+      "CATALIN MANU // PORTFOLIO CLI [ARCHIVE MODE]",
       "------------------------------------------------------------",
-      "[HANDSHAKE]: POST http://127.0.0.1:8000/v1 ... 503 OFFLINE",
-      "[RUNTIME]: GitHub Pages Static Export (Cloud Sandboxed)",
-      "[FALLBACK]: Decrypted local knowledge base into memory.",
+      "[LIVE ENGINE]: llama.cpp + Qwen3.5 on Catalin's workstation - offline on a static host",
+      "[STATIC MIRROR]: pre-compiled pipeline answers + BM25 search over the portfolio records",
+      "[PRIVACY]: answers are already in the bundle; nothing is sent anywhere",
       "",
-      "Available commands: vortex, stack, contact, projects, about, ml, ping, clear"
+      "Available commands: vortex, stack, contact, projects, about, ml, ping, help",
+      "Any other question works too: the archive searches the portfolio records."
     ]
   }
 }

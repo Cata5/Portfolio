@@ -213,14 +213,34 @@ export function OpsPanel() {
                   className={controlClass}
                 />
               </Field>
+              <Field label="Runtime disclosure label">
+                <input
+                  type="text"
+                  value={themes?.common?.disclosureLabel ?? ""}
+                  onChange={(e) =>
+                    updateField("offlineThemes.common.disclosureLabel", e.target.value)
+                  }
+                  className={controlClass}
+                />
+              </Field>
+              <Field label="Processing label">
+                <input
+                  type="text"
+                  value={themes?.common?.processingLabel ?? ""}
+                  onChange={(e) =>
+                    updateField("offlineThemes.common.processingLabel", e.target.value)
+                  }
+                  className={controlClass}
+                />
+              </Field>
             </div>
           </div>
 
           <div className="space-y-4 border-t border-border pt-5">
             <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-signal">
-              Glitched glass dossiers
+              Glitched glass banner
             </h3>
-            <Field label="503 banner">
+            <Field label="Archive banner">
               <input
                 type="text"
                 value={themes?.glitchedAssistant?.bannerText ?? ""}
@@ -230,26 +250,6 @@ export function OpsPanel() {
                 className={controlClass}
               />
             </Field>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {(
-                [
-                  ["vortexSummary", "Vortex summary"],
-                  ["stackSummary", "Stack summary"],
-                  ["contactSummary", "Contact summary"],
-                ] as const
-              ).map(([key, label]) => (
-                <Field key={key} label={label}>
-                  <textarea
-                    rows={4}
-                    value={themes?.glitchedAssistant?.[key] ?? ""}
-                    onChange={(e) =>
-                      updateField(`offlineThemes.glitchedAssistant.${key}`, e.target.value)
-                    }
-                    className={controlClass}
-                  />
-                </Field>
-              ))}
-            </div>
           </div>
 
           <div className="space-y-4 border-t border-border pt-5">

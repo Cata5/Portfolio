@@ -10,7 +10,7 @@ import {
 
 import { useEditor } from "@/components/editor/editor-context";
 import { useRAG } from "@/components/rag/rag-context";
-import { BASE_PATH, isGhPages, withBasePath } from "@/lib/base-path";
+import { apiPath, BASE_PATH, isGhPages } from "@/lib/base-path";
 import {
   Panel,
   ReadoutRow,
@@ -82,7 +82,7 @@ export function OverviewPanel({
     setIsRestarting(true);
     setFeedback({ tone: "success", text: "Applying parameters to the local model instance…" });
     try {
-      const res = await fetch(withBasePath("/api/rag/models/reload"), {
+      const res = await fetch(apiPath("/api/rag/models/reload"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

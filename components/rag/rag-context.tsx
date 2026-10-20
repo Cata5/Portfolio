@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { useEditor } from "@/components/editor/editor-context";
-import { isGhPages, withBasePath } from "@/lib/base-path";
+import { apiPath, isGhPages } from "@/lib/base-path";
 import type { ValidatedCitation } from "@/lib/rag/citations/validator";
 import type { GroundedEvidence, RetrievalDiagnostics } from "@/lib/rag/types/retrieval";
 import type { PipelineTimings, RAGPipelineStage } from "@/lib/rag/types/events";
@@ -115,7 +115,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
           headers.set("Content-Type", "application/json");
         }
         if (authToken) headers.set("Authorization", `Bearer ${authToken}`);
-        const res = await fetch(withBasePath(path), { ...init, headers });
+        const res = await fetch(apiPath(path), { ...init, headers });
         let data: Record<string, unknown> | undefined;
         try {
           data = (await res.json()) as Record<string, unknown>;
@@ -142,7 +142,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch(withBasePath("/api/rag/status"));
+      const res = await fetch(apiPath("/api/rag/status"));
       if (res.ok) {
         const data = await res.json();
         setStatus(data);
@@ -154,7 +154,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
 
   const fetchConfig = useCallback(async () => {
     try {
-      const res = await fetch(withBasePath("/api/rag/config"));
+      const res = await fetch(apiPath("/api/rag/config"));
       if (res.ok) {
         const data = await res.json();
         setConfig(data.config);
@@ -166,7 +166,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
 
   const refreshDocuments = useCallback(async () => {
     try {
-      const res = await fetch(withBasePath("/api/rag/documents"));
+      const res = await fetch(apiPath("/api/rag/documents"));
       if (res.ok) {
         const data = await res.json();
         setDocuments(data.documents || []);
@@ -297,7 +297,7 @@ export function RAGProvider({ children }: { children: React.ReactNode }) {
       setIsStreaming(true);
 
       try {
-        const res = await fetch(withBasePath("/api/rag/query"), {
+        const res = await fetch(apiPath("/api/rag/query"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

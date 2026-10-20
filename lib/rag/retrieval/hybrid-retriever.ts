@@ -62,12 +62,14 @@ export class HybridRetriever {
       config.models.embeddingBaseUrl,
       config.models.embeddingModel,
       config.models.embeddingDimension,
+      String(config.models.embeddingMaxInputTokens ?? 500),
     ].join("|");
     if (!this.embeddingProvider || this.embeddingProviderKey !== key) {
       this.embeddingProvider = new OpenAICompatibleEmbeddingProvider({
         baseUrl: config.models.embeddingBaseUrl,
         modelName: config.models.embeddingModel,
         dimension: config.models.embeddingDimension,
+        maxInputTokens: config.models.embeddingMaxInputTokens,
       });
       this.embeddingProviderKey = key;
     }

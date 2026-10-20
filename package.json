@@ -9,6 +9,7 @@
     "lint": "eslint",
     "rag:index": "npx tsx scripts/index-portfolio.ts",
     "rag:test": "npx tsx scripts/run-rag-tests.ts",
+    "rag:archive": "npx tsx scripts/build-rag-archive.ts",
     "rag:eval": "npx tsx scripts/run-eval.ts"
   },
   "dependencies": {

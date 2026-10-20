@@ -6,27 +6,42 @@ import {
   Send,
   ArrowUpRight,
   AlertTriangle,
-  Radio,
-  Cpu,
-  Mail,
-  Layers,
-  Code,
+  ChevronDown,
+  ChevronRight,
   RefreshCw,
 } from "lucide-react";
 import { highlightAndScrollTo } from "./navigation-highlighter";
-import { CLogo } from "./c-logo";
 import { GlitchText } from "./glitch-text";
 import { useEditor } from "@/components/editor/editor-context";
+import { OfflineAnswerBody } from "./offline-answer-body";
+import { answerOfflineQuery, corpusRecordCount } from "@/lib/rag/offline/assistant";
+import { ragArchive } from "@/lib/rag/offline/archive-data";
+import type {
+  OfflineAction,
+  OfflineBlock,
+  OfflineSource,
+  OfflineTrace,
+} from "@/lib/rag/offline/types";
 
 interface GlitchMessage {
   id: string;
   role: "system" | "user" | "bot";
   title?: string;
+  badge?: string;
+  /** User message text. Bot answers render from `blocks`. */
+  content?: string;
+  blocks?: OfflineBlock[];
+  sources?: OfflineSource[];
+  trace?: OfflineTrace;
   errorLog?: string[];
-  content: string;
   timestamp: string;
-  actions?: { label: string; target: string; type: "scroll" | "route" | "external"; icon?: string }[];
+  actions?: OfflineAction[];
 }
+
+// Monotonic ids: `Date.now()` is impure and React may re-invoke the handlers
+// that build messages, so identity comes from a counter instead of the clock.
+let messageSeq = 0;
+const nextId = (prefix: string) => `${prefix}_${(messageSeq += 1)}`;
 
 export function GlitchedChatView() {
   const router = useRouter();
@@ -35,29 +50,63 @@ export function GlitchedChatView() {
 
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [expandedLogs, setExpandedLogs] = useState<Record<string, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [messages, setMessages] = useState<GlitchMessage[]>(() => [
-    {
+  const recordCount = corpusRecordCount(cmsContent);
+  const featured = cmsContent.projects.find((project) => project.featured) ?? cmsContent.projects[0];
+
+  const buildWelcome = (): GlitchMessage => {
+    const bullets: string[] = [];
+    if (cmsContent.site?.name) {
+      bullets.push(`${cmsContent.site.name} — ${cmsContent.site.role ?? ""}`.trim());
+    }
+    if (featured) {
+      bullets.push(
+        `Featured build: ${featured.title}${featured.platform ? ` (${featured.platform})` : ""}`
+      );
+    }
+    bullets.push(
+      `Archive: ${recordCount} portfolio records + ${ragArchive.entries.length} pre-compiled answers`
+    );
+    if (cmsContent.site?.email) bullets.push(`Direct contact: ${cmsContent.site.email}`);
+
+    const actions: OfflineAction[] = [];
+    if (featured) {
+      actions.push({
+        id: `route-/projects/${featured.id}`,
+        label: `${featured.title} Case Study`,
+        type: "route",
+        target: `/projects/${featured.id}`,
+      });
+    }
+    actions.push({ id: "scroll-stack", label: "Tech Stack & Skills", type: "scroll", target: "stack" });
+    actions.push({ id: "scroll-contact", label: "Contact Channels", type: "scroll", target: "contact" });
+
+    return {
       id: "init",
       role: "system",
-      title: themes?.cyberpunk?.telemetryTitle || "HOST PROTOCOL: STATIC STANDALONE (GH-PAGES)",
-      errorLog: [
-        "POST http://127.0.0.1:8000/v1/chat/completions (Unsloth Daemon)",
-        "ERROR 0x503: CONNECTION_REFUSED on public static export",
-        "STATUS: Fallback to verified local offline bundle",
+      title: themes?.common?.assistantTitle || "Catalin AI Guide // [STATIC ARCHIVE]",
+      badge: themes?.common?.badge || "ARCHIVE MODE // STATIC MIRROR",
+      errorLog: themes?.glitchedAssistant?.handshakeLog || [
+        "LIVE ENGINE: local neural weights on Catalin's workstation (offline on a static host)",
+        "STATIC MIRROR: pre-compiled answers + lexical search over the portfolio records",
       ],
-      content:
-        themes?.common?.welcomeDescription ||
-        "LOCAL NEURAL LINK OFFLINE // HOST DISCONNECTED\nCatalin's custom LLM inference engine (Gemma 4 Q4_K_M) runs locally on his dedicated workstation. On static GitHub Pages hosting, live neural generation is in standby.",
+      blocks: [
+        {
+          kind: "text",
+          text:
+            themes?.common?.welcomeDescription ||
+            "This static mirror answers from a pre-compiled archive plus a lexical search over the portfolio records.",
+        },
+        { kind: "bullets", items: bullets },
+      ],
       timestamp: "00:00:01",
-      actions: [
-        { label: "Flagship: Vortex Case Study", target: "/projects/vortex", type: "route" },
-        { label: "Tech Stack & Skills", target: "stack", type: "scroll" },
-        { label: "Contact Channels", target: "contact", type: "scroll" },
-      ],
-    },
-  ]);
+      actions,
+    };
+  };
+
+  const [messages, setMessages] = useState<GlitchMessage[]>(() => [buildWelcome()]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -65,78 +114,8 @@ export function GlitchedChatView() {
     }
   }, [messages, isTyping]);
 
-  const generateFallbackResponse = (query: string): GlitchMessage => {
-    const q = query.toLowerCase();
-    const time = new Date().toLocaleTimeString();
-
-    const rawError = [
-      `QUERY: "${query}"`,
-      "HANDSHAKE: 127.0.0.1:8000 ... FAILED (503 Service Unavailable)",
-      "FALLBACK: Decrypting static verified record from client index",
-    ];
-
-    if (q.includes("vortex") || q.includes("hardest") || q.includes("complex") || q.includes("best project")) {
-      return {
-        id: `msg_${Date.now()}`,
-        role: "bot",
-        title: "STATIC CACHED EVIDENCE // VORTEX",
-        errorLog: rawError,
-        content:
-          "Vortex is my flagship and most technically challenging project. It is a client-side media player for Android phones and tablets and Android TV, plus a Compose Multiplatform desktop client, built with ExoPlayer, in-app mpv, and direct integration with 5 working storage providers (Google Drive, SMB, SFTP, FTPS, WebDAV).",
-        timestamp: time,
-        actions: [
-          { label: "Open Vortex Case Study", target: "/projects/vortex", type: "route" },
-          { label: "View on Work Section", target: "work", type: "scroll" },
-        ],
-      };
-    }
-
-    if (q.includes("contact") || q.includes("email") || q.includes("hire") || q.includes("reach")) {
-      return {
-        id: `msg_${Date.now()}`,
-        role: "bot",
-        title: "DIRECT CONTACT CHANNELS",
-        errorLog: rawError,
-        content:
-          "Catalin is reachable directly via:\n• Email: cata.manu06@gmail.com\n• GitHub: https://github.com/Cata5\n• LinkedIn: https://www.linkedin.com/in/cata5",
-        timestamp: time,
-        actions: [
-          { label: "Jump to Contact Form", target: "contact", type: "scroll" },
-          { label: "GitHub Profile", target: "https://github.com/Cata5", type: "external" },
-        ],
-      };
-    }
-
-    if (q.includes("stack") || q.includes("skills") || q.includes("technologies") || q.includes("language")) {
-      return {
-        id: `msg_${Date.now()}`,
-        role: "bot",
-        title: "CORE TECHNICAL STACK",
-        errorLog: rawError,
-        content:
-          "• Languages: TypeScript, Python, Kotlin, C++\n• Frontend: Next.js 16, React 19, Tailwind CSS v4, Motion\n• Backend & Systems: Node.js, FastAPI, Flask, SQLite, Media3/ExoPlayer\n• Machine Learning: PyTorch, YOLOv8, CNNs, CUDA",
-        timestamp: time,
-        actions: [
-          { label: "View Skills Matrix", target: "stack", type: "scroll" },
-          { label: "ML Experiments Notebook", target: "ml", type: "scroll" },
-        ],
-      };
-    }
-
-    return {
-      id: `msg_${Date.now()}`,
-      role: "bot",
-      title: "STATIC FALLBACK RESPONSE",
-      errorLog: rawError,
-      content:
-        `Received query: "${query}"\nLocal neural weights are hosted on Catalin's workstation. To run live unbounded inference with Gemma 4, clone the repository locally and start with 'npm run dev'.`,
-      timestamp: time,
-      actions: [
-        { label: "Explore All Projects", target: "projects", type: "scroll" },
-        { label: "View GitHub Repository", target: "https://github.com/Cata5/Portfolio", type: "external" },
-        { label: "Contact Catalin", target: "contact", type: "scroll" },
-      ],
-    };
+  const toggleLog = (id: string) => {
+    setExpandedLogs((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleSend = (e: React.FormEvent) => {
@@ -146,7 +125,7 @@ export function GlitchedChatView() {
     setInput("");
 
     const userMsg: GlitchMessage = {
-      id: `user_${Date.now()}`,
+      id: nextId("user"),
       role: "user",
       content: query,
       timestamp: new Date().toLocaleTimeString(),
@@ -156,10 +135,23 @@ export function GlitchedChatView() {
     setIsTyping(true);
 
     setTimeout(() => {
-      const botResponse = generateFallbackResponse(query);
-      setMessages((prev) => [...prev, botResponse]);
+      const answer = answerOfflineQuery(query, { source: cmsContent, archive: ragArchive });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: nextId("msg"),
+          role: "bot",
+          title: answer.title,
+          badge: answer.badge,
+          blocks: answer.blocks,
+          sources: answer.sources,
+          trace: answer.trace,
+          actions: answer.actions,
+          timestamp: new Date().toLocaleTimeString(),
+        },
+      ]);
       setIsTyping(false);
-    }, 450);
+    }, 120);
   };
 
   const handleAction = (action: { target: string; type: "scroll" | "route" | "external" }) => {
@@ -168,15 +160,15 @@ export function GlitchedChatView() {
 
   return (
     <div className="relative flex h-full flex-col justify-between overflow-hidden bg-transparent font-mono select-none">
-      {/* Glitch Status Banner Bar */}
+      {/* Archive Status Banner Bar */}
       <div className="relative z-30 flex items-center justify-between border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold tracking-wider text-amber-300">
-            [ NEURAL LINK // OFFLINE ]
+            [ ARCHIVE MODE // STATIC MIRROR ]
           </span>
         </div>
         <span className="rounded border border-amber-500/40 bg-amber-500/20 px-2 py-0.5 text-[9.5px] font-semibold text-amber-200 tracking-wider">
-          STANDBY PROTOCOL
+          {themes?.common?.status || "ARCHIVE"}
         </span>
       </div>
 
@@ -186,15 +178,19 @@ export function GlitchedChatView() {
         <div className="rounded-xl border border-border/50 bg-card/40 p-3.5 backdrop-blur-xl ring-1 ring-white/5 space-y-2">
           <div className="flex items-center justify-between border-b border-border/40 pb-2 text-[10.5px] text-muted-foreground">
             <span className="flex items-center gap-1.5 font-bold text-signal">
-              <GlitchText text="SYSTEM TELEMETRY // GH-PAGES" speed={15} periodicTwitch />
+              <GlitchText
+                text={themes?.cyberpunk?.telemetryTitle || "SYSTEM TELEMETRY // GH-PAGES"}
+                speed={15}
+                periodicTwitch
+              />
             </span>
             <span className="text-amber-400 font-semibold">STATIC RUNTIME</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-muted-foreground font-mono leading-relaxed">
-            <div>HOST: <span className="text-foreground">cata5.github.io</span></div>
-            <div>STATUS: <span className="text-amber-400 font-semibold">STANDALONE DEPLOY</span></div>
-            <div>INFERENCE: <span className="text-foreground/80">Local (Unsloth)</span></div>
-            <div>FALLBACK: <span className="text-emerald-400 font-semibold">Grounded Offline Index</span></div>
+            <div>HOST: <span className="text-foreground">{themes?.cyberpunk?.host || "cata5.github.io"}</span></div>
+            <div>STATUS: <span className="text-amber-400 font-semibold">{themes?.cyberpunk?.status || "ARCHIVE MODE"}</span></div>
+            <div>INFERENCE: <span className="text-foreground/80">{themes?.cyberpunk?.inference || "Local workstation (offline here)"}</span></div>
+            <div>ANSWERS: <span className="text-emerald-400 font-semibold">{themes?.cyberpunk?.fallback || "Pre-compiled + corpus search"}</span></div>
           </div>
         </div>
 
@@ -213,6 +209,8 @@ export function GlitchedChatView() {
             );
           }
 
+          const isLogOpen = expandedLogs[msg.id] || false;
+
           return (
             <div key={msg.id} className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-150">
               <div className="max-w-[92%] rounded-xl border border-border/50 bg-card/40 p-3.5 text-[13px] text-foreground backdrop-blur-xl ring-1 ring-white/5 space-y-2.5">
@@ -221,21 +219,44 @@ export function GlitchedChatView() {
                     <span className="glitch-text-active">
                       <GlitchText text={msg.title} speed={15} />
                     </span>
+                    {msg.badge && (
+                      <span className="ml-auto rounded bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-300">
+                        {msg.badge}
+                      </span>
+                    )}
                   </div>
                 )}
 
-                {/* Error Log Line */}
-                {msg.errorLog && (
-                  <div className="rounded border border-amber-500/20 bg-amber-500/5 p-2 text-[10.5px] font-mono text-amber-300/80 space-y-0.5">
-                    {msg.errorLog.map((l, lIdx) => (
-                      <div key={lIdx}>&gt; {l}</div>
-                    ))}
+                {/* Runtime disclosure, collapsed by default */}
+                {msg.errorLog && msg.errorLog.length > 0 && (
+                  <div className="rounded border border-amber-500/20 bg-amber-500/5 p-2 text-[10.5px] font-mono">
+                    <button
+                      type="button"
+                      onClick={() => toggleLog(msg.id)}
+                      className="flex w-full items-center justify-between text-amber-300/90 font-bold hover:text-amber-200 cursor-pointer"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <AlertTriangle className="size-3 text-amber-400" />
+                        <span>{themes?.common?.disclosureLabel || "Runtime details"}</span>
+                      </span>
+                      {isLogOpen ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+                    </button>
+                    {isLogOpen && (
+                      <div className="pt-1.5 mt-1.5 border-t border-amber-500/20 text-amber-300/80 space-y-0.5">
+                        {msg.errorLog.map((line, lIdx) => (
+                          <div key={lIdx}>&gt; {line}</div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
-                <div className="whitespace-pre-line text-foreground/90 leading-relaxed font-sans sm:font-mono text-xs 2xl:text-[13.5px]">
-                  {msg.content}
-                </div>
+                <OfflineAnswerBody
+                  variant="cyberpunk"
+                  blocks={msg.blocks ?? []}
+                  sources={msg.sources}
+                  trace={msg.trace}
+                />
 
                 {msg.actions && msg.actions.length > 0 && (
                   <div className="pt-2 border-t border-border/30 flex flex-wrap gap-1.5">
@@ -260,32 +281,34 @@ export function GlitchedChatView() {
         {isTyping && (
           <div className="flex items-center gap-2 text-xs text-amber-400 font-mono animate-pulse">
             <RefreshCw className="size-3 animate-spin text-amber-400" />
-            <span>[ACCESSING CACHED STATIC EMBEDDINGS]...</span>
+            <span>[{themes?.common?.processingLabel || "Searching archive records"}]...</span>
           </div>
         )}
       </div>
 
-      {/* Glitched Input Bar in Frosted Glass */}
+      {/* Input Bar in Frosted Glass */}
       <form onSubmit={handleSend} className="relative z-30 border-t border-border/40 bg-card/30 p-3 backdrop-blur-xl">
         <div className="relative flex items-center">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a query (e.g. hardest project, stack, contact)..."
+            placeholder="Ask about a project, the stack, contact..."
+            aria-label="Ask the portfolio archive"
             className="w-full rounded-xl border border-border/60 bg-neutral-950/60 px-4 py-2.5 pr-11 font-mono text-xs 2xl:text-[13px] text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none focus:ring-1 focus:ring-signal/50"
           />
           <button
             type="submit"
             disabled={!input.trim() || isTyping}
+            aria-label="Send question"
             className="absolute right-2 rounded-lg bg-signal/20 p-1.5 text-signal hover:bg-signal hover:text-signal-ink transition-all disabled:opacity-40 cursor-pointer"
           >
             <Send className="size-3.5" />
           </button>
         </div>
         <div className="mt-1.5 flex items-center justify-between text-[10px] text-muted-foreground/80 px-1">
-          <span>HOST: STATIC GITHUB PAGES</span>
-          <span>ENTER TO QUERY</span>
+          <span>{themes?.common?.footerHost || "HOST: STATIC GITHUB PAGES"}</span>
+          <span>{themes?.common?.footerAction || "ENTER TO QUERY ARCHIVE"}</span>
         </div>
       </form>
     </div>

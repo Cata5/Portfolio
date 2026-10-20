@@ -14,19 +14,35 @@ import { highlightAndScrollTo } from "./navigation-highlighter";
 import { CLogo } from "./c-logo";
 import { GlitchText } from "./glitch-text";
 import { useEditor } from "@/components/editor/editor-context";
+import { OfflineAnswerBody } from "./offline-answer-body";
+import { answerOfflineQuery, corpusRecordCount } from "@/lib/rag/offline/assistant";
+import { ragArchive } from "@/lib/rag/offline/archive-data";
+import type {
+  OfflineAction,
+  OfflineBlock,
+  OfflineSource,
+  OfflineTrace,
+} from "@/lib/rag/offline/types";
 
-interface GlitchOfflineMessage {
+interface StandbyMessage {
   id: string;
   role: "user" | "bot";
-  query?: string;
   badge?: string;
   title?: string;
+  /** User message text. Bot answers render from `blocks`. */
+  content?: string;
+  blocks?: OfflineBlock[];
+  sources?: OfflineSource[];
+  trace?: OfflineTrace;
   errorLog?: string[];
-  content: string;
-  bullets?: string[];
-  actions?: { label: string; target: string; type: "scroll" | "route" | "external" }[];
+  actions?: OfflineAction[];
   timestamp: string;
 }
+
+// Monotonic ids: `Date.now()` is impure and React may re-invoke the handlers
+// that build messages, so identity comes from a counter instead of the clock.
+let messageSeq = 0;
+const nextId = (prefix: string) => `${prefix}_${(messageSeq += 1)}`;
 
 const TOPIC_CHIPS = [
   {
@@ -43,7 +59,7 @@ const TOPIC_CHIPS = [
   },
   {
     label: "Machine Learning Lab",
-    query: "What machine learning models and experiments has Catalin trained?",
+    query: "Which machine learning models has Catalin trained, and on what hardware?",
   },
 ];
 
@@ -57,34 +73,56 @@ export function HolographicStandbyView() {
   const [expandedLogs, setExpandedLogs] = useState<Record<string, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [messages, setMessages] = useState<GlitchOfflineMessage[]>(() => [
-    {
+  const recordCount = corpusRecordCount(cmsContent);
+  const featured = cmsContent.projects.find((project) => project.featured) ?? cmsContent.projects[0];
+
+  const buildWelcome = (): StandbyMessage => {
+    const bullets: string[] = [];
+    if (cmsContent.site?.name) {
+      bullets.push(`${cmsContent.site.name} — ${cmsContent.site.role ?? ""}`.trim());
+    }
+    if (featured) {
+      bullets.push(
+        `Featured build: ${featured.title}${featured.platform ? ` (${featured.platform})` : ""}`
+      );
+    }
+    bullets.push(
+      `Searchable archive: ${recordCount} portfolio records + ${ragArchive.entries.length} pre-compiled answers`
+    );
+    if (cmsContent.site?.email) {
+      bullets.push(`Direct contact: ${cmsContent.site.email}`);
+    }
+
+    const actions: OfflineAction[] = [];
+    if (featured) {
+      actions.push({
+        id: `route-/projects/${featured.id}`,
+        label: `Open ${featured.title} Case Study`,
+        type: "route",
+        target: `/projects/${featured.id}`,
+      });
+    }
+    actions.push({ id: "scroll-stack", label: "View Tech Stack Grid", type: "scroll", target: "stack" });
+    actions.push({ id: "scroll-contact", label: "Contact Channels", type: "scroll", target: "contact" });
+
+    return {
       id: "init",
       role: "bot",
-      badge: themes?.common?.status ? `HOST OFFLINE // ${themes.common.status}` : "HOST OFFLINE // STANDBY ARCHIVE",
-      title: themes?.common?.assistantTitle || "Catalin AI Guide // [OFFLINE ARCHIVE]",
+      badge: themes?.common?.badge || "ARCHIVE MODE // STATIC MIRROR",
+      title: themes?.common?.assistantTitle || "Catalin AI Guide // [STATIC ARCHIVE]",
       errorLog: themes?.glitchedAssistant?.handshakeLog || [
-        "POST http://127.0.0.1:8000/v1/chat/completions (Local Workstation)",
-        "STATUS 503 SERVICE UNAVAILABLE (ERR_CONNECTION_REFUSED)",
-        "HOST SANDBOX: cata5.github.io/Portfolio (Static Cloud Target)",
-        "PROTOCOL: Auto-switched to Pre-Compiled Verified Knowledge Archive",
+        "LIVE ENGINE: local neural weights on Catalin's workstation (not reachable from a static host)",
+        "STATIC MIRROR: pre-compiled answers + lexical search over the portfolio records",
       ],
-      content:
-        themes?.common?.welcomeDescription ||
-        "Local neural inference weights (Gemma 4 Q4_K_M via Unsloth) run on Catalin's workstation and are unreachable on this static GitHub Pages build. The assistant is reading from the pre-indexed portfolio knowledge archive with instant verified navigation.",
-      bullets: [
-        "Vortex (Cross-Platform Media Player) - Flagship systems engineering project",
-        "Technical Stack: TypeScript, Python, Kotlin, Next.js 16, React 19, PyTorch",
-        "Direct Contact: cata.manu06@gmail.com | github.com/Cata5 | linkedin.com/in/cata5",
-      ],
-      actions: [
-        { label: "Open Vortex Case Study", target: "/projects/vortex", type: "route" },
-        { label: "View Tech Stack Grid", target: "stack", type: "scroll" },
-        { label: "Contact Channels", target: "contact", type: "scroll" },
-      ],
+      // The header card above already carries the description; the opening
+      // message shows the facts derived from the CMS instead of repeating it.
+      blocks: [{ kind: "bullets", items: bullets }],
+      actions,
       timestamp: "00:00:01",
-    },
-  ]);
+    };
+  };
+
+  const [messages, setMessages] = useState<StandbyMessage[]>(() => [buildWelcome()]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -96,139 +134,13 @@ export function HolographicStandbyView() {
     setExpandedLogs((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const generateOfflineResponse = (query: string): GlitchOfflineMessage => {
-    const q = query.toLowerCase();
-    const time = new Date().toLocaleTimeString();
-
-    const rawError = themes?.glitchedAssistant?.handshakeLog || [
-      `QUERY: "${query}"`,
-      "HANDSHAKE: Target http://127.0.0.1:8000/v1 ... FAILED",
-      "ERROR 0x503: Workstation LLM daemon offline on static cloud hosting",
-      "DECRYPT: Reading verified claim embeddings from local bundle...",
-    ];
-
-    if (q.includes("vortex") || q.includes("hardest") || q.includes("complex") || q.includes("flagship") || q.includes("best project")) {
-      return {
-        id: `msg_${Date.now()}`,
-        role: "bot",
-        badge: "VERIFIED ARCHIVE // VORTEX",
-        title: "Vortex - Cross-Platform Streaming Media Player",
-        errorLog: rawError,
-        content:
-          themes?.glitchedAssistant?.vortexSummary ||
-          "Vortex is my flagship and most technically challenging project: a client-side media player for Android phones and tablets and Android TV, plus a Compose Multiplatform desktop client built on a shared module.",
-        bullets: [
-          "Streams directly from 5 storage protocols: Google Drive OAuth, SMB, SFTP, FTPS and WebDAV",
-          "Dual playback engines: Media3/ExoPlayer (Android/TV) and in-app mpv integration (Windows desktop)",
-          "WorkManager background download queue with quotas, pauses, and auto-cleanup",
-          "YouTube music streaming engine with background playback and real offline downloads",
-        ],
-        actions: [
-          { label: "Open Vortex Case Study", target: "/projects/vortex", type: "route" },
-          { label: "View in Featured Work", target: "work", type: "scroll" },
-        ],
-        timestamp: time,
-      };
-    }
-
-    if (q.includes("contact") || q.includes("email") || q.includes("hire") || q.includes("reach") || q.includes("social")) {
-      return {
-        id: `msg_${Date.now()}`,
-        role: "bot",
-        badge: "VERIFIED ARCHIVE // DIRECT CHANNELS",
-        title: "Catalin Manu - Direct Contact Uplink",
-        errorLog: rawError,
-        content:
-          themes?.glitchedAssistant?.contactSummary ||
-          "Catalin is open for full-time software engineering roles and high-impact internships:",
-        bullets: [
-          "Email: cata.manu06@gmail.com",
-          "GitHub: https://github.com/Cata5",
-          "LinkedIn: https://www.linkedin.com/in/cata5",
-          "Location: Bucharest, Romania (ETTI POLITEHNICA University)",
-        ],
-        actions: [
-          { label: "Scroll to Contact Form", target: "contact", type: "scroll" },
-          { label: "GitHub Profile", target: "https://github.com/Cata5", type: "external" },
-        ],
-        timestamp: time,
-      };
-    }
-
-    if (q.includes("stack") || q.includes("skill") || q.includes("language") || q.includes("technolog") || q.includes("framework")) {
-      return {
-        id: `msg_${Date.now()}`,
-        role: "bot",
-        badge: "VERIFIED ARCHIVE // TECH MATRIX",
-        title: "Technical Stack & Engineering Competencies",
-        errorLog: rawError,
-        content:
-          themes?.glitchedAssistant?.stackSummary ||
-          "Core languages, web architectures, backend engines, and machine learning stacks actively used across projects:",
-        bullets: [
-          "Primary Languages: TypeScript, Python, Kotlin, C++",
-          "Web & Frontend: Next.js 16 (App Router), React 19, Tailwind CSS v4, Motion, Base UI",
-          "Backend & Systems: Node.js, FastAPI, Flask, SQLite, Room (KMP), ExoPlayer/mpv",
-          "Machine Learning: PyTorch, YOLOv8 object detection, custom CNNs, CUDA Acceleration",
-        ],
-        actions: [
-          { label: "View Full Skills Grid", target: "stack", type: "scroll" },
-          { label: "ML Experiments Notebook", target: "ml", type: "scroll" },
-        ],
-        timestamp: time,
-      };
-    }
-
-    if (q.includes("ml") || q.includes("machine learning") || q.includes("yolo") || q.includes("model") || q.includes("ai")) {
-      return {
-        id: `msg_${Date.now()}`,
-        role: "bot",
-        badge: "VERIFIED ARCHIVE // ML LAB",
-        title: "Machine Learning Experiments & Vision Models",
-        errorLog: rawError,
-        content: "Applied machine learning notebooks, vision models, and neural experiments:",
-        bullets: [
-          "Custom YOLOv8 object detection and real-time bounding box segmentation",
-          "CNN image classification trained on custom datasets with PyTorch & CUDA",
-          "Interactive browser neural visualizer and model training loss curves",
-        ],
-        actions: [
-          { label: "View ML Lab Section", target: "ml", type: "scroll" },
-          { label: "Explore All Projects", target: "projects", type: "scroll" },
-        ],
-        timestamp: time,
-      };
-    }
-
-    return {
-      id: `msg_${Date.now()}`,
-      role: "bot",
-      badge: "VERIFIED ARCHIVE // FALLBACK",
-      title: "Offline Static Dossier Record",
-      errorLog: rawError,
-      content: `Received query: "${query}"\nLocal workstation LLM inference is offline on this static GitHub Pages host. Decrypted verified facts from the bundled knowledge registry:`,
-      bullets: [
-        "Flagship Project: Vortex (Cross-platform Kotlin/Compose media player)",
-        "Education: Computer & Information Technology (CTI) at ETTI Bucharest",
-        "Primary Stack: TypeScript, Next.js, Python, Kotlin, PyTorch",
-        "Direct Contact: cata.manu06@gmail.com",
-      ],
-      actions: [
-        { label: "Explore Projects", target: "projects", type: "scroll" },
-        { label: "Tech Stack", target: "stack", type: "scroll" },
-        { label: "Contact Form", target: "contact", type: "scroll" },
-      ],
-      timestamp: time,
-    };
-  };
-
   const handleSend = (textToSend?: string) => {
     const query = (textToSend || input).trim();
     if (!query || isProcessing) return;
     setInput("");
 
-    const userMsg: GlitchOfflineMessage = {
-      id: `user_${Date.now()}`,
+    const userMsg: StandbyMessage = {
+      id: nextId("user"),
       role: "user",
       content: query,
       timestamp: new Date().toLocaleTimeString(),
@@ -237,11 +149,26 @@ export function HolographicStandbyView() {
     setMessages((prev) => [...prev, userMsg]);
     setIsProcessing(true);
 
+    // The archive is local, so the answer is ready immediately; the timeout
+    // only lets the question paint before the answer lands under it.
     setTimeout(() => {
-      const response = generateOfflineResponse(query);
-      setMessages((prev) => [...prev, response]);
+      const answer = answerOfflineQuery(query, { source: cmsContent, archive: ragArchive });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: nextId("msg"),
+          role: "bot",
+          badge: answer.badge,
+          title: answer.title,
+          blocks: answer.blocks,
+          sources: answer.sources,
+          trace: answer.trace,
+          actions: answer.actions,
+          timestamp: new Date().toLocaleTimeString(),
+        },
+      ]);
       setIsProcessing(false);
-    }, 450);
+    }, 120);
   };
 
   const handleAction = (action: { target: string; type: "scroll" | "route" | "external" }) => {
@@ -250,15 +177,16 @@ export function HolographicStandbyView() {
 
   return (
     <div className="flex h-full flex-col justify-between bg-transparent font-sans">
-      {/* Real-time Embedded Glitch Notification Banner */}
+      {/* Archive Mode Banner */}
       <div className="border-b border-amber-500/30 bg-amber-500/10 px-3.5 py-2 backdrop-blur-md flex items-center justify-between text-xs font-mono">
         <div className="flex items-center gap-2">
           <span className="font-bold text-amber-300">
-            {themes?.glitchedAssistant?.bannerText || "[ ERROR 0x503: LOCAL LLM UNREACHABLE // READING OFFLINE ARCHIVE ]"}
+            {themes?.glitchedAssistant?.bannerText ||
+              "[ ARCHIVE MODE // PRE-COMPILED ANSWERS + CORPUS SEARCH ]"}
           </span>
         </div>
         <span className="rounded border border-amber-500/40 bg-amber-500/20 px-2 py-0.5 text-[9.5px] font-semibold text-amber-200 uppercase tracking-wider">
-          {themes?.common?.status || "STANDBY"}
+          {themes?.common?.status || "ARCHIVE"}
         </span>
       </div>
 
@@ -277,14 +205,14 @@ export function HolographicStandbyView() {
           <div className="space-y-1">
             <h2 className="glitch-text-active text-base sm:text-lg font-bold tracking-tight text-foreground">
               <GlitchText
-                text={themes?.common?.assistantTitle || "Catalin AI Guide // [STANDBY]"}
+                text={themes?.common?.assistantTitle || "Catalin AI Guide // [STATIC ARCHIVE]"}
                 speed={20}
                 periodicTwitch
               />
             </h2>
             <p className="max-w-md mx-auto text-xs text-muted-foreground leading-relaxed">
               {themes?.common?.welcomeDescription ||
-                "Local workstation neural weights (Gemma 4 via Unsloth) are in standby on this static deployment. Select a topic or type any question below to decrypt the verified portfolio archive."}
+                "The live assistant runs local neural weights on Catalin's workstation. This static mirror answers from a pre-compiled archive plus a lexical search over the portfolio records."}
             </p>
           </div>
 
@@ -328,7 +256,7 @@ export function HolographicStandbyView() {
                 {/* Header Badge */}
                 <div className="flex items-center justify-between border-b border-border/40 pb-2 text-xs font-mono">
                   <span className="rounded bg-amber-500/20 px-2 py-0.5 font-bold text-amber-300 tracking-wide text-[10px]">
-                    {msg.badge || "VERIFIED OFFLINE CLAIM"}
+                    {msg.badge || "ARCHIVE RECORD"}
                   </span>
                   <span className="text-muted-foreground text-[10.5px]">{msg.timestamp}</span>
                 </div>
@@ -340,9 +268,9 @@ export function HolographicStandbyView() {
                   </h3>
                 )}
 
-                {/* Collapsible Network Error Log Diagnostics */}
+                {/* Runtime disclosure: why the live model is not answering here */}
                 {msg.errorLog && msg.errorLog.length > 0 && (
-                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-2.5 font-mono text-[11px] space-y-1.5">
+                  <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-2.5 font-mono text-[11px] space-y-1.5">
                     <button
                       type="button"
                       onClick={() => toggleErrorLog(msg.id)}
@@ -350,7 +278,7 @@ export function HolographicStandbyView() {
                     >
                       <span className="flex items-center gap-1.5">
                         <AlertTriangle className="size-3 text-amber-400" />
-                        <span>HTTP 503 Diagnostic Handshake</span>
+                        <span>{themes?.common?.disclosureLabel || "Runtime details"}</span>
                       </span>
                       {isLogOpen ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
                     </button>
@@ -365,22 +293,13 @@ export function HolographicStandbyView() {
                   </div>
                 )}
 
-                {/* Response Text with Scramble Reveal */}
-                <div className="text-foreground/90 text-xs 2xl:text-[13.5px] leading-relaxed font-sans">
-                  {msg.content}
-                </div>
-
-                {/* Bullet Points */}
-                {msg.bullets && msg.bullets.length > 0 && (
-                  <div className="space-y-1.5 pt-1">
-                    {msg.bullets.map((b, bIdx) => (
-                      <div key={bIdx} className="flex items-start gap-2 text-xs 2xl:text-[13px] text-muted-foreground leading-relaxed">
-                        <span className="text-signal select-none font-bold">•</span>
-                        <span>{b}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {/* Answer */}
+                <OfflineAnswerBody
+                  variant="holographic"
+                  blocks={msg.blocks ?? []}
+                  sources={msg.sources}
+                  trace={msg.trace}
+                />
 
                 {/* Action Buttons */}
                 {msg.actions && msg.actions.length > 0 && (
@@ -407,7 +326,7 @@ export function HolographicStandbyView() {
         {isProcessing && (
           <div className="flex items-center gap-2 text-xs font-mono text-amber-400 animate-pulse pl-1">
             <RefreshCw className="size-3 animate-spin text-amber-400" />
-            <span>[DECRYPTING OFFLINE KNOWLEDGE RECORD]...</span>
+            <span>[{themes?.common?.processingLabel || "Searching archive records"}]...</span>
           </div>
         )}
       </div>
@@ -419,12 +338,14 @@ export function HolographicStandbyView() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={themes?.common?.inputPlaceholder || "Ask offline archive (e.g. hardest project, stack, contact)..."}
+            placeholder={themes?.common?.inputPlaceholder || "Ask about a project, the stack, ML runs, contact..."}
+            aria-label="Ask the portfolio archive"
             className="w-full rounded-xl border border-border/60 bg-neutral-950/60 px-4 py-2.5 pr-11 font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none focus:ring-1 focus:ring-signal/50"
           />
           <button
             type="submit"
             disabled={!input.trim() || isProcessing}
+            aria-label="Send question"
             className="absolute right-2 rounded-lg bg-signal/20 p-1.5 text-signal hover:bg-signal hover:text-signal-ink transition-all disabled:opacity-40 cursor-pointer"
           >
             <Send className="size-3.5" />

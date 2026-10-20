@@ -82,15 +82,18 @@ export function ThinkingIndicator({
   const activeStage: RAGPipelineStage = stage ?? "query_understanding";
   const stepIndex = Math.max(STAGE_ORDER.indexOf(activeStage), 0);
   const sourceCount = evidence?.length ?? 0;
-  const sourceTitles = sourceCount > 0 ? evidence!.map((e) => e.title) : [];
+  const uniqueTitles = [...new Set(sourceCount > 0 ? evidence!.map((e) => e.title) : [])];
+  // Status events can leave a partial timings object behind ({} on a failed
+  // run), so only trust a finite total.
+  const totalMs = timings && Number.isFinite(timings.totalMs) ? timings.totalMs : null;
   const cached =
-    !!timings && timings.generationMs === 0 && timings.totalMs < 150;
+    totalMs !== null && timings!.generationMs === 0 && totalMs < 150;
 
   const summary = !isStreaming
     ? cached
       ? "Answered instantly"
-      : timings
-        ? `Thought for ${(timings.totalMs / 1000).toFixed(1)}s`
+      : totalMs !== null
+        ? `Thought for ${(totalMs / 1000).toFixed(1)}s`
         : "Thought process"
     : hasContent
       ? STAGE_LABELS.generation
@@ -141,7 +144,7 @@ export function ThinkingIndicator({
                 {STAGE_ORDER.map((s, i) => {
                   const done = !isStreaming || i < stepIndex;
                   const active = isStreaming && i === stepIndex;
-                  const ms = timings ? stageMs(s, timings) : 0;
+                  const ms = totalMs !== null ? stageMs(s, timings!) : 0;
                   return (
                     <li key={s} className="flex items-center gap-2 font-mono text-[10.5px] leading-none">
                       {done ? (
@@ -168,7 +171,7 @@ export function ThinkingIndicator({
                       </span>
                       {!isStreaming && (
                         <span className="ml-auto tabular-nums text-muted-foreground/60">
-                          {ms > 0 ? `${ms} ms` : ""}
+                          {Number.isFinite(ms) && ms > 0 ? `${ms} ms` : ""}
                         </span>
                       )}
                     </li>
@@ -185,8 +188,8 @@ export function ThinkingIndicator({
                   <p className="font-mono text-[10.5px] leading-relaxed text-muted-foreground/80">
                     Read {sourceCount} source{sourceCount === 1 ? "" : "s"}:{" "}
                     <span className="text-muted-foreground">
-                      {sourceTitles.slice(0, 4).join(" · ")}
-                      {sourceCount > 4 ? ` +${sourceCount - 4} more` : ""}
+                      {uniqueTitles.slice(0, 4).join(" · ")}
+                      {uniqueTitles.length > 4 ? ` +${uniqueTitles.length - 4} more` : ""}
                     </span>
                   </p>
                 )}

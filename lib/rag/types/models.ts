@@ -18,6 +18,11 @@ export interface IEmbeddingProvider {
   embedText(text: string): Promise<number[]>;
   embedBatch(texts: string[], batchSize?: number): Promise<number[][]>;
   healthCheck(): Promise<boolean>;
+  /**
+   * Optional readiness probe run before bulk embedding. Lazy-loading local
+   * servers need this so the first batches don't time out into hash fallback.
+   */
+  warmUp?(timeoutMs?: number): Promise<boolean>;
   /** Optional diagnostics for status reporting (not all providers implement it). */
   getHealth?(): EmbeddingProviderHealth;
 }
@@ -72,6 +77,8 @@ export interface ModelConfig {
   embeddingBaseUrl: string;
   embeddingModel: string;
   embeddingDimension: number;
+  /** Per-input token budget sent to the embedding server (default 500). */
+  embeddingMaxInputTokens?: number;
 
   rerankerProvider: "openai-compatible" | "local-cross-encoder" | "llm-prompt" | "lexical-semantic";
   rerankerBaseUrl: string;

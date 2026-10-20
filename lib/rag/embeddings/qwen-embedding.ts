@@ -1,11 +1,21 @@
 import type { IEmbeddingProvider, EmbeddingProviderHealth } from "./interface";
 import { embeddingCache } from "./cache";
 import { batchExecute } from "./batcher";
+import { truncateToTokenBudget } from "../chunking/tokenizer";
+
+/** Conservative default: most local embedding models cap inputs near 512 tokens. */
+const DEFAULT_EMBEDDING_TOKEN_BUDGET = 400;
+/** Floor for the adaptive cap; below this the request is treated as failed. */
+const MIN_EMBEDDING_TOKEN_BUDGET = 100;
+/** Extra attempts after the server reports an input as too long. */
+const MAX_BUDGET_RETRIES = 3;
 
 export interface OpenAICompatibleEmbeddingOptions {
   baseUrl: string; // e.g. "http://127.0.0.1:1234/v1" or "http://127.0.0.1:8000/v1"
   modelName: string; // e.g. "text-embedding-nomic-embed-text-v1.5" or "qwen3-embedding-0.6b"
   dimension?: number; // e.g. 768 or 1024 or 1536
+  /** Per-input token budget; longer chunks are trimmed before embedding. */
+  maxInputTokens?: number;
   apiKey?: string;
   timeoutMs?: number;
   /** Reuse/store embeddings in the in-memory cache (config: `indexing.enableEmbeddingCache`). */
@@ -26,7 +36,8 @@ export function l2Normalize(vector: number[]): number[] {
  * Uses high-entropy subword hashing & position weighting to generate
  * dense semantic representations when local server is offline.
  */
-function generateDeterministicEmbedding(text: string, dimension = 768): number[] {
+/** Exported for diagnostics/tests: lets callers detect hash-fallback vectors. */
+export function generateDeterministicEmbedding(text: string, dimension = 768): number[] {
   const vec = new Array(dimension).fill(0);
   if (!text || text.length === 0) return vec;
 
@@ -68,15 +79,35 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
   private isServerHealthy: boolean | null = null;
   private fallbackEmbeddings = 0;
   private warnedFallback = false;
+  /**
+   * Dimension actually observed from the server. Starts at the configured
+   * value and is corrected on the first successful response so hash-fallback
+   * vectors can never be a different length than the real ones (a mixed-length
+   * index silently wrecks cosine ranking).
+   */
+  private effectiveDimension: number;
+  private warnedDimension = false;
+  /**
+   * Current per-input token cap. Local servers reject a whole batch when any
+   * single input exceeds the model window (bge-small: 510 tokens) and the
+   * token estimator is only approximate, so this shrinks on rejection rather
+   * than trusting one configured number.
+   */
+  private tokenBudget: number;
+  private truncatedInputs = 0;
+  private warnedTruncation = false;
 
   constructor(options: OpenAICompatibleEmbeddingOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");
     this.modelName = options.modelName || "text-embedding-qwen3-0.6b";
     this.dimension = options.dimension || 768;
+    this.effectiveDimension = this.dimension;
     // No fake default key: keyless servers (Unsloth) must receive no auth header.
     this.apiKey = options.apiKey || "";
     this.timeoutMs = options.timeoutMs || 4000;
     this.cacheEnabled = options.cacheEnabled !== false;
+    // Leave generous headroom under the common 512-token window.
+    this.tokenBudget = options.maxInputTokens ?? DEFAULT_EMBEDDING_TOKEN_BUDGET;
   }
 
   private getHeaders(): Record<string, string> {
@@ -128,7 +159,143 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
           `(degraded retrieval quality). Fix the server/model, then re-index to replace fallback vectors.`
       );
     }
-    return generateDeterministicEmbedding(text, this.dimension);
+    return generateDeterministicEmbedding(text, this.effectiveDimension);
+  }
+
+  /** Keep fallback vectors the same length as the vectors the server returns. */
+  private adoptDimension(observed: number): void {
+    if (!Number.isFinite(observed) || observed <= 0 || observed === this.effectiveDimension) return;
+    if (!this.warnedDimension) {
+      this.warnedDimension = true;
+      console.warn(
+        `[RAG embeddings] ${this.modelName} returns ${observed}-dim vectors but the configured ` +
+          `dimension is ${this.dimension}; using ${observed} so fallback vectors stay consistent.`
+      );
+    }
+    this.effectiveDimension = observed;
+  }
+
+  /**
+   * Trim an input to the current token budget. Servers reject the *whole*
+   * batch when any single input is too long (bge-small: 510 tokens), which
+   * silently replaces every vector in that batch with hash fallbacks.
+   */
+  private limitInput(text: string): string {
+    if (this.tokenBudget <= 0) return text;
+    const { text: limited, truncated } = truncateToTokenBudget(text, this.tokenBudget);
+    if (!truncated) return text;
+    this.truncatedInputs++;
+    if (!this.warnedTruncation) {
+      this.warnedTruncation = true;
+      console.warn(
+        `[RAG embeddings] inputs over ${this.tokenBudget} tokens are trimmed before embedding ` +
+          `(${this.modelName}); raise LOCAL_EMBEDDING_MAX_TOKENS if the model allows more.`
+      );
+    }
+    return limited;
+  }
+
+  /** Tighten the input cap after a rejection; false when the floor is reached. */
+  private shrinkTokenBudget(): boolean {
+    const next = Math.floor(this.tokenBudget * 0.75);
+    if (next < MIN_EMBEDDING_TOKEN_BUDGET) return false;
+    this.tokenBudget = next;
+    console.warn(
+      `[RAG embeddings] ${this.modelName} rejected inputs as too long; retrying with a ${next}-token cap.`
+    );
+    return true;
+  }
+
+  /**
+   * POST /embeddings for the given inputs, returning one vector per input in
+   * the original order (`null` per malformed item) or `null` when the request
+   * could not be satisfied. Over-long inputs are truncated, and a `400`
+   * rejection tightens the budget and retries, since the token estimate is
+   * content-dependent (code splits into more tokens than prose).
+   */
+  private async fetchVectors(
+    inputs: string[],
+    timeoutMs: number
+  ): Promise<(number[] | null)[] | null> {
+    for (let attempt = 0; attempt <= MAX_BUDGET_RETRIES; attempt++) {
+      let res: Response;
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        res = await fetch(`${this.baseUrl}/embeddings`, {
+          method: "POST",
+          headers: this.getHeaders(),
+          body: JSON.stringify({
+            model: this.modelName,
+            input: inputs.map((text) => this.limitInput(text)),
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+      } catch {
+        return null;
+      }
+
+      if (!res.ok) {
+        if (res.status === 400 && this.shrinkTokenBudget()) continue;
+        return null;
+      }
+
+      const data = await res.json().catch(() => null);
+      const items: { index?: number; embedding?: number[] }[] = Array.isArray(data?.data)
+        ? data.data
+        : [];
+      if (items.length !== inputs.length) return null;
+
+      const ordered: (number[] | null)[] = new Array(inputs.length).fill(null);
+      for (let j = 0; j < items.length; j++) {
+        const item = items[j];
+        // OpenAI-compatible servers may return items out of order (via `index`)
+        const at =
+          typeof item.index === "number" && item.index >= 0 && item.index < inputs.length
+            ? item.index
+            : j;
+        ordered[at] = Array.isArray(item.embedding) && item.embedding.length > 0 ? item.embedding : null;
+      }
+      return ordered;
+    }
+    return null;
+  }
+
+  /**
+   * One-shot readiness probe with a generous budget.
+   *
+   * Local servers (llama.cpp / LM Studio / Unsloth Studio) load an embedding
+   * model lazily on first use, which can take far longer than a normal request
+   * timeout. Without this probe the first batches abort, fall back to hash
+   * vectors, and the index ends up with mixed-dimension garbage. Failures are
+   * swallowed: the caller keeps its normal per-batch fallback behaviour.
+   */
+  public async warmUp(timeoutMs = 60000): Promise<boolean> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      const res = await fetch(`${this.baseUrl}/embeddings`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ model: this.modelName, input: "warmup" }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const data = res.ok ? await res.json() : null;
+      const vector = data?.data?.[0]?.embedding;
+      if (Array.isArray(vector) && vector.length > 0) {
+        this.adoptDimension(vector.length);
+        this.isServerHealthy = true;
+        return true;
+      }
+      this.isServerHealthy = false;
+      return false;
+    } catch {
+      this.isServerHealthy = false;
+      return false;
+    }
   }
 
   public async embedText(text: string): Promise<number[]> {
@@ -139,37 +306,18 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
     }
 
     // 2. Try remote OpenAI-compatible server (LM Studio / Unsloth)
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
-
-      const res = await fetch(`${this.baseUrl}/embeddings`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({
-          model: this.modelName,
-          input: text,
-        }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.data && data.data[0] && Array.isArray(data.data[0].embedding)) {
-          const rawVec = data.data[0].embedding;
-          const normalized = l2Normalize(rawVec);
-          if (this.cacheEnabled) {
-            embeddingCache.set(text, this.modelName, this.dimension, normalized);
-          }
-          this.isServerHealthy = true;
-          return normalized;
-        }
+    const vectors = await this.fetchVectors([text], this.timeoutMs);
+    const vector = vectors?.[0];
+    if (vector) {
+      this.adoptDimension(vector.length);
+      const normalized = l2Normalize(vector);
+      if (this.cacheEnabled) {
+        embeddingCache.set(text, this.modelName, this.dimension, normalized);
       }
-      this.isServerHealthy = false;
-    } catch {
-      this.isServerHealthy = false;
+      this.isServerHealthy = true;
+      return normalized;
     }
+    this.isServerHealthy = false;
 
     // 3. Fallback to deterministic embedding (never cached)
     return this.makeFallbackVec(text);
@@ -196,57 +344,31 @@ export class OpenAICompatibleEmbeddingProvider implements IEmbeddingProvider {
 
       if (uncachedTexts.length === 0) return results;
 
-      // Try batch call to OpenAI-compatible server
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs * 2);
-
-        const res = await fetch(`${this.baseUrl}/embeddings`, {
-          method: "POST",
-          headers: this.getHeaders(),
-          body: JSON.stringify({
-            model: this.modelName,
-            input: uncachedTexts,
-          }),
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-
-        if (res.ok) {
-          const data = await res.json();
-          const items: { index?: number; embedding?: number[] }[] = Array.isArray(data?.data) ? data.data : [];
-          let complete = items.length === uncachedTexts.length;
-          if (complete) {
-            for (let j = 0; j < items.length; j++) {
-              const item = items[j];
-              if (!Array.isArray(item.embedding)) {
-                complete = false;
-                break;
-              }
-              // OpenAI-compatible servers may return items out of order (via `index`)
-              const localIdx =
-                typeof item.index === "number" && item.index >= 0 && item.index < uncachedTexts.length
-                  ? item.index
-                  : j;
-              const origIdx = uncachedIndices[localIdx];
-              const normalized = l2Normalize(item.embedding);
-              results[origIdx] = normalized;
-              if (this.cacheEnabled) {
-                embeddingCache.set(uncachedTexts[localIdx], this.modelName, this.dimension, normalized);
-              }
-            }
+      // One request for the whole batch; over-long inputs are trimmed and a
+      // rejection retries with a smaller cap instead of poisoning the batch.
+      const vectors = await this.fetchVectors(uncachedTexts, this.timeoutMs * 2);
+      if (vectors) {
+        let complete = vectors.length === uncachedTexts.length;
+        for (let j = 0; complete && j < vectors.length; j++) {
+          const vector = vectors[j];
+          if (!vector) {
+            complete = false;
+            break;
           }
-          if (complete) {
-            this.isServerHealthy = true;
-            return results;
+          const origIdx = uncachedIndices[j];
+          this.adoptDimension(vector.length);
+          const normalized = l2Normalize(vector);
+          results[origIdx] = normalized;
+          if (this.cacheEnabled) {
+            embeddingCache.set(uncachedTexts[j], this.modelName, this.dimension, normalized);
           }
-          this.isServerHealthy = false;
-        } else {
-          this.isServerHealthy = false;
         }
-      } catch {
-        this.isServerHealthy = false;
+        if (complete) {
+          this.isServerHealthy = true;
+          return results;
+        }
       }
+      this.isServerHealthy = false;
 
       // Fallback individually for anything the server did not provide (never cached)
       for (let j = 0; j < uncachedTexts.length; j++) {

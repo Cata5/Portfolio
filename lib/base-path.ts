@@ -31,3 +31,16 @@ export function withBasePath(href: string): string {
   if (href === BASE_PATH || href.startsWith(`${BASE_PATH}/`)) return href;
   return `${BASE_PATH}${href}`;
 }
+
+/**
+ * Canonical URL for a same-origin API route.
+ *
+ * `next.config.ts` sets `trailingSlash: true`, so `/api/x` is served from
+ * `/api/x/` and the bare path only ever answers with a 308. GETs survive that
+ * redirect, but a POST replayed across it can fail before reaching the route
+ * (observed as an empty-body 502 from the dev server), so requests target the
+ * canonical path directly instead of paying for the extra hop.
+ */
+export function apiPath(path: string): string {
+  return withBasePath(path.endsWith("/") ? path : `${path}/`);
+}
