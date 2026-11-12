@@ -38,6 +38,8 @@ export type RoadmapRun = {
   /** First and last logged cross-entropy for this run. */
   lossStart: number;
   lossEnd: number;
+  /** Maximum steps plotted for this run (defaults to 4000). */
+  steps?: number;
   /** Terminal screenshot in public/. */
   shot: string;
   /** What this stage changed about the output. */
@@ -59,6 +61,22 @@ export type RoadmapRunsSection = {
   caveat: string;
 };
 
+export type RoadmapChatSample = {
+  id: string;
+  topic: string;
+  prompt: string;
+  response: string;
+};
+
+export type RoadmapChatSection = {
+  label: string;
+  navLabel: string;
+  title: string;
+  intro: string;
+  modelBadge?: string;
+  decodingBadge?: string;
+};
+
 /**
  * The LLM from Scratch build board. Copy, runtime facts and every stage live
  * in content/roadmap.json, so the whole flagship block is editable from the
@@ -78,12 +96,18 @@ export const roadmap = roadmapJson as unknown as {
   noteLink: string;
   runtime: RoadmapRuntime[];
   stages: RoadmapStage[];
+  chatSamplesSection?: RoadmapChatSection;
+  chatSamples?: RoadmapChatSample[];
   runsSection: RoadmapRunsSection;
   runs: RoadmapRun[];
 };
 
 export const llmRoadmap: RoadmapStage[] = roadmap.stages;
 export const llmRuntime: RoadmapRuntime[] = roadmap.runtime;
+export const llmChatSamplesSection: RoadmapChatSection | undefined =
+  roadmap.chatSamplesSection;
+export const llmChatSamples: RoadmapChatSample[] =
+  roadmap.chatSamples ?? [];
 export const llmRuns: RoadmapRun[] = roadmap.runs;
 export const llmRunsSection: RoadmapRunsSection = roadmap.runsSection;
 

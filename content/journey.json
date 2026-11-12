@@ -3,7 +3,7 @@
     "date": "2026",
     "category": "main",
     "title": "CataAI",
-    "note": "Generative language model built from first principles in PyTorch - character-level tokenization, autoregressive tensor pipeline, attention blocks and causal training stack.",
+    "note": "A 38.1M-parameter Romanian Transformer LLM built from scratch in PyTorch - custom 4,096 BPE tokenizer, RoPE, RMSNorm, SwiGLU, FlashAttention SDPA, and two-phase pretraining + SFT on a 6GB RTX 3060 Laptop GPU.",
     "image": "",
     "link": "/projects/llm-from-scratch",
     "tags": [
@@ -11,6 +11,8 @@
       "PyTorch",
       "Python",
       "CUDA",
+      "FlashAttention",
+      "BPE",
       "Transformers"
     ]
   },
@@ -30,11 +32,15 @@
     "date": "May 2026",
     "category": "main",
     "title": "Vortex",
-    "note": "Android app for cloud media streaming with Google Drive as a cloud supplier.",
+    "note": "Client-side media & music streaming ecosystem (Android, Android TV, Desktop) with five cloud providers, Stremio-style in-memory torrent streaming (pure Kotlin/JVM BitTorrent engine), and YouTube Music.",
     "tags": [
       "Kotlin",
-      "OAuth",
-      "Android"
+      "Android",
+      "Android TV",
+      "Compose Multiplatform",
+      "BitTorrent",
+      "Media3",
+      "Stremio"
     ]
   },
   {

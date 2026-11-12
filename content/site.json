@@ -12,7 +12,7 @@
   "currently": {
     "label": "Currently building",
     "project": "CataAI",
-    "stack": "Python",
-    "status": "in progress"
+    "stack": "Python · PyTorch",
+    "status": "v3 active"
   }
 }

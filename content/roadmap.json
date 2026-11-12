@@ -1,160 +1,218 @@
 {
-  "eyebrow": "In progress · 2026",
-  "intro": "A generative language model written from first principles: character-level tokenization and an auto-regressive data pipeline, then scaled dot-product attention, a Transformer block, and the same model re-run on a BPE vocabulary.\n",
-  "statusLabel": "In development",
+  "eyebrow": "CataAI v3 · 2026",
+  "intro": "A 38.1M-parameter Romanian Transformer LLM written and trained from first principles in PyTorch: custom 4,096-token BPE with ChatML, RoPE, RMSNorm, SwiGLU, FlashAttention SDPA, KV-cache, and two-phase pretraining + SFT on a 6GB RTX 3060 Laptop GPU.\n",
+  "statusLabel": "Trained & interactive",
   "roadmapLabel": "Build Roadmap",
   "shippedLabel": "stages shipped",
   "ctaLabel": "View full project page",
   "railLabel": "shipped",
   "buildingLabel": "building",
   "plannedLabel": "planned",
-  "noteLead": "Tensor shapes · attention math · failure modes - all on",
-  "noteLink": "the LLM from Scratch page →",
+  "noteLead": "Architecture · ablation runs · Romanian chat samples - all on",
+  "noteLink": "the CataAI project page →",
   "runtime": [
     {
-      "label": "Language",
-      "value": "Python 3.14"
+      "label": "Model",
+      "value": "38.1M params · 8 layers · 8 heads · d_model 512 · 512 ctx"
     },
     {
       "label": "Framework",
-      "value": "PyTorch (Cuda Compatible)"
+      "value": "PyTorch (native, zero external model libs)"
     },
     {
       "label": "Compute",
-      "value": "CUDA 13.2 ready - wheel via setup_cuda.bat"
+      "value": "RTX 3060 Laptop (6GB VRAM) · bfloat16 · FlashAttention SDPA"
     },
     {
       "label": "Corpus",
-      "value": "Shakespeare, 1.1 MB - ~1M character tokens"
+      "value": "135.1 MB Romanian pretrain + 3.45 MB ChatML SFT (4,096 BPE)"
     }
   ],
   "stages": [
     {
       "n": 1,
       "id": "tokenizer",
-      "title": "Vocabulary & Tokenization",
+      "title": "Vocabulary & BPE Tokenization",
       "short": "tokenize",
-      "file": "tokenizer.py",
+      "file": "src/data/tokenizer.py",
       "status": "done",
-      "summary": "Character-level encoder over the raw corpus: unique token set, bijective maps, encode / decode with round-trip verification.",
+      "summary": "From character-level encoding to a 4,096-token UTF-8 BPE tokenizer with native Romanian diacritics and 6 ChatML special tokens.",
       "items": [
-        "stoi (char -> int) and itos (int -> char) built from the sorted unique token set",
-        "encode(text) -> list[int] and decode(tokens) -> str",
-        "Round-trip check: decode(encode(s)) == s",
-        "Small vocabulary (~65 symbols), zero out-of-vocabulary tokens, long sequences as the trade-off",
-        "Byte Pair Encoding added later in the same file: byte-level base vocabulary plus learned merges"
+        "Initial character-level encoder (65 symbols) with bijective stoi/itos round-trip verification",
+        "Incremental UTF-8 Byte Pair Encoding (BPE) trained from scratch to 4,096 tokens",
+        "100% native Romanian diacritics preservation (ă, â, î, ș, ț) without character corruption",
+        "6 reserved ChatML special tokens: <|im_start|>, <|im_sep|>, <|im_end|>, <|fim_suffix|>, <|eos|>, <|pad|>",
+        "Serialized tokenizer cache (bpe_4096_special.pkl) with fingerprint verification on resume"
       ]
     },
     {
       "n": 2,
       "id": "data-pipeline",
-      "title": "Data Pipeline & Batching",
+      "title": "Data Pipeline & Pre-Tokenized Cache",
       "short": "dataset",
-      "file": "dataset.py",
+      "file": "src/data/dataset.py",
       "status": "done",
-      "summary": "Corpus to a torch.long tensor with a 90 / 10 split and a batch sampler over fixed context windows.",
+      "summary": "Multiprocess BPE encoding into cached .pt tensors, 90/10 train/val splits, and autoregressive (B, T) batch sampling.",
       "items": [
-        "Encoded corpus read once into a 1D torch.long tensor",
-        "Train / validation split (90% / 10%) to catch overfitting early",
-        "get_batch(split, batch_size, block_size) -> x, y with shape (B, T)",
-        "Autoregressive pairs: x = data[i : i+T], y = data[i+1 : i+T+1] - T predictions per window",
-        "Tokenizer injected, so the same pipeline serves both the character and the BPE run"
+        "135.1 MB Romanian tech & history Phase 1 corpus + 3.45 MB Phase 2 ChatML dialogues",
+        "Pre-tokenized .pt tensor cache keyed by content hash and vocab size",
+        "Train / validation split (90% / 10%) for continuous generalization tracking",
+        "Autoregressive pairs: x = data[i : i+T], y = data[i+1 : i+T+1] across 512-token windows",
+        "Assistant-Only Loss Masking in Phase 2 so gradients target only assistant responses and <|im_end|>"
       ]
     },
     {
       "n": 3,
       "id": "bigram",
-      "title": "Baseline Bigram Model",
-      "short": "bigram",
-      "file": "model.py",
+      "title": "Baseline & Ablation Lab",
+      "short": "ablation",
+      "file": "src/utils/experiments.py",
       "status": "done",
-      "summary": "An attention-free lookup table that exercises the whole pipeline end to end and sets the loss baseline to beat.",
+      "summary": "Six controlled Shakespeare runs stepping from an attention-free Bigram baseline to a 4-block BPE Transformer.",
       "items": [
-        "Embedding + linear head: logits (B, T, V) against targets (B, T)",
-        "Flatten for cross-entropy: (B * T, V) vs (B * T)",
-        "Training loop: forward -> loss -> zero_grad -> backward -> step",
-        "Autoregressive generation loop sampling from the last position",
-        "4000 steps on CPU: loss 4.32 -> 1.51"
+        "Attention-free Bigram baseline exercising the training and generation loop (loss 4.32 -> 1.51)",
+        "Single-head -> 4-head -> +FFN -> 4 stacked blocks -> 384-token BPE comparison matrix",
+        "Same corpus, window, and optimizer across runs, isolating one mechanism at a time",
+        "JSON run logging and terminal snapshots recorded as the project's empirical baseline"
       ]
     },
     {
       "n": 4,
       "id": "attention",
-      "title": "Self-Attention from Scratch",
+      "title": "Self-Attention, RoPE & FlashAttention",
       "short": "attention",
-      "file": "SingleHeadAttention.py",
+      "file": "src/models/attention/single_head_attention.py",
       "status": "done",
-      "summary": "Scaled dot-product attention with a causal mask, first as one head, then as parallel heads concatenated through an output projection.",
+      "summary": "Multi-head causal self-attention with Rotary Positional Embeddings (RoPE), FlashAttention SDPA on CUDA, and per-head KV-cache.",
       "items": [
-        "Q / K / V linear projections without bias, head_size channels per head",
-        "Scaling by 1 / sqrt(head_size) keeps the softmax out of saturation",
-        "Causal mask as a registered buffer, masked_fill with -inf before the softmax",
-        "Single head first (head_size = 64), then 4 parallel heads (head_size = 16)",
-        "Heads concatenated and projected back to n_embed with a single Linear"
+        "Bias-free Q / K / V projections across 8 parallel heads (head_size = 64)",
+        "Rotary Positional Embeddings (RoPE) applied to Q and K relative positions",
+        "Fused FlashAttention via F.scaled_dot_product_attention on CUDA with CPU fallback",
+        "Per-head KV-cache storing past K/V tensors for linear-cost autoregressive decoding"
       ]
     },
     {
       "n": 5,
       "id": "transformer",
-      "title": "The Transformer Block",
+      "title": "Pre-RMSNorm & SwiGLU Transformer",
       "short": "transformer",
-      "file": "block.py",
+      "file": "src/models/block.py",
       "status": "done",
-      "summary": "Pre-LayerNorm blocks with residual connections, learned position embeddings, stacked L layers and a linear projection back to the vocabulary.",
+      "summary": "8 stacked Pre-RMSNorm Transformer blocks with SwiGLU feed-forward layers totaling 38,064,640 active parameters.",
       "items": [
-        "Token embedding + learned position embedding, summed before the first block",
-        "Pre-LN residual block: x = x + Attention(LayerNorm(x))",
-        "Second residual: x = x + FeedForward(LayerNorm(x))",
-        "FeedForward as Linear(64, 256) -> ReLU -> Linear(256, 64)",
-        "4 blocks stacked in an nn.Sequential with a final LayerNorm, trained on CUDA"
+        "8 Pre-RMSNorm residual blocks: x = x + MHA(RMSNorm(x)), x = x + SwiGLU(RMSNorm(x))",
+        "SwiGLU MLP: SiLU(w_gate(x)) * w_value(x) -> w_out with 4x expansion (512 -> 2048 -> 512)",
+        "Final RMSNorm and linear vocabulary head projecting to 4,096 logits",
+        "38,064,640 (~38.1M) parameters fitting comfortably within 6GB VRAM"
       ]
     },
     {
       "n": 6,
       "id": "training",
-      "title": "Optimization & Training System",
+      "title": "Two-Phase Training System",
       "short": "training",
-      "file": "train.py",
+      "file": "src/training/train_ro.py",
       "status": "done",
-      "summary": "AdamW with a cosine learning-rate schedule and warmup, a no-grad validation loop, and checkpoint save / reload for long runs.",
+      "summary": "bfloat16 mixed precision, Fused AdamW, cosine LR decay with warmup, Phase 1 pretraining (val loss 2.16) and Phase 2 SFT (val loss 1.23).",
       "items": [
-        "Trainer class owning the model, the loader and the optimizer",
-        "AdamW with zero_grad(set_to_none=True) between steps",
-        "Loss printed every 500 iterations - the loss traces on the project page are those prints",
-        "Device selected from torch.cuda.is_available(), CUDA run through setup_cuda.bat",
-        "experiments.py sweeps tokenizer x architecture and writes the results to JSON"
+        "Mixed precision bfloat16 + CUDA Fused AdamW + gradient accumulation (2 micro-batches)",
+        "Cosine learning-rate schedule with linear warmup and full training/resume checkpoints",
+        "Phase 1 Pretraining: 10,300 steps on 135.1 MB Romanian corpus (best val loss 2.1587)",
+        "Phase 2 ChatML SFT: 3,000 steps with assistant-only loss masking (best val loss 1.2261)"
       ]
     },
     {
       "n": 7,
       "id": "inference",
-      "title": "Inference & Text Sampling",
-      "short": "sampling",
-      "file": "",
-      "status": "current",
-      "summary": "Greedy decoding, temperature scaling and top-k filtering, with a KV-cache so generation stays linear instead of quadratic.",
+      "title": "Streaming Chat & KV-Cache Sampling",
+      "short": "chat",
+      "file": "src/inference/chat_ro.py",
+      "status": "done",
+      "summary": "Real-time CLI streaming chat with KV-cache, temperature, top-k, top-p, repetition penalty, and sliding-window conversation history.",
       "items": [
-        "Autoregressive loop sampling from softmax with torch.multinomial",
-        "Context trimmed to the last block_size tokens, so generation can run past the window",
-        "Text decoded back through whichever tokenizer produced the ids",
-        "Still to do: temperature, top-k / top-p filtering and a KV-cache"
+        "Token-by-token streaming (generate_stream) with sub-50ms time-to-first-token on GPU",
+        "KV-cache decoding with temperature (0.25), top_k (25), top_p (0.85), and repetition_penalty (1.25)",
+        "ConversationManager maintaining multi-turn ChatML history within a 384-token prompt budget",
+        "Automatic checkpoint discovery (find_best_checkpoint) prioritizing Phase 2 SFT weights"
       ]
     }
   ],
+  "chatSamplesSection": {
+    "label": "Chat samples",
+    "navLabel": "Chat",
+    "title": "Real Romanian conversations with CataAI v3",
+    "intro": "Recorded directly from the interactive CLI (chat_ro.py) running the 38.1M-parameter Phase 2 ChatML checkpoint on RTX 3060. These samples showcase the model's strongest answers on identity, two-phase training, Transformer attention, BPE tokenization, and storage hardware — alongside an honest note where 38.1M capacity occasionally shows topic drift on adjacent prompts.",
+    "modelBadge": "38.1M · 8L × 8H · RoPE · SwiGLU · KV-Cache",
+    "decodingBadge": "temp 0.25 · top_k 25 · top_p 0.85 · rep_penalty 1.25"
+  },
+  "chatSamples": [
+    {
+      "id": "cine-esti-creator",
+      "topic": "Identitate & Creator",
+      "prompt": "Salut! Cine ești tu și cine te-a creat?",
+      "response": "Am fost creat, programat și antrenat de la zero de către Manu Cătălin pe laptopul său personal, folosind PyTorch și o placă video NVIDIA GeForce RTX 3060. Totul a fost scris de el de la zero, fără librării prefabricate de modele lingvistice."
+    },
+    {
+      "id": "parametri",
+      "topic": "Parametri & Arhitectură",
+      "prompt": "Câți parametri ai?",
+      "response": "Sunt un model lingvistic Transformer cu 38.1 milioane de parametri, dezvoltat și antrenat de la zero de către Manu Cătălin pe laptopul său personal. Sunt specializat pe limba română și pot explica noțiuni aprofundate despre calculatoare, hardware, procesoare, plăci video și programare."
+    },
+    {
+      "id": "ce-este-un-gpu",
+      "topic": "Ce este un GPU",
+      "prompt": "Ce este un GPU?",
+      "response": "Un GPU este un procesor paralel specializat. În calculatoare, el generează imaginile 3D, accelerează editarea video și este motorul principal din spatele inteligenței artificiale moderne datorită capacității sale de a efectua miliarde de calcule simultan."
+    }
+  ],
   "runsSection": {
-    "label": "Training runs",
-    "navLabel": "Runs",
-    "title": "Six runs, one model, one corpus",
-    "intro": "Every stage was trained on the same Shakespeare corpus with the same window and the same optimizer, and each run is the terminal output exactly as it came out of the script. Pick a stage to see its loss trace, its log and the text it produced - the log lines are the only checkpointing there was, so the screenshots are the record.",
-    "hint": "← → step through the stages",
-    "chartLabel": "Cross-entropy by step",
+    "label": "Training & ablation runs",
+    "navLabel": "Loss chart",
+    "title": "CataAI v3 training curves & foundational ablations",
+    "intro": "Track the full training trajectory of CataAI: Phase 1 Romanian pretraining (loss 8.4 → 2.15 over 10,000 steps), Phase 2 ChatML SFT (loss 10.4 → ~1.9 over 3,000 steps), alongside the initial six Shakespeare ablation stages.",
+    "hint": "← → step through the runs",
+    "chartLabel": "Cross-entropy loss by step",
     "chartBaseline": "Random init -ln(1/65) ≈ 4.17",
-    "sampleLabel": "Generated text",
-    "caveat": "Loss is not comparable across the two tokenizers: the character run scores 65 classes, the BPE run 384, so the BPE curve sits higher on the same axis while buying far more context per window - about 20-25 words instead of 5-7."
+    "sampleLabel": "Generated text output",
+    "caveat": "Loss curves reflect their respective vocabulary sizes and objectives: 65 classes for character runs, 384 for Shakespeare BPE, and 4,096 classes for CataAI v3 (Romanian UTF-8 BPE + ChatML special tokens with assistant-only loss masking in Phase 2)."
   },
   "runs": [
     {
       "n": 1,
+      "id": "cataai-phase1",
+      "short": "Phase 1",
+      "title": "CataAI v3 Phase 1 Pretraining",
+      "file": "train_ro.py",
+      "model": "38.1M Transformer Decoder (8L × 8H, d_model=512, RoPE, RMSNorm, SwiGLU)",
+      "tokenizer": "BPE · 4096 tokens (Romanian diacritics + ChatML)",
+      "tokenizerKind": "bpe",
+      "config": "block 512 · batch 8 (accum 2 = 16) · 10,000 steps · RTX 3060 Laptop (bfloat16)",
+      "lossStart": 8.4,
+      "lossEnd": 2.15,
+      "steps": 10000,
+      "shot": "/projects/llm-from-scratch/ro-phase1-pretrain.png",
+      "note": "Phase 1 autoregressive pretraining on 135.1 MB of clean Romanian Wikipedia, technology and history corpus. Fused AdamW with cosine learning-rate decay drops cross-entropy from 8.4 to 2.15 across 10,000 steps.",
+      "sample": "--- Test Generare Text după Faza 1 (Pretraining) ---\nInteligența artificială reprezintă o ramură a informaticii care dezvoltă sisteme capabile să rezolve sarcini complexe. Microprocesoarele moderne utilizează arhitecturi x86 și ARM pentru calcul de înaltă performanță..."
+    },
+    {
+      "n": 2,
+      "id": "cataai-phase2",
+      "short": "Phase 2",
+      "title": "CataAI v3 Phase 2 ChatML SFT",
+      "file": "train_phase2_only.py",
+      "model": "38.1M Transformer Decoder · Assistant-Only Loss Masking",
+      "tokenizer": "BPE · 4096 tokens (ChatML special tokens)",
+      "tokenizerKind": "bpe",
+      "config": "block 512 · batch 8 (accum 2 = 16) · 3,000 steps · RTX 3060 Laptop (bfloat16)",
+      "lossStart": 10.4,
+      "lossEnd": 1.9,
+      "steps": 3000,
+      "shot": "/projects/llm-from-scratch/ro-phase1-pretrain.png",
+      "note": "Supervised fine-tuning on curated multi-turn Romanian dialogues using ChatML markup. Applying assistant-only loss masking causes loss to start at 10.4 on token generation and converge to ~1.9, aligning identity and technical explanations.",
+      "sample": "<|im_start|>user\nSalut! Cine ești tu și cine te-a creat?<|im_end|>\n<|im_start|>assistant\nSalut! Am fost creat, programat și antrenat de la zero de către Manu Cătălin pe laptopul său personal, folosind PyTorch și o placă video NVIDIA GeForce RTX 3060.<|im_end|>"
+    },
+    {
+      "n": 3,
       "id": "bigram",
       "short": "bigram",
       "title": "Bigram, no attention",
@@ -165,12 +223,13 @@
       "config": "block 32 · batch 64 · 4000 steps · CPU",
       "lossStart": 4.324,
       "lossEnd": 1.5128,
+      "steps": 4000,
       "shot": "/projects/llm-from-scratch/run-01-bigram.png",
       "note": "The floor of the whole project: predict a character from the previous character and nothing else. No context, no positions, yet the loss falls to 1.51 - letter statistics alone get most of the way, and the English-looking fragments are pure memorization of spelling patterns.",
       "sample": "May starly thy short.\n\nCAPULET:\nConspirate, her did appray will palace, here the fill'n art, her being beggen:\nHe with Citizen:\nNow, we climb, thee cries by thy good.\nPard, not employly underst, watch dead before not spill'd still be me,\n'Comen a man terryl insteels: let the propen at home not baces"
     },
     {
-      "n": 2,
+      "n": 4,
       "id": "single-head",
       "short": "1 head",
       "title": "Single-head self-attention",
@@ -181,12 +240,13 @@
       "config": "block 32 · batch 64 · 4000 steps · CPU",
       "lossStart": 4.1772,
       "lossEnd": 1.9973,
+      "steps": 4000,
       "shot": "/projects/llm-from-scratch/run-02-single-head.png",
       "note": "One head, three bias-free projections for Q, K and V, scores scaled by 1/sqrt(head_size) and masked with -inf above the diagonal. The attention is not stacking or memory yet, but short real words start surviving - and the rhythm of the verse comes through.",
       "sample": "CUS:\nYoul deam: thansto hir him thy fire blose slay dow'll dit thum,\nMy thour stallickish thas of to-stan:\nRome theat a with gui youhou worould your hold, the sping ber,\nWith feat shad yec of it play res godaingh say tolites to goner is fate:\n  abith crell fatersh chay kint des,\nIs ther of I speay b"
     },
     {
-      "n": 3,
+      "n": 5,
       "id": "multi-head",
       "short": "4 heads",
       "title": "Multi-head attention",
@@ -197,12 +257,13 @@
       "config": "block 32 · batch 64 · 4000 steps · CPU",
       "lossStart": 4.1803,
       "lossEnd": 2.0005,
+      "steps": 4000,
       "shot": "/projects/llm-from-scratch/run-03-multi-head.png",
       "note": "The same head, run four times in parallel with head_size = n_embed / 4 = 16, then concatenated and projected back to n_embed. Different heads settle on different patterns - punctuation, agreement, character names - and the scene structure (speaker lines, blank-line breaks) becomes much more stable.",
       "sample": "cots hian hour they, for put bed prode ade,\nI\nFFCand &eveillond, wivis crach perit man,\nWillelse hun borkete, fuse hes.\n\nFor tuchobbet, the nomengto.\n\nFKrestly hfly our mee, my nis sone,\nWons neath! teld, tars so ay fit hes, semy\n'd bu onerturke, werem, he wershod dour-\nMy mat lerd:\nFrivefall a'd sh"
     },
     {
-      "n": 4,
+      "n": 6,
       "id": "multi-head-ff",
       "short": "+ FFN",
       "title": "Multi-head + feed-forward",
@@ -213,12 +274,13 @@
       "config": "block 32 · batch 64 · 4000 steps · CPU",
       "lossStart": 4.6646,
       "lossEnd": 2.3326,
+      "steps": 4000,
       "shot": "/projects/llm-from-scratch/run-04-multi-head-ff.png",
       "note": "Attention only mixes information between tokens - it contains no nonlinearity of its own. The feed-forward net adds one per token: Linear(64, 256) -> ReLU -> Linear(256, 64), a 4x expansion that gives the network room to represent more. Loss ends higher here simply because this run had more parameters to fit in the same 4000 steps.",
       "sample": "An hibur'd meteanouqif ier BUSprv, sed, pemouno IO,\nMOIBe uying E:\nDYodis fth tente t IZERD t m?\nCED m fur,\nCFeve w Vzxl,\nDOLonithind here we s:\nS:\n\nFot t h het! renornw l hy alis ouell weave pe the gos ck, o CEnu oulery EMakye\n  aguano pr avithes sus har, shes mall ta s bac h thived jean ons ng"
     },
     {
-      "n": 5,
+      "n": 7,
       "id": "blocks",
       "short": "4 blocks",
       "title": "Four stacked Transformer blocks",
@@ -229,12 +291,13 @@
       "config": "block 32 · batch 64 · 4000 steps · CUDA",
       "lossStart": 4.2082,
       "lossEnd": 2.3224,
+      "steps": 4000,
       "shot": "/projects/llm-from-scratch/run-05-transformer-blocks.png",
       "note": "The full block: x = x + Attention(LayerNorm(x)) then x = x + FeedForward(LayerNorm(x)), four of them in a row plus a final LayerNorm before the head. Pre-LN plus residual connections is what makes depth trainable at all - and it runs on the GPU. Four thousand steps is not much for a four-layer model, which is exactly why the curve is still descending when it ends.",
       "sample": "CTokess thigorntgack sh KEH:\nByo vay myou gotod mend tou shee!\n\nBONLSA:\nFiseve tik amw usser.\nWhoratmee stp. Find ft rell oceno betatun wat\nSe, crus,\nI theanleey ajd, cogurbohamdt teclo ome'ss st th thas son oaisie orus adatint\n  memorw myer,\nAsowr fa terferfe bl,\nPAN nood:\nAngoe,\nWhariso,\nG Lor to,\nI"
     },
     {
-      "n": 6,
+      "n": 8,
       "id": "bpe",
       "short": "BPE",
       "title": "Byte Pair Encoding tokenizer",
@@ -245,6 +308,7 @@
       "config": "block 32 · batch 64 · 4000 steps · vocab 384",
       "lossStart": 6.1292,
       "lossEnd": 2.3899,
+      "steps": 4000,
       "shot": "/projects/llm-from-scratch/run-06-bpe.png",
       "note": "Same network, same window, different tokenizer: bytes as the base vocabulary plus 128 learned merges, so whole words and common suffixes become single tokens. The window now holds roughly 20-25 words instead of 5-7 - and the output finally spells things correctly while keeping the dramatic vocabulary intact.",
       "sample": "ce,\non, my burdening souls. Thuse nought selded so,\nHence from swears black'd blood, to have mine.\nWe live dist the sides of mercy 'best this we offence,\nToad here was the great swear dwelly swear that you course,\nAnd woe, a tready!"

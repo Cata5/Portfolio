@@ -12,6 +12,7 @@ import { ScrollScale } from "@/components/motion/scroll-scale";
 import { TextReveal } from "@/components/motion/text-reveal";
 import { ProjectVisual } from "@/components/project-visual";
 import { MediaBand } from "@/components/projects/media-band";
+import { ChatSamples } from "@/components/projects/chat-samples";
 import { RoadmapSection } from "@/components/projects/roadmap-section";
 import { RunComparison } from "@/components/projects/run-comparison";
 import { ScreenshotGallery } from "@/components/projects/screenshot-gallery";
@@ -20,7 +21,12 @@ import {
   type SectionAnchor,
 } from "@/components/projects/section-nav";
 import { limitationsWithSource, sourceAvailability } from "@/data/project-extras";
-import { llmRuns, llmRunsSection } from "@/data/roadmap";
+import {
+  llmChatSamples,
+  llmChatSamplesSection,
+  llmRuns,
+  llmRunsSection,
+} from "@/data/roadmap";
 import { site } from "@/data/site";
 import {
   getProject,
@@ -189,6 +195,12 @@ export default async function ProjectPage({
   if (project.description) sections.push({ id: "overview", label: "Overview" });
   if (project.id === "llm-from-scratch") {
     sections.push({ id: "roadmap", label: "Roadmap" });
+    if (llmChatSamples.length > 0 && llmChatSamplesSection) {
+      sections.push({
+        id: "chat-samples",
+        label: llmChatSamplesSection.navLabel,
+      });
+    }
     if (llmRuns.length > 0) {
       sections.push({ id: "runs", label: llmRunsSection.navLabel });
     }
@@ -346,6 +358,16 @@ export default async function ProjectPage({
 
           {/* ---- Roadmap (LLM from Scratch) ---------------------------- */}
           <RoadmapSection id={project.id} />
+
+          {/* ---- Real Romanian Chat Samples (LLM from Scratch) --------- */}
+          {project.id === "llm-from-scratch" &&
+            llmChatSamples.length > 0 &&
+            llmChatSamplesSection && (
+              <ChatSamples
+                samples={llmChatSamples}
+                copy={llmChatSamplesSection}
+              />
+            )}
 
           {/* ---- Recorded training runs (LLM from Scratch) ----------- */}
           {project.id === "llm-from-scratch" && llmRuns.length > 0 && (

@@ -38,7 +38,11 @@ export type ContentState = {
   journey: JourneyEntry[];
   activities: Activity[];
   certifications: Certification[];
-  ml: typeof mlData;
+  ml: {
+    fields: string[];
+    hardware: string;
+    runs: MlRun[];
+  };
   projects: Project[];
   roadmap: {
     eyebrow: string;

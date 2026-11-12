@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowUpRight, Check } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 
@@ -7,7 +8,6 @@ import { Container } from "@/components/container";
 import { GlassCard } from "@/components/glass-card";
 import { ProjectLink } from "@/components/motion/project-link";
 import { Reveal } from "@/components/motion/reveal";
-import { Stagger } from "@/components/motion/stagger";
 import { TextReveal } from "@/components/motion/text-reveal";
 import { Editable } from "@/components/editor/editable";
 import { useEditor } from "@/components/editor/editor-context";
@@ -134,6 +134,11 @@ export function LlmShowcase({ project }: { project: Project }) {
   const currentStages = currentRoadmap.stages || llmRoadmap;
   const currentRuntime = currentRoadmap.runtime || llmRuntime;
   const { done, total, percent, railPercent } = roadmapProgress(currentStages);
+  const [selectedStage, setSelectedStage] = useState(() =>
+    Math.max(0, currentStages.length - 1),
+  );
+  const activeIndex = Math.min(selectedStage, Math.max(0, currentStages.length - 1));
+  const activeStage = currentStages[activeIndex];
 
   const llmIndex = content.projects.findIndex((p) => p.id === "llm-from-scratch");
   const targetProjectPath = llmIndex !== -1 ? `projects.${llmIndex}` : "projects.1";
@@ -234,7 +239,7 @@ export function LlmShowcase({ project }: { project: Project }) {
               </ProjectLink>
             </div>
 
-            {/* Right column - the seven-stage rail + stage cards */}
+            {/* Right column - interactive seven-stage rail + active stage card */}
             <div className="lg:col-span-8">
               <div className="relative">
                 <span
@@ -248,34 +253,61 @@ export function LlmShowcase({ project }: { project: Project }) {
                     width: `calc((100% - 1.75rem) * ${railPercent / 100})`,
                   }}
                 />
-                <ol className="relative flex items-start justify-between gap-1">
-                  {currentStages.map((stage) => {
+                <ol
+                  role="tablist"
+                  aria-label="Build stages"
+                  className="relative flex items-start justify-between gap-1"
+                >
+                  {currentStages.map((stage, sIdx) => {
                     const meta = STATUS_META[stage.status];
+                    const isSelected = sIdx === activeIndex;
                     return (
                       <li
                         key={stage.id}
-                        className="flex min-w-0 flex-1 flex-col items-center gap-2"
+                        className="flex min-w-0 flex-1 flex-col items-center"
                       >
-                        <StageNode stage={stage} />
-                        <span
+                        <button
+                          type="button"
+                          role="tab"
+                          aria-selected={isSelected}
+                          onClick={() => setSelectedStage(sIdx)}
                           className={cn(
-                            "hidden font-mono text-[9px] uppercase tracking-[0.12em] md:block",
-                            meta.className,
+                            "group flex w-full flex-col items-center gap-2 rounded-lg py-0.5 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal",
+                            !isSelected && "opacity-70 hover:opacity-100",
                           )}
                         >
-                          {stage.short}
-                        </span>
+                          <span
+                            className={cn(
+                              "rounded-full transition-transform",
+                              isSelected && "ring-2 ring-signal/50 ring-offset-2 ring-offset-background",
+                            )}
+                          >
+                            <StageNode stage={stage} />
+                          </span>
+                          <span
+                            className={cn(
+                              "hidden font-mono text-[9px] uppercase tracking-[0.12em] md:block",
+                              isSelected ? "text-foreground" : meta.className,
+                            )}
+                          >
+                            {stage.short}
+                          </span>
+                        </button>
                       </li>
                     );
                   })}
                 </ol>
               </div>
 
-              <Stagger className="mt-8 grid gap-3 sm:grid-cols-2">
-                {currentStages.map((stage, sIdx) => (
-                  <StageCard key={stage.id || sIdx} stage={stage} stageIndex={sIdx} />
-                ))}
-              </Stagger>
+              {activeStage && (
+                <div className="mt-6">
+                  <StageCard
+                    key={activeStage.id || activeIndex}
+                    stage={activeStage}
+                    stageIndex={activeIndex}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </GlassCard>

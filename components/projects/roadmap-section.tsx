@@ -24,9 +24,9 @@ export function RoadmapSection({ id }: { id: string }) {
         </h2>
         <div className="min-w-0 md:col-span-9">
           <p className="mb-6 text-[17px] font-light leading-relaxed text-foreground/90 md:text-[18px]">
-            Seven stages from raw text to sampled text, taken in order. Each
-            one has to run end to end before the next begins, so the loss
-            baseline and the tensor shapes stay honest at every step.
+            Seven stages from a raw UTF-8 byte stream to a 38.1M-parameter
+            Romanian conversational Transformer. Each stage was verified end to
+            end before scaling to the next.
           </p>
 
           <div className="mb-8 flex items-center gap-4">
