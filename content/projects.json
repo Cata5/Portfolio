@@ -1,5 +1,104 @@
 [
   {
+    "id": "cataai-ultra",
+    "title": "CataAI Ultra",
+    "tabLabel": "CataAI Ultra",
+    "category": "AI / ML",
+    "platform": "Python · Next.js 16 · PyTorch",
+    "year": 2026,
+    "status": "Active",
+    "summary": "An end-to-end Visual LLM Builder & Neural Architecture Studio capable of designing and training any parameter Large Language Model with the proper hardware (from lightweight edge SLMs up to multi-billion parameter models) - drag-and-drop React Flow canvas, analytical VRAM estimator, WDDM zero-paging engine, hybrid Muon + AdamW optimizer, and multi-phase pretraining/SFT pipeline.",
+    "description": "CataAI Ultra (LLM Maker) is a full-stack, local-first Visual Neural Architecture Studio and LLM Training Platform designed to democratize pretraining, fine-tuning, and architectural experimentation for Large Language Models of any parameter size. Powered by a Next.js 16 (React 19, TypeScript, Tailwind CSS, @xyflow/react) visual canvas, developers and researchers can visually compose custom transformer architectures with strict tensor dimension contracts — plugging in MHA, GQA, MQA, RoPE, RMSNorm, LayerNorm, SwiGLU, GeLU, and residual causal Canon convolutions. The platform features an instant analytical VRAM & parameter estimator that calculates weights, optimizer states, activations, and KV-cache footprint before allocating a single GPU second. Supported by hardware-tier scaling profiles, it trains models from lightweight prototype models on consumer GPUs up to multi-billion parameter architectures on enterprise clusters. Its algorithmic engine combines hybrid batched Muon (Quintic Newton-Schulz orthogonalization on 2D matrices) with Fused AdamW, automated micro-batching solvers, NVML telemetry, decoupled multiprocessing workers, and a complete multi-phase training pipeline (Pretrain → WSD Mid-train → SFT → ChatML).",
+    "technologies": [
+      "Python 3.14",
+      "PyTorch 2.11",
+      "CUDA 12.8",
+      "Next.js 16 (App Router)",
+      "React 19",
+      "TypeScript",
+      "Tailwind CSS",
+      "@xyflow/react (React Flow)",
+      "Muon Optimizer (Newton-Schulz)",
+      "AdamW (Fused)",
+      "Canon Conv1d Layers",
+      "GQA (Grouped-Query Attention)",
+      "RoPE & QK-Norm",
+      "SwiGLU",
+      "FlashAttention-2 (SDPA)",
+      "NVIDIA NVML Telemetry",
+      "WDDM Zero-Paging Engine",
+      "SQLite WAL",
+      "aiohttp & WebSockets",
+      "pytest (272 tests)"
+    ],
+    "image": "/projects/cataai-ultra/visual-studio.png",
+    "github": "https://github.com/Cata5/CataAI-Ultra",
+    "featured": true,
+    "screenshots": [
+      "/projects/cataai-ultra/visual-studio.png",
+      "/projects/cataai-ultra/training-console.png",
+      "/projects/cataai-ultra/overview.png"
+    ],
+    "runtimes": [
+      {
+        "id": "studio",
+        "label": "Visual Network Studio",
+        "device": "desktop",
+        "shot": "/projects/cataai-ultra/visual-studio.png",
+        "description": "Drag-and-drop React Flow canvas for visually wiring transformer layers (MHA, GQA, MQA, RoPE, RMSNorm, SwiGLU) with real-time tensor validation and instant parameter calculation."
+      },
+      {
+        "id": "training",
+        "label": "Training Console",
+        "device": "desktop",
+        "shot": "/projects/cataai-ultra/training-console.png",
+        "description": "Multi-phase experiment controller with Warmup-Stable-Decay (WSD) schedule visualization, precision configuration (BF16), and automated batch geometry solver."
+      },
+      {
+        "id": "overview",
+        "label": "Command Center",
+        "device": "desktop",
+        "shot": "/projects/cataai-ultra/overview.png",
+        "description": "Real-time mission control with 8 KPI cards, live loss and learning rate trajectory plots, active NVIDIA NVML hardware stats, and dynamic on-the-fly LR scaling slider."
+      }
+    ],
+    "features": [
+      "Visual Node-Based LLM Builder: Drag-and-drop React Flow canvas to visually construct, customize, and validate custom transformer architectures with real-time tensor dimension checking",
+      "Scales to Any Parameter Size: Hardware-adaptive engine engineered to train models of any scale with proper hardware (lightweight edge SLMs up to 7B+ on enterprise clusters)",
+      "Modular Neural Block Library: Visually plug and configure Attention (MHA, GQA, MQA), Normalization (RMSNorm, LayerNorm), Activations (SwiGLU, GeLU, SiLU), Positional Embeddings (RoPE, ALiBi), and Causal Convolutions (Canon Conv1d)",
+      "Analytical Preflight VRAM Estimator: Computes exact memory breakdowns (weights, optimizer states, activations, KV-cache) before allocating GPU resources, eliminating out-of-memory crashes",
+      "WDDM Zero-Paging Protection Engine: Active memory ceiling guard solving micro-batch and gradient accumulation steps to prevent Windows paging cliffs into system RAM",
+      "Hybrid Muon + AdamW Optimization: Batched Quintic Newton-Schulz orthogonalization on 2D hidden layer matrices delivering faster token convergence than standard AdamW",
+      "Dual-Interface Web Platform: Complete Next.js 16 Sci-Fi Workstation on Port 8080 + standalone zero-dependency aiohttp embedded dark UI on Port 8081 for headless/SSH environments",
+      "Decoupled Training Process: Training loop runs in an isolated Python process (multiprocessing spawn) over typed queues and SQLite WAL persistence; server reloads never interrupt the worker",
+      "Real-Time NVIDIA NVML Telemetry: Live hardware monitor tracking GPU core/memory clocks, wattage, temperatures, fan speeds, and PCIe throughput",
+      "Multi-Phase Training Pipeline: Sequence-packed causal pre-training (varlen_attn), Warmup-Stable-Decay mid-training, SFT with prompt loss masking (label: -100), and ChatML dialog alignment",
+      "Hot-Swappable JSON Model Registry: Export, import, clone, and validate custom network architectures dynamically without touching Python source code",
+      "Sequential GPU Inference & Benchmark Lab: Side-by-side checkpoint comparison and benchmark evaluation enforcing single-model GPU residency to prevent memory collisions",
+      "272 Automated Tests: Full test suite covering neural layer arithmetic, tokenizer parity, dataset pipelines, VRAM estimators, checkpoint resumption, and REST/WebSocket APIs"
+    ],
+    "partialFeatures": [
+      "Network Studio supports saving, loading, cloning, and estimating custom architectures from JSON; visual node graph rendering is fully interactive with drag-and-drop node placement"
+    ],
+    "plannedFeatures": [
+      "Extend WSD mid-training schedule to 7B+ tokens on dedicated multi-GPU cluster",
+      "Add automated RLVR (Reinforcement Learning with Verifiable Rewards) stage using sympy sandbox",
+      "Native ONNX and GGUF quantization export pipeline for mobile and edge deployment"
+    ],
+    "architecture": "A decoupled dual-tier neural research workstation. The frontend is a Next.js 16 App Router application (Port 8080) written in React 19, TypeScript, Tailwind CSS, and @xyflow/react, connecting via HTTP reverse proxy and WebSockets to the Python backend (Port 8081). The backend runs an aiohttp async control plane that dispatches training jobs to an isolated multiprocessing worker process (spawn context). The worker executes custom user-configured transformer architectures in PyTorch with FlashAttention-2 SDPA, modular attention/MLP layers, and a hybrid Muon + AdamW optimizer with Warmup-Stable-Decay scheduling. Memory protection logic monitors NVIDIA NVML telemetry in real time, capping VRAM to avoid Windows WDDM paging cliffs, and persists metrics and checkpoints atomically into SQLite WAL and .pt snapshots.",
+    "architectureDiagram": "Next.js 16 Visual Workstation (Port 8080)      Zero-Dependency Fallback UI (Port 8081)\n  React 19 · @xyflow/react · Chart.js · Lucide   ←→  Embedded aiohttp Single-Page Dark Console\n        ↓ [HTTP Proxy /api/* & WebSocket /ws]\n  aiohttp Control Plane (server.py)\n        ↓ [mp.Queue typed commands & events]\n  WorkerManager (Multiprocessing Spawn Context)\n        ↓\n  [ Training Worker Loop ]  Zero-Paging VRAM Protection (Preflight Analytical Memory Solver)\n        ↓\n  [ Custom Visual Architecture ] User-Composed: MHA/GQA/MQA · SwiGLU · RoPE · RMSNorm · Canon Conv1d\n        ↓\n  [ Hybrid Optimizer ]     Muon (2D weight matrices, Newton-Schulz) + Fused AdamW (1D / Embeddings)\n        ↓\n  [ Hardware & Storage ]    NVIDIA NVML Telemetry · SQLite WAL (rocanon_studio.db) · Atomic Checkpoints",
+    "limitations": [
+      "Maximum trainable parameter size is bounded by physical hardware VRAM and distributed cluster resources",
+      "Windows WDDM driver reserves 450-800 MB of VRAM, making strict zero-paging guards essential on consumer single-GPU setups",
+      "Non-causal encoder architectures (e.g., pure BERT) currently require custom task adapters for MLM training"
+    ],
+    "futureWork": [
+      "Scale pretraining to 7B tokens using cluster distributed data parallel (DDP) with FSDP",
+      "Integrate on-policy distillation (MobileLLM-R1 style) for short-chain reasoning and mathematics",
+      "Release quantized INT4 / GGUF model checkpoints for edge inference on phones and Raspberry Pi"
+    ]
+  },
+  {
     "id": "vortex",
     "title": "Vortex",
     "tabLabel": "Vortex",

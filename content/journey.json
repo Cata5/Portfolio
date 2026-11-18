@@ -1,5 +1,23 @@
 [
   {
+    "date": "Nov 2026",
+    "category": "main",
+    "title": "CataAI Ultra · Visual LLM Builder",
+    "note": "Built a full-stack Visual LLM Builder & neural architecture studio capable of training any parameter LLM with proper hardware (from 15M on consumer 6GB GPUs up to 7B+ on clusters) - featuring a drag-and-drop React Flow canvas, analytical VRAM estimator, zero-paging engine, and hybrid Muon + AdamW.",
+    "image": "/projects/cataai-ultra/overview.png",
+    "link": "/projects/cataai-ultra",
+    "tags": [
+      "Visual LLM Builder",
+      "Next.js 16",
+      "PyTorch",
+      "React Flow",
+      "Muon",
+      "CUDA",
+      "WDDM",
+      "Any Parameter"
+    ]
+  },
+  {
     "date": "2026",
     "category": "main",
     "title": "CataAI",

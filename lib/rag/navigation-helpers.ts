@@ -40,8 +40,8 @@ const PORTFOLIO_SECTIONS: {
   },
   {
     id: "work",
-    label: "Featured Project (Vortex)",
-    keywords: ["vortex", "flagship", "best project", "featured project", "main project", "star project", "featured work"],
+    label: "Featured Project (CataAI Ultra & Vortex)",
+    keywords: ["cataai ultra", "cataai", "visual llm builder", "vortex", "flagship", "best project", "featured project", "main project", "star project", "featured work"],
     description: "Scroll to featured case study",
     icon: "rocket",
   },

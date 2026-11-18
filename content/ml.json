@@ -29,6 +29,15 @@
     },
     {
       "category": "llm",
+      "model": "CataAI Ultra · Visual LLM Builder (Any Parameter LLM · 15M to 7B+ Scale)",
+      "dataset": "Custom pretraining & SFT corpora (FineWeb-Edu, FineMath, Stack-Edu, Wikipedia)",
+      "framework": "Next.js 16 Visual Studio · PyTorch 2.11 · @xyflow/react · Muon + AdamW · Canon Conv1d",
+      "hardware": "Adaptive: Consumer 6GB up to Datacenter Clusters (A100 / H100)",
+      "training": "Visual Architecture Builder & Zero-OOM VRAM Estimator, Multi-Phase (Pretrain → WSD Mid-train → SFT), Batched Newton-Schulz Muon, WDDM Zero-Paging",
+      "notes": "Full visual neural architecture studio: visually design, configure, and train any parameter LLM (from lightweight edge models on 6GB GPUs up to multi-billion parameter models on clusters) with modular attention, SwiGLU, RoPE, RMSNorm, and preflight memory solvers."
+    },
+    {
+      "category": "llm",
       "model": "CataAI v3 (Romanian Transformer from Scratch - 38.1M params)",
       "dataset": "Phase 1: 135.1 MB tech/history (69M tokens) + Phase 2: 3.45 MB ChatML",
       "framework": "Pure PyTorch · FlashAttention SDPA · RoPE · SwiGLU · BPE (4096)",

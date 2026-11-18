@@ -333,15 +333,19 @@ function WorkSectionForm({
   content: ReturnType<typeof useEditor>["content"];
   updateField: (path: string, val: unknown) => void;
 }) {
-  const [activeTab, setActiveTab] = useState<"vortex" | "llm">("vortex");
+  const [activeTab, setActiveTab] = useState<"ultra" | "vortex" | "llm">("ultra");
+
+  const ultraIndex = content.projects.findIndex((p) => p.id === "cataai-ultra");
+  const ultra = ultraIndex !== -1 ? content.projects[ultraIndex] : content.projects.find((p) => p.id === "cataai-ultra");
+  const ultraPath = ultraIndex !== -1 ? `projects.${ultraIndex}` : "projects.0";
 
   const vortexIndex = content.projects.findIndex((p) => p.id === "vortex");
-  const vortex = vortexIndex !== -1 ? content.projects[vortexIndex] : content.projects[0];
-  const vortexPath = vortexIndex !== -1 ? `projects.${vortexIndex}` : "projects.0";
+  const vortex = vortexIndex !== -1 ? content.projects[vortexIndex] : content.projects[1];
+  const vortexPath = vortexIndex !== -1 ? `projects.${vortexIndex}` : "projects.1";
 
   const llmIndex = content.projects.findIndex((p) => p.id === "llm-from-scratch");
   const llm = llmIndex !== -1 ? content.projects[llmIndex] : content.projects.find((p) => p.id === "llm-from-scratch");
-  const llmPath = llmIndex !== -1 ? `projects.${llmIndex}` : "projects.1";
+  const llmPath = llmIndex !== -1 ? `projects.${llmIndex}` : "projects.2";
 
   const roadmap = content.roadmap;
   const stages = roadmap?.stages || [];
@@ -352,6 +356,18 @@ function WorkSectionForm({
       <div className="flex rounded-xl border border-border/60 bg-neutral-900/60 p-1">
         <button
           type="button"
+          onClick={() => setActiveTab("ultra")}
+          className={cn(
+            "flex-1 rounded-lg py-1.5 font-mono text-xs font-semibold transition-all cursor-pointer",
+            activeTab === "ultra"
+              ? "bg-signal text-white shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          01. {ultra?.tabLabel || ultra?.title || "CataAI Ultra"}
+        </button>
+        <button
+          type="button"
           onClick={() => setActiveTab("vortex")}
           className={cn(
             "flex-1 rounded-lg py-1.5 font-mono text-xs font-semibold transition-all cursor-pointer",
@@ -360,7 +376,7 @@ function WorkSectionForm({
               : "text-muted-foreground hover:text-foreground",
           )}
         >
-          01. {vortex?.tabLabel || vortex?.title || "Vortex"}
+          02. {vortex?.tabLabel || vortex?.title || "Vortex"}
         </button>
         <button
           type="button"
@@ -372,11 +388,79 @@ function WorkSectionForm({
               : "text-muted-foreground hover:text-foreground",
           )}
         >
-          02. {llm?.tabLabel || llm?.title || "LLM from Scratch"}
+          03. {llm?.tabLabel || llm?.title || "CataAI"}
         </button>
       </div>
 
-      {activeTab === "vortex" ? (
+      {activeTab === "ultra" ? (
+        ultra ? (
+          <div className="space-y-4 animate-in fade-in duration-150">
+            <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-saffron">
+              Flagship 01: CataAI Ultra ({ultra.title})
+            </h4>
+
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Tab Switcher Label</label>
+              <input
+                type="text"
+                placeholder="e.g. CataAI Ultra"
+                value={ultra.tabLabel ?? ""}
+                onChange={(e) => updateField(`${ultraPath}.tabLabel`, e.target.value)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Title</label>
+              <input
+                type="text"
+                value={ultra.title || ""}
+                onChange={(e) => updateField(`${ultraPath}.title`, e.target.value)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Summary</label>
+              <textarea
+                rows={3}
+                value={ultra.summary || ""}
+                onChange={(e) => updateField(`${ultraPath}.summary`, e.target.value)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Detailed Description</label>
+              <textarea
+                rows={5}
+                value={ultra.description || ""}
+                onChange={(e) => updateField(`${ultraPath}.description`, e.target.value)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Architecture Narrative</label>
+              <textarea
+                rows={4}
+                value={ultra.architecture || ""}
+                onChange={(e) => updateField(`${ultraPath}.architecture`, e.target.value)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 p-3 font-sans text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-mono text-[11px] text-muted-foreground">Technologies (comma separated)</label>
+              <TagInput
+                value={ultra.technologies}
+                onChange={(tags) => updateField(`${ultraPath}.technologies`, tags)}
+                className="w-full rounded-xl border border-border bg-neutral-900/90 px-3 py-2 font-mono text-xs text-foreground focus:border-signal focus:outline-none"
+              />
+            </div>
+          </div>
+        ) : null
+      ) : activeTab === "vortex" ? (
         vortex ? (
           <div className="space-y-4 animate-in fade-in duration-150">
             <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-saffron">

@@ -21,26 +21,31 @@ import { projects } from "@/data/projects";
 import { cn } from "@/lib/utils";
 import { RuntimeFrame } from "./device-frames";
 import { LlmShowcase } from "./llm-showcase";
+import { UltraShowcase } from "./ultra-showcase";
 
-type FlagshipId = "vortex" | "llm-from-scratch";
+type FlagshipId = "cataai-ultra" | "vortex" | "llm-from-scratch";
 
 /** The systems the section promotes - each one has its own stage below. */
 const FLAGSHIPS: { id: FlagshipId; label: string; live?: boolean }[] = [
+  { id: "cataai-ultra", label: "CataAI Ultra", live: true },
   { id: "vortex", label: "Vortex" },
-  { id: "llm-from-scratch", label: "LLM from Scratch", live: true },
+  { id: "llm-from-scratch", label: "CataAI", live: true },
 ];
 
 /**
  * Flagship Work Section:
- * Two systems, switched by the tab bar - Vortex keeps its single-device focus
- * stage (runtimes, device frames), and LLM from Scratch gets the build
- * roadmap board (see ./llm-showcase).
+ * Promotes key systems, switched by the tab bar:
+ * - CataAI Ultra (Flagship 01): Visual LLM Builder (trains any parameter LLM with proper hardware) & Next.js 16 Studio
+ * - Vortex (Flagship 02): Multi-platform in-memory BitTorrent & cloud streaming
+ * - CataAI (Flagship 03): 38.1M Romanian Transformer from scratch & 7-stage roadmap
  */
 export function FeaturedProjects() {
   const { content, isEditing, selectedField, setSelectedField } = useEditor();
-  const [index, setIndex] = useState(1); // Default to TV (index 1)
-  const [flagship, setFlagship] = useState<FlagshipId>("vortex");
+  const [index, setIndex] = useState(1); // Default to TV (index 1) for Vortex
+  const [flagship, setFlagship] = useState<FlagshipId>("cataai-ultra");
 
+  const ultraIndex = content.projects.findIndex((p) => p.id === "cataai-ultra");
+  const ultra = ultraIndex !== -1 ? content.projects[ultraIndex] : projects.find((p) => p.id === "cataai-ultra") ?? null;
   const vortexIndex = content.projects.findIndex((p) => p.id === "vortex");
   const vortex = vortexIndex !== -1 ? content.projects[vortexIndex] : projects.find((p) => p.id === "vortex") ?? null;
   const llmIndex = content.projects.findIndex((p) => p.id === "llm-from-scratch");
@@ -120,10 +125,10 @@ export function FeaturedProjects() {
         >
           {FLAGSHIPS.map((f, i) => {
             const selected = f.id === flagship;
-            const project = f.id === "vortex" ? vortex : llm;
-            const projectIndex = f.id === "vortex" ? vortexIndex : llmIndex;
+            const project = f.id === "cataai-ultra" ? ultra : f.id === "vortex" ? vortex : llm;
+            const projectIndex = f.id === "cataai-ultra" ? ultraIndex : f.id === "vortex" ? vortexIndex : llmIndex;
             const tabName = project?.tabLabel || project?.title || f.label;
-            const tabPath = projectIndex !== -1 ? `projects.${projectIndex}.tabLabel` : (f.id === "vortex" ? "projects.0.tabLabel" : "projects.1.tabLabel");
+            const tabPath = projectIndex !== -1 ? `projects.${projectIndex}.tabLabel` : `projects.${i}.tabLabel`;
 
             return (
               <button
@@ -174,7 +179,9 @@ export function FeaturedProjects() {
           })}
         </div>
 
-        {flagship === "llm-from-scratch" && llm ? (
+        {flagship === "cataai-ultra" && ultra ? (
+          <UltraShowcase project={ultra} />
+        ) : flagship === "llm-from-scratch" && llm ? (
           <LlmShowcase project={llm} />
         ) : vortex && active ? (
           <>
@@ -352,10 +359,10 @@ export function FeaturedProjects() {
         <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
           Platform matrix · architecture · module map · capabilities - all on{" "}
           <ProjectLink
-            href={`/projects/${flagship === "vortex" ? vortex?.id ?? "vortex" : llm?.id ?? "llm-from-scratch"}`}
+            href={`/projects/${flagship === "cataai-ultra" ? ultra?.id ?? "cataai-ultra" : flagship === "vortex" ? vortex?.id ?? "vortex" : llm?.id ?? "llm-from-scratch"}`}
             className="text-signal transition-colors hover:text-foreground"
           >
-            {flagship === "vortex" ? "the Vortex page" : "the LLM from Scratch page"} →
+            {flagship === "cataai-ultra" ? "the CataAI Ultra page" : flagship === "vortex" ? "the Vortex page" : "the CataAI page"} →
           </ProjectLink>
         </p>
       </Container>

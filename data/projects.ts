@@ -72,6 +72,7 @@ export function getProject(id: string) {
 export const realProjects = projects.filter((p) => !p.placeholder);
 
 const FEATURED_ORDER = [
+  "cataai-ultra",
   "vortex",
   "llm-from-scratch",
   "aplicatie-teka",
